@@ -1,0 +1,111 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.tour-card {
+  display: flex;
+  flex-direction: column;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform $transition-normal, box-shadow $transition-normal,
+              border-color $transition-normal;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+    border-color: #cccccc;
+  }
+
+  // ── Cover ─────────────────────────────────────────────────────────────────
+  &__cover {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: $bg-surface-alt;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform $transition-slow;
+    }
+
+    &:hover img { transform: scale(1.04); }
+  }
+
+  &__cover-placeholder {
+    @include flex-center;
+    width: 100%;
+    height: 100%;
+    background: #f0f0f0;
+
+    span {
+      font-size: $font-size-3xl;
+      color: #cccccc;
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: $space-3;
+    left: $space-3;
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &--free {
+      background: $color-success;
+      color: white;
+    }
+  }
+
+  // ── Body ──────────────────────────────────────────────────────────────────
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-5;
+    flex: 1;
+  }
+
+  &__lang {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: $accent-primary;
+    letter-spacing: 0.1em;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    color: $text-primary;
+    @include line-clamp(2);
+  }
+
+  &__creator {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__translated {
+    color: $accent-primary;
+    font-style: italic;
+  }
+
+  &__footer {
+    @include flex-between;
+    margin-top: auto;
+    padding-top: $space-4;
+  }
+
+  &__price {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+  }
+}

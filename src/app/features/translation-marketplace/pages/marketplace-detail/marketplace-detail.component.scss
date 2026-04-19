@@ -1,0 +1,60 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.marketplace-detail {
+  padding-block: $space-12;
+  max-width: 700px;
+
+  &__header {
+    margin-bottom: $space-8;
+    h1 { font-size: $font-size-2xl; margin-bottom: $space-3; }
+  }
+
+  &__lang {
+    font-size: $font-size-sm;
+    color: $accent-primary;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-bottom: $space-8;
+  }
+
+  &__comp { color: $text-primary; font-size: $font-size-base; }
+  &__desc { color: $text-secondary; line-height: $line-height-loose; }
+
+  &__apply {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+    h2 { font-size: $font-size-xl; }
+  }
+
+  &__success {
+    background: rgba($color-success, 0.1);
+    border: 1px solid $color-success;
+    border-radius: $radius-md;
+    padding: $space-4 $space-5;
+    color: $color-success;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+
+  &__auth-hint {
+    margin-top: $space-6;
+    color: $text-secondary;
+    a { color: $accent-primary; font-weight: $font-weight-semibold; }
+  }
+}

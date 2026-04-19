@@ -1,0 +1,492 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.detail {
+  &__loading {
+    @include flex-center;
+    min-height: 60dvh;
+    font-size: $font-size-4xl;
+    color: $accent-primary;
+  }
+
+  // ── Hero ────────────────────────────────────────────────────────────────────
+  &__hero {
+    position: relative;
+    min-height: 60dvh;
+    background-size: cover;
+    background-position: center;
+    background-color: $bg-surface;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: $gradient-overlay;
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  &__hero-content {
+    padding-block: $space-10;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__lang {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: $accent-primary;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    color: $white;
+
+    @include md { font-size: $font-size-4xl; }
+  }
+
+  &__creator {
+    font-size: $font-size-base;
+    color: rgba($white, 0.7);
+
+    a { color: $white; font-weight: $font-weight-semibold; }
+  }
+
+  &__translator {
+    font-style: italic;
+    color: $accent-primary;
+
+    a { color: $accent-primary; font-weight: $font-weight-semibold; &:hover { color: $accent-hover; } }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $space-5;
+  }
+
+  &__price {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $white;
+  }
+
+  &__cta {
+    margin-top: $space-2;
+    color: rgba($white, 0.8);
+  }
+
+  // ── Tour info ────────────────────────────────────────────────────────────────
+  &__info {
+    padding-block: $space-8;
+    border-top: 1px solid $border-default;
+
+    h2 {
+      font-size: $font-size-2xl;
+      margin-bottom: $space-4;
+    }
+  }
+
+  &__description {
+    color: $text-secondary;
+    font-size: $font-size-base;
+    line-height: $line-height-loose;
+    margin-bottom: $space-6;
+    max-width: 680px;
+  }
+
+  &__info-grid {
+    display: grid;
+    gap: $space-4;
+    grid-template-columns: 1fr;
+
+    @include sm { grid-template-columns: repeat(2, 1fr); }
+    @include lg { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  // ── Stops & Reviews ─────────────────────────────────────────────────────────
+  &__reviews {
+    padding-block: $space-12;
+    border-top: 1px solid $border-default;
+
+    h2 {
+      font-size: $font-size-2xl;
+      margin-bottom: $space-4;
+    }
+  }
+
+  &__audio-preview {
+    padding-block: $space-10;
+    border-top: 1px solid $border-default;
+
+    h2 {
+      font-size: $font-size-2xl;
+      margin-bottom: $space-2;
+    }
+  }
+
+  &__map {
+    padding-block: $space-8;
+    border-top: 1px solid $border-default;
+
+    h2 {
+      font-size: $font-size-2xl;
+      margin-bottom: $space-5;
+    }
+  }
+
+  &__author {
+    padding-block: $space-12;
+    border-top: 1px solid $border-default;
+
+    h2 {
+      font-size: $font-size-2xl;
+      margin-bottom: $space-6;
+    }
+  }
+
+  &__reviews-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $space-4;
+    margin-bottom: $space-6;
+
+    h2 { margin-bottom: 0; }
+  }
+
+  &__review-sort {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    font-size: $font-size-sm;
+  }
+
+  &__write-review-btn {
+    display: inline-block;
+    padding: $space-3 $space-6;
+    border-radius: $radius-md;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    background: $accent-primary;
+    color: $white;
+    border: none;
+    cursor: pointer;
+    margin-bottom: $space-6;
+    transition: background $transition-fast;
+
+    &:hover { background: $accent-hover; }
+  }
+
+  &__review-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-top: $space-6;
+  }
+}
+
+// ── Tour map with dots ───────────────────────────────────────────────────────
+.tour-map {
+  position: relative;
+  border: 1px solid #eeeeee;
+  overflow: hidden;
+
+  &__img {
+    width: 100%;
+    display: block;
+  }
+
+  &__dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-family-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+}
+
+// ── Author card ──────────────────────────────────────────────────────────────
+.author-card {
+  display: flex;
+  gap: $space-5;
+  align-items: flex-start;
+
+  &__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid $border-default;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__avatar-fallback {
+    @include flex-center;
+    width: 100%;
+    height: 100%;
+    background: $accent-primary;
+    color: $white;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-xl;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+
+    &:hover { color: $accent-primary; }
+  }
+
+  &__stats {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__bio {
+    margin-top: $space-2;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+}
+
+// ── Info items ───────────────────────────────────────────────────────────────
+.info-item {
+  display: flex;
+  gap: $space-3;
+  align-items: flex-start;
+  padding: $space-4;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    color: $accent-primary;
+    flex-shrink: 0;
+    margin-top: 2px;
+
+    svg { width: 100%; height: 100%; }
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    margin-bottom: $space-1;
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    color: $text-primary;
+
+    &--number {
+      font-size: $font-size-xl;
+      font-family: $font-family-primary;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+    }
+  }
+
+  &__unit {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-regular;
+    color: $text-secondary;
+  }
+}
+
+// ── Sort buttons ─────────────────────────────────────────────────────────────
+.sort-btn {
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  border: 1px solid $border-default;
+  background: transparent;
+  color: $text-secondary;
+  font-size: $font-size-xs;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover { border-color: $accent-primary; color: $text-primary; }
+  &--active { background: $accent-primary; border-color: $accent-primary; color: $white; }
+}
+
+// ── Review form ──────────────────────────────────────────────────────────────
+.review-form {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  margin-bottom: $space-6;
+
+  h3 { font-size: $font-size-lg; color: $text-primary; }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $color-warning;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__textarea {
+    width: 100%;
+    padding: $space-3;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    resize: vertical;
+    transition: border-color $transition-fast;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-3;
+  }
+}
+
+.btn {
+  display: inline-block;
+  padding: $space-3 $space-6;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all $transition-fast;
+
+  &--primary {
+    background: $accent-primary;
+    color: $white;
+    &:hover { background: $accent-hover; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $text-secondary;
+    border: 1px solid $border-default;
+    &:hover { color: $text-primary; }
+  }
+}
+
+// ── Custom audio player ──────────────────────────────────────────────────────
+.audio-player {
+  margin-top: $space-6;
+
+  audio { display: none; }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-4 $space-5;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-lg;
+  }
+
+  &__play {
+    @include flex-center;
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-full;
+    background: $accent-primary;
+    color: $white;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    flex-shrink: 0;
+    transition: background $transition-fast;
+
+    &:hover { background: $accent-hover; }
+  }
+
+  &__bar {
+    flex: 1;
+    height: 6px;
+    background: rgba($accent-primary, 0.2);
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__progress {
+    height: 100%;
+    background: $accent-primary;
+    border-radius: $radius-full;
+    transition: width 0.2s linear;
+  }
+
+  &__time {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+}
+
+.review-card {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__header {
+    @include flex-between;
+
+    strong { color: $text-primary; font-size: $font-size-sm; }
+  }
+
+  &__body {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-loose;
+  }
+
+  &__date {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}

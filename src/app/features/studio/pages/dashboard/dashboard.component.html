@@ -1,0 +1,100 @@
+<section class="dashboard">
+  <div class="dashboard__header">
+    <h1 class="dashboard__title">Creator Studio</h1>
+    <a routerLink="/studio/tours/new" class="btn btn--primary">
+      + New tour
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="dashboard__loading" role="status">Loading your dashboard…</div>
+  }
+
+  @if (stats(); as s) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-card__value">{{ s.total_tours }}</span>
+        <span class="stat-card__label">Total tours</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__value">{{ s.published_tours }}</span>
+        <span class="stat-card__label">Published</span>
+        <span class="stat-card__sub">{{ publishedPct() }}% of total</span>
+      </div>
+      <div class="stat-card stat-card--accent">
+        <span class="stat-card__value">€{{ s.total_earnings | number:'1.2-2' }}</span>
+        <span class="stat-card__label">Total earnings</span>
+        <a routerLink="/studio/earnings" class="stat-card__link">View breakdown →</a>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__value">{{ s.pending_jobs }}</span>
+        <span class="stat-card__label">Pending translation jobs</span>
+        <a routerLink="/jobs" class="stat-card__link">Go to jobs →</a>
+      </div>
+    </div>
+  }
+
+  <div class="dashboard__section">
+    <div class="dashboard__section-header">
+      <h2>Recent tours</h2>
+      <a routerLink="/studio/tours" class="link-muted">View all</a>
+    </div>
+
+    @if (recentTours().length === 0 && !loading()) {
+      <div class="dashboard__empty">
+        <p>You haven't created any tours yet.</p>
+        <a routerLink="/studio/tours/new" class="btn btn--primary">Create your first tour</a>
+      </div>
+    } @else {
+      <div class="tours-table">
+        <div class="tours-table__head">
+          <span>Title</span>
+          <span>Status</span>
+          <span>Variants</span>
+          <span>Actions</span>
+        </div>
+        @for (tour of recentTours(); track tour.id) {
+          <div class="tours-table__row">
+            <span class="tours-table__title">{{ tour.title }}</span>
+            <span class="status-badge" [class]="'status-badge--' + tour.status">{{ tour.status }}</span>
+            <span>{{ tour.variant_count ?? 0 }}</span>
+            <div class="tours-table__actions">
+              <a [routerLink]="['/studio/tours', tour.id]" class="link-action">Edit</a>
+              <a [routerLink]="['/studio/tours', tour.id, 'variants', 'new']" class="link-action link-action--ghost">+ Variant</a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="dashboard__section">
+    <h2>Quick links</h2>
+    <div class="quick-links">
+      <a routerLink="/studio/tours" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#128506;</span>
+        <span>Manage tours</span>
+      </a>
+      <a routerLink="/studio/requests" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#128236;</span>
+        <span>Translation requests</span>
+      </a>
+      <a routerLink="/jobs" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#127760;</span>
+        <span>Translation jobs</span>
+      </a>
+      <a routerLink="/studio/earnings" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#128176;</span>
+        <span>Earnings</span>
+      </a>
+      <a routerLink="/studio/connect/complete" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#128179;</span>
+        <span>Stripe Payments</span>
+      </a>
+      <a routerLink="/account/profile" class="quick-link">
+        <span class="quick-link__icon" aria-hidden="true">&#128100;</span>
+        <span>My profile</span>
+      </a>
+    </div>
+  </div>
+</section>

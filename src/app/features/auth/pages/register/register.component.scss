@@ -1,0 +1,95 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.auth-page {
+  min-height: calc(100dvh - 64px);
+  @include flex-center;
+  background: #fafafa;
+  padding: $space-6;
+}
+
+.auth-layout {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border: 1px solid #eeeeee;
+  overflow: hidden;
+
+  &__image {
+    display: none;
+    position: relative;
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+
+    @include md { display: block; }
+  }
+
+  &__image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(#000, 0.4);
+    display: flex;
+    align-items: flex-end;
+    padding: $space-6;
+
+    h2 {
+      font-family: $font-family-primary;
+      font-size: $font-size-xl;
+      color: #ffffff;
+      line-height: $line-height-tight;
+    }
+  }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: $space-6 $space-8;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  &__brand {
+    margin-bottom: $space-4;
+
+    h1 {
+      font-family: $font-family-primary;
+      font-size: $font-size-2xl;
+      color: #1a1a1a;
+    }
+
+    p {
+      color: #666666;
+      margin-top: $space-2;
+    }
+  }
+
+  &__switch {
+    text-align: center;
+    margin-top: $space-4;
+    font-size: $font-size-sm;
+    color: #666666;
+
+    a {
+      color: $accent-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__error {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+}

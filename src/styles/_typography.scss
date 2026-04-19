@@ -1,0 +1,54 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+h1 { font-size: $font-size-3xl; @include sm { font-size: $font-size-4xl; } }
+h2 { font-size: $font-size-2xl; @include sm { font-size: $font-size-3xl; } }
+h3 { font-size: $font-size-xl;  @include sm { font-size: $font-size-2xl; } }
+h4 { font-size: $font-size-lg;  @include sm { font-size: $font-size-xl;  } }
+h5 { font-size: $font-size-md;  }
+h6 { font-size: $font-size-base; }
+
+p {
+  font-family: $font-family-secondary;
+  font-size: $font-size-base;
+  color: $text-secondary;
+  line-height: $line-height-normal;
+}
+
+a {
+  color: $accent-primary;
+  transition: color $transition-fast;
+  &:hover { color: $accent-hover; }
+}
+
+strong { font-weight: $font-weight-bold; }
+small  { font-size: $font-size-sm; color: $text-secondary; }
+
+// Utility classes
+.text-primary   { color: $text-primary !important; }
+.text-secondary { color: $text-secondary !important; }
+.text-muted     { color: $text-muted !important; }
+.text-accent    { color: $accent-primary !important; }
+.text-success   { color: $color-success !important; }
+.text-error     { color: $color-error !important; }
+.text-warning   { color: $color-warning !important; }
+
+.font-heading    { font-family: $font-family-primary !important; }
+.font-body       { font-family: $font-family-secondary !important; }
+.font-decorative { font-family: $font-family-decorative !important; }
+
+.text-xs   { font-size: $font-size-xs; }
+.text-sm   { font-size: $font-size-sm; }
+.text-base { font-size: $font-size-base; }
+.text-lg   { font-size: $font-size-lg; }
+.text-xl   { font-size: $font-size-xl; }
+.text-2xl  { font-size: $font-size-2xl; }
+
+.font-light    { font-weight: $font-weight-light; }
+.font-regular  { font-weight: $font-weight-regular; }
+.font-semibold { font-weight: $font-weight-semibold; }
+.font-bold     { font-weight: $font-weight-bold; }
+
+.text-center { text-align: center; }
+.text-left   { text-align: left; }
+.text-right  { text-align: right; }

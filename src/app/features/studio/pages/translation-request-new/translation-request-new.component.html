@@ -1,0 +1,51 @@
+<div class="page">
+  <h1 class="page__title">Offer a translation job</h1>
+  <p class="page__sub">Post a request on the marketplace or invite someone directly.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
+    @if (error()) {
+      <div class="form__error" role="alert">{{ error() }}</div>
+    }
+
+    <div class="field">
+      <label class="field__label">Tour</label>
+      <select formControlName="tour_id" class="field__select">
+        <option value="">Select a tour…</option>
+        @for (tour of tours(); track tour.id) {
+          <option [value]="tour.id">{{ tour.title }}</option>
+        }
+      </select>
+    </div>
+
+    <app-input label="Target language code (e.g. fr, de, it)" formControlName="target_language_code" />
+    <app-input label="Description" formControlName="description" hint="Tell translators what this tour is about" />
+
+    <div class="field">
+      <label class="field__label">Compensation type</label>
+      <select formControlName="compensation_type" class="field__select">
+        <option value="fixed">Fixed fee</option>
+        <option value="percentage">Percentage per sale</option>
+      </select>
+    </div>
+
+    <app-input
+      label="Compensation value (cents for fixed, integer % for percentage)"
+      type="number"
+      formControlName="compensation_value"
+    />
+
+    <div class="field">
+      <label class="field__label">Visibility</label>
+      <select formControlName="visibility" class="field__select">
+        <option value="public">Public marketplace</option>
+        <option value="direct">Direct (invite a specific user)</option>
+      </select>
+    </div>
+
+    @if (form.controls.visibility.value === 'direct') {
+      <app-input label="Target user ID" formControlName="target_user_id" />
+    }
+
+    <app-button type="submit" variant="primary" [loading]="loading()">Post request</app-button>
+  </form>
+</div>

@@ -1,0 +1,245 @@
+<div class="detail">
+  @if (loading()) {
+    <div class="detail__loading">
+      <span class="font-decorative font-decorative-animate">&#x10980;</span>
+    </div>
+  } @else {
+    @if (variant(); as v) {
+      <!-- Hero -->
+      <div class="detail__hero" [style.backgroundImage]="v.tour_cover_image_url ? 'url(' + v.tour_cover_image_url + ')' : null">
+        <div class="detail__hero-overlay">
+          <div class="detail__hero-content container">
+            <span class="detail__lang">{{ v.language_code | uppercase }}</span>
+            <h1 class="detail__title">{{ v.tour_title }}</h1>
+            <p class="detail__creator">
+              by <a [routerLink]="['/creators', v.creator_username]">{{ v.creator_name }}</a>@if (v.translator_username) {
+                <span class="detail__translator"> · translated by <a [routerLink]="['/creators', v.translator_username]">{{ v.translator_name }}</a></span>
+              }
+            </p>
+            <div class="detail__meta">
+              <app-star-rating [rating]="v.average_rating" [count]="v.review_count" />
+              <span class="detail__price">
+                @if (v.price_cents === 0) { Free }
+                @else { {{ v.price_cents / 100 | currency:'EUR' }} }
+              </span>
+            </div>
+            <div class="detail__cta">
+              @if (owned() && purchaseId()) {
+                <app-button [routerLink]="['/library', purchaseId(), 'play']" variant="primary" size="lg">Start tour</app-button>
+              } @else if (auth.isLoggedIn()) {
+                <app-button variant="primary" size="lg" [loading]="acquiring()" (click)="acquire()">
+                  @if (v.price_cents === 0) { Get for free } @else { Buy tour }
+                </app-button>
+                @if (error()) {
+                  <p class="detail__error">{{ error() }}</p>
+                }
+              } @else {
+                <app-button routerLink="/auth/register" variant="primary" size="lg">Sign up to purchase</app-button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio preview -->
+      @if (v.presentation_audio_url) {
+        <section class="detail__audio-preview container">
+          <h2>Listen to a preview</h2>
+          <p class="text-secondary">Hear the creator introduce this tour</p>
+          <div class="audio-player">
+            <audio #audioPreview [src]="v.presentation_audio_url" (timeupdate)="onAudioTimeUpdate(audioPreview)" preload="metadata"></audio>
+            <div class="audio-player__controls">
+              <button type="button" class="audio-player__play" (click)="togglePreview(audioPreview)">
+                {{ previewPlaying() ? '&#9646;&#9646;' : '&#9654;' }}
+              </button>
+              <div class="audio-player__bar">
+                <div class="audio-player__progress" [style.width.%]="previewProgress()"></div>
+              </div>
+              <span class="audio-player__time">0:{{ previewTime() | number:'2.0-0' }} / 0:30</span>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- Tour details -->
+      <section class="detail__info container">
+        <h2>Tour details</h2>
+        @if (v.tour_description) {
+          <p class="detail__description">{{ v.tour_description }}</p>
+        }
+        <div class="detail__info-grid">
+          <div class="info-item">
+            <span class="info-item__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.5 4.5l2 2m-2-2L9 11l-1 4 4-1 6.5-6.5-2-2z"/><path d="M19 15v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/></svg>
+            </span>
+            <div>
+              <span class="info-item__label">Stops</span>
+              <strong class="info-item__value info-item__value--number">{{ v.stop_count }}</strong>
+            </div>
+          </div>
+          @if (v.duration_minutes) {
+            <div class="info-item">
+              <span class="info-item__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </span>
+              <div>
+                <span class="info-item__label">Duration</span>
+                <strong class="info-item__value info-item__value--number">{{ v.duration_minutes }} <span class="info-item__unit">min</span></strong>
+              </div>
+            </div>
+          }
+          @if (v.setting) {
+            <div class="info-item">
+              <span class="info-item__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11l2 2m-2-2v10a1 1 0 0 1-1 1h-3m-4 0h4"/></svg>
+              </span>
+              <div>
+                <span class="info-item__label">Setting</span>
+                <strong class="info-item__value">{{ v.setting | titlecase }}</strong>
+              </div>
+            </div>
+          }
+          @if (v.start_address) {
+            <div class="info-item">
+              <span class="info-item__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+              <div>
+                <span class="info-item__label">Start</span>
+                <strong class="info-item__value">{{ v.start_address }}</strong>
+              </div>
+            </div>
+          }
+          @if (v.end_address) {
+            <div class="info-item">
+              <span class="info-item__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              </span>
+              <div>
+                <span class="info-item__label">End</span>
+                <strong class="info-item__value">{{ v.end_address }}</strong>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Tour map -->
+      @if (v.map_image_url && v.spaces?.length > 0) {
+        <section class="detail__map container">
+          <h2>Tour map</h2>
+          <div class="tour-map">
+            <img [src]="v.map_image_url" alt="Tour map" class="tour-map__img" />
+            @for (space of v.spaces; track space.id; let i = $index) {
+              @if (space.map_x != null) {
+                <div class="tour-map__dot"
+                  [style.left.%]="space.map_x"
+                  [style.top.%]="space.map_y">
+                  {{ getRomanNumeral(i) }}
+                </div>
+              }
+            }
+          </div>
+        </section>
+      }
+
+      <!-- About the author -->
+      <section class="detail__author container">
+        <h2>About the author</h2>
+        <div class="author-card">
+          <a [routerLink]="['/creators', v.creator_username]" class="author-card__avatar">
+            @if (v.creator_avatar) {
+              <img [src]="v.creator_avatar" [alt]="v.creator_name" />
+            } @else {
+              <span class="author-card__avatar-fallback">{{ (v.creator_name ?? 'U')[0] | uppercase }}</span>
+            }
+          </a>
+          <div class="author-card__info">
+            <a [routerLink]="['/creators', v.creator_username]" class="author-card__name">{{ v.creator_name }}</a>
+            <span class="author-card__stats">{{ v.creator_tour_count }} published tour(s)</span>
+            @if (v.creator_bio) {
+              <p class="author-card__bio">{{ v.creator_bio }}</p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Reviews -->
+      <section class="detail__reviews container">
+        <div class="detail__reviews-header">
+          <h2>Reviews</h2>
+          @if (reviews().length > 0) {
+            <div class="detail__review-sort">
+              <span class="text-secondary">Sort by:</span>
+              <button class="sort-btn" [class.sort-btn--active]="reviewSort() === 'newest'" (click)="changeReviewSort('newest')">Newest</button>
+              <button class="sort-btn" [class.sort-btn--active]="reviewSort() === 'oldest'" (click)="changeReviewSort('oldest')">Oldest</button>
+              <button class="sort-btn" [class.sort-btn--active]="reviewSort() === 'highest'" (click)="changeReviewSort('highest')">Highest</button>
+              <button class="sort-btn" [class.sort-btn--active]="reviewSort() === 'lowest'" (click)="changeReviewSort('lowest')">Lowest</button>
+            </div>
+          }
+        </div>
+
+        <!-- Write a review (only for owners who haven't reviewed yet) -->
+        @if (owned() && !hasReviewed()) {
+          @if (!showReviewForm()) {
+            <button class="detail__write-review-btn" (click)="showReviewForm.set(true)">Write a review</button>
+          } @else {
+            <div class="review-form">
+              <h3>Your review</h3>
+              <app-star-rating
+                [rating]="reviewRating()"
+                [interactive]="true"
+                (ratingChange)="onReviewRatingChange($event)"
+              />
+
+              @if (bodyRequired()) {
+                <p class="review-form__hint">Ratings of 3 stars or below require a comment (min {{ MIN_BODY_LENGTH }} chars)</p>
+              }
+
+              <textarea
+                class="review-form__textarea"
+                [ngModel]="reviewBody()"
+                (ngModelChange)="reviewBody.set($event)"
+                placeholder="Share your experience…"
+                rows="3"
+                maxlength="2000"
+              ></textarea>
+
+              @if (reviewError()) {
+                <div class="review-form__error" role="alert">{{ reviewError() }}</div>
+              }
+
+              <div class="review-form__actions">
+                <button class="btn btn--ghost" (click)="showReviewForm.set(false)">Cancel</button>
+                <button class="btn btn--primary" [disabled]="submittingReview() || reviewRating() === 0" (click)="submitReview()">
+                  {{ submittingReview() ? 'Submitting…' : 'Submit' }}
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (reviews().length === 0) {
+          <p class="text-secondary">No reviews yet.{{ owned() ? '' : ' Purchase this tour to leave one!' }}</p>
+        } @else {
+          <div class="detail__review-list">
+            @for (review of reviews(); track review.id) {
+              <div class="review-card">
+                <div class="review-card__header">
+                  <strong>{{ review.display_name || review.reviewer_username }}</strong>
+                  <app-star-rating [rating]="review.rating" />
+                </div>
+                @if (review.body) {
+                  <p class="review-card__body">{{ review.body }}</p>
+                }
+                <span class="review-card__date">{{ review.created_at | date:'mediumDate' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <p class="container" style="padding-block: 4rem; color: var(--color-text-secondary)">Tour not found.</p>
+    }
+  }
+</div>

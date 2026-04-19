@@ -1,0 +1,65 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTINE — Global Stylesheet Entry Point
+// ─────────────────────────────────────────────────────────────────────────────
+
+// All @use rules must come first
+@use '@angular/material' as mat;
+@use 'styles/variables' as *;
+@use 'styles/mixins'    as *;
+@use 'styles/reset';
+@use 'styles/typography';
+@use 'styles/utilities';
+
+// ── Angular Material theme ───────────────────────────────────────────────────
+@include mat.core();
+
+$constantine-frontend-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+  ),
+  density: (
+    scale: 0,
+  )
+));
+
+:root {
+  @include mat.all-component-themes($constantine-frontend-theme);
+}
+
+// ── CSS Custom Properties ─────────────────────────────────────────────────────
+:root {
+  --color-bg-base:          #{$bg-base};
+  --color-bg-surface:       #{$bg-surface};
+  --color-bg-surface-alt:   #{$bg-surface-alt};
+  --color-bg-dark:          #{$bg-dark};
+  --color-bg-light:         #{$bg-light};
+  --color-text-primary:     #{$text-primary};
+  --color-text-secondary:   #{$text-secondary};
+  --color-text-muted:       #{$text-muted};
+  --color-text-dark:        #{$text-dark};
+  --color-text-on-dark:     #{$text-on-dark};
+  --color-accent:           #{$accent-primary};
+  --color-accent-hover:     #{$accent-hover};
+  --color-accent-muted:     #{$accent-muted};
+  --color-accent-blue:      #{$accent-blue};
+  --color-border:           #{$border-default};
+  --color-success:          #{$color-success};
+  --color-warning:          #{$color-warning};
+  --color-error:            #{$color-error};
+  --color-info:             #{$color-info};
+  --shadow-sm:              #{$shadow-sm};
+  --shadow-md:              #{$shadow-md};
+  --shadow-lg:              #{$shadow-lg};
+  --radius-sm:              #{$radius-sm};
+  --radius-md:              #{$radius-md};
+  --radius-lg:              #{$radius-lg};
+  --radius-xl:              #{$radius-xl};
+  --transition-fast:        #{$transition-fast};
+  --transition-normal:      #{$transition-normal};
+  --transition-slow:        #{$transition-slow};
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: 'Nunito', 'Helvetica Neue', sans-serif; }

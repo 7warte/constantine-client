@@ -1,0 +1,27 @@
+<div class="tag-input">
+  <div class="tag-input__tags">
+    @for (tag of tags; track tag; let i = $index) {
+      <span class="tag-chip">
+        {{ tag }}
+        <button type="button" class="tag-chip__remove" (click)="removeTag(i)">&times;</button>
+      </span>
+    }
+    <input
+      #input
+      type="text"
+      class="tag-input__field"
+      placeholder="{{ tags.length === 0 ? 'Add tags (e.g. history, rome, walking)…' : 'Add more…' }}"
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+      (blur)="onBlur()"
+    />
+  </div>
+
+  @if (showSuggestions()) {
+    <ul class="tag-input__suggestions">
+      @for (s of suggestions(); track s) {
+        <li (mousedown)="selectSuggestion(s)">{{ s }}</li>
+      }
+    </ul>
+  }
+</div>

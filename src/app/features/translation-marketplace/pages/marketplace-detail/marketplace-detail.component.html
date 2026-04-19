@@ -1,0 +1,49 @@
+<div class="marketplace-detail container">
+  @if (loading()) {
+    <p class="text-secondary">Loading…</p>
+  } @else {
+    @if (request(); as req) {
+      <div class="marketplace-detail__header">
+        <h1>Translation Request</h1>
+        <span class="marketplace-detail__lang">Target language: {{ req.target_language_code | uppercase }}</span>
+      </div>
+
+      <div class="marketplace-detail__body card">
+        <div class="marketplace-detail__comp">
+          <strong>Compensation:</strong>
+          @if (req.compensation_type === 'fixed') {
+            {{ req.compensation_value / 100 | currency:'EUR' }} fixed
+          } @else {
+            {{ req.compensation_value }}% per sale
+          }
+        </div>
+        <p class="marketplace-detail__desc">{{ req.description || 'No further description provided.' }}</p>
+      </div>
+
+      @if (auth.isLoggedIn()) {
+        @if (applied()) {
+          <div class="marketplace-detail__success">Application submitted! The creator will review it.</div>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="apply()" class="marketplace-detail__apply" novalidate>
+            <h2>Apply for this job</h2>
+            @if (error()) {
+              <div class="marketplace-detail__error" role="alert">{{ error() }}</div>
+            }
+            <app-input
+              label="Message (optional)"
+              formControlName="message"
+              hint="Introduce yourself and explain why you are a good fit"
+            />
+            <app-button type="submit" variant="primary" [loading]="applying()">Submit application</app-button>
+          </form>
+        }
+      } @else {
+        <p class="marketplace-detail__auth-hint">
+          <a routerLink="/auth/login">Sign in</a> to apply for this job.
+        </p>
+      }
+    } @else {
+      <p class="text-secondary">Request not found.</p>
+    }
+  }
+</div>

@@ -1,0 +1,51 @@
+<div class="checkout-page">
+  <div class="checkout-card">
+    @if (loading()) {
+      <p class="text-secondary">Loading…</p>
+    } @else if (variant()) {
+      <div class="checkout-card__header">
+        <h1>Complete your purchase</h1>
+        <p class="text-secondary">You are about to unlock this tour variant.</p>
+      </div>
+
+      <div class="checkout-card__summary">
+        @if (variant()!.tour_cover_image_url) {
+          <img [src]="variant()!.tour_cover_image_url" [alt]="variant()!.tour_title" class="checkout-card__cover" />
+        }
+        <div>
+          <h2 class="checkout-card__title">{{ variant()!.tour_title }}</h2>
+          <p class="checkout-card__meta">Language: {{ variant()!.language_code | uppercase }}</p>
+        </div>
+      </div>
+
+      <div class="checkout-card__price">
+        <span>Total</span>
+        <strong>
+          @if (variant()!.price_cents === 0) { Free }
+          @else { {{ variant()!.price_cents / 100 | currency:'EUR' }} }
+        </strong>
+      </div>
+
+      @if (error()) {
+        <div class="checkout-card__error" role="alert">{{ error() }}</div>
+      }
+
+      <!-- Stripe Payment Element mounts here -->
+      @if (clientSecret()) {
+        <div class="checkout-card__payment">
+          <div #paymentElementRef></div>
+          <app-button variant="primary" size="lg" [block]="true" [loading]="paying()" (click)="confirmPayment()">
+            Pay now
+          </app-button>
+        </div>
+      } @else {
+        <!-- Initial purchase button (creates PaymentIntent or handles free) -->
+        <app-button variant="primary" size="lg" [block]="true" [loading]="paying()" (click)="purchase()">
+          @if (variant()!.price_cents === 0) { Get for free } @else { Pay now }
+        </app-button>
+      }
+    } @else {
+      <p class="text-secondary">Tour not found.</p>
+    }
+  </div>
+</div>

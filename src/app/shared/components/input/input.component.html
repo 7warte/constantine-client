@@ -1,0 +1,21 @@
+<div class="field" [class.field--invalid]="invalid" [class.field--disabled]="disabled">
+  @if (label) {
+    <label class="field__label">{{ label }}</label>
+  }
+  <input
+    class="field__input"
+    [type]="type"
+    [placeholder]="placeholder"
+    [value]="value"
+    [disabled]="disabled"
+    (input)="onInput($event)"
+    (blur)="onTouched()"
+  />
+  <span class="field__message">
+    @if (invalid && errorMessage) {
+      <span class="field__error" role="alert">{{ errorMessage }}</span>
+    } @else if (hint) {
+      <span class="field__hint">{{ hint }}</span>
+    }
+  </span>
+</div>

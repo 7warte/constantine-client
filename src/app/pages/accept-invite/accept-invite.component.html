@@ -1,0 +1,68 @@
+<div class="invite-page">
+  <div class="invite-card">
+    @if (loading()) {
+      <p class="text-secondary">Loading invitation…</p>
+    } @else if (error() && !invite()) {
+      <h1>Invitation not found</h1>
+      <p class="text-secondary">{{ error() }}</p>
+    } @else if (invite()) {
+
+      @if (accepted()) {
+        <span class="invite-card__icon invite-card__icon--success">&#10003;</span>
+        <h1>You're in!</h1>
+        <p class="text-secondary">You've accepted the translation job for <strong>{{ invite()!.tour_title }}</strong>.</p>
+        <a routerLink="/studio" class="btn btn--primary">Go to Studio</a>
+      } @else {
+        <h1>Translation Invitation</h1>
+        <p class="text-secondary">
+          <strong>{{ invite()!.requester_name }}</strong> has invited you to translate a tour.
+        </p>
+
+        <div class="invite-card__details">
+          @if (invite()!.cover_image_url) {
+            <img [src]="invite()!.cover_image_url" alt="Tour cover" class="invite-card__cover" />
+          }
+          <table class="invite-card__table">
+            <tr>
+              <td class="invite-card__label">Tour</td>
+              <td><strong>{{ invite()!.tour_title }}</strong></td>
+            </tr>
+            <tr>
+              <td class="invite-card__label">Language</td>
+              <td>{{ invite()!.target_language_code | uppercase }}</td>
+            </tr>
+            <tr>
+              <td class="invite-card__label">Compensation</td>
+              <td><strong>{{ getCompensationText() }}</strong></td>
+            </tr>
+          </table>
+        </div>
+
+        @if (invite()!.description) {
+          <div class="invite-card__note">
+            <strong>Note from the creator:</strong>
+            <p>{{ invite()!.description }}</p>
+          </div>
+        }
+
+        @if (error()) {
+          <div class="invite-card__error" role="alert">{{ error() }}</div>
+        }
+
+        @if (auth.isLoggedIn()) {
+          <button class="btn btn--primary btn--lg" [disabled]="accepting()" (click)="accept()">
+            {{ accepting() ? 'Accepting…' : 'Accept Translation Job' }}
+          </button>
+        } @else {
+          <div class="invite-card__auth-prompt">
+            <p>Sign in or create an account to accept this job:</p>
+            <div class="invite-card__auth-actions">
+              <a [routerLink]="['/auth/login']" [queryParams]="{ returnTo: '/auth/accept-invite/' + token }" class="btn btn--primary">Sign in</a>
+              <a [routerLink]="['/auth/register']" [queryParams]="{ returnTo: '/auth/accept-invite/' + token }" class="btn btn--ghost">Create account</a>
+            </div>
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="creator-profile">
+  @if (loading()) {
+    <div class="creator-profile__loading container">
+      <span class="font-decorative font-decorative-animate">&#x10980;</span>
+    </div>
+  } @else {
+    @if (user(); as u) {
+      <div class="creator-profile__header">
+        <div class="creator-profile__header-inner container">
+          <div class="creator-profile__avatar">
+            @if (u.avatar_url) {
+              <img [src]="u.avatar_url" [alt]="u.display_name" />
+            } @else {
+              <span class="creator-profile__avatar-fallback">{{ u.display_name[0] | uppercase }}</span>
+            }
+          </div>
+          <div>
+            <h1 class="creator-profile__name">{{ u.display_name }}</h1>
+            <p class="creator-profile__username">&#64;{{ u.username }}</p>
+            @if (u.bio) {
+              <p class="creator-profile__bio">{{ u.bio }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="creator-profile__tours container">
+        <h2>Tours by {{ u.display_name }}</h2>
+        @if (tours().length === 0) {
+          <p class="text-secondary">No published tours yet.</p>
+        } @else {
+          <div class="creator-profile__grid">
+            @for (tour of tours(); track tour.id) {
+              <app-card [tour]="tour" />
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="container" style="padding-block: 4rem; color: var(--color-text-secondary)">Creator not found.</p>
+    }
+  }
+</div>

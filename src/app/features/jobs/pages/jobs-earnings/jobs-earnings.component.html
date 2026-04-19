@@ -1,0 +1,65 @@
+<section class="jobs-earnings">
+  <div class="jobs-earnings__header">
+    <div>
+      <h1 class="page-title">Contributor Earnings</h1>
+      <p class="page-sub">Payments for completed translation jobs</p>
+    </div>
+    <div class="jobs-earnings__nav">
+      <a routerLink="/jobs" class="btn btn--secondary">Browse jobs</a>
+      <a routerLink="/account/payouts" class="btn btn--ghost">Payout settings</a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading earnings…</div>
+  }
+
+  @if (summary(); as s) {
+    <div class="summary-row">
+      <div class="summary-stat">
+        <span class="summary-stat__value">{{ s.total_completed_jobs }}</span>
+        <span class="summary-stat__label">Jobs completed</span>
+      </div>
+      <div class="summary-stat summary-stat--accent">
+        <span class="summary-stat__value">€{{ s.total_earned | number:'1.2-2' }}</span>
+        <span class="summary-stat__label">Total earned</span>
+      </div>
+      <div class="summary-stat">
+        <span class="summary-stat__value">€{{ s.pending_payment | number:'1.2-2' }}</span>
+        <span class="summary-stat__label">Pending payment</span>
+      </div>
+    </div>
+  }
+
+  <div class="jobs-earnings__section">
+    <h2 class="section-title">Payment history</h2>
+
+    @if (payments().length === 0 && !loading()) {
+      <div class="empty-state">
+        <p>No payments yet. Complete translation jobs to start earning.</p>
+        <a routerLink="/jobs" class="btn btn--primary">Find jobs</a>
+      </div>
+    } @else {
+      <div class="payments-table">
+        <div class="payments-table__head">
+          <span>Date</span>
+          <span>Job</span>
+          <span>Languages</span>
+          <span>Amount</span>
+          <span>Status</span>
+        </div>
+        @for (p of payments(); track p.id) {
+          <div class="payments-table__row">
+            <span class="col-date">{{ p.paid_at | date:'mediumDate' }}</span>
+            <span class="col-job">{{ p.tour_title }}</span>
+            <span class="col-langs">
+              {{ p.source_language | uppercase }} → {{ p.target_language | uppercase }}
+            </span>
+            <span class="col-amount">€{{ p.amount | number:'1.2-2' }}</span>
+            <span class="status-badge" [class]="'status-badge--' + p.payment_status">{{ p.payment_status }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

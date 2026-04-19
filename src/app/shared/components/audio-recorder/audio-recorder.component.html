@@ -1,0 +1,42 @@
+<div class="recorder">
+  @if (error()) {
+    <p class="recorder__error">{{ error() }}</p>
+  }
+
+  @switch (state()) {
+    @case ('idle') {
+      <button type="button" class="recorder__btn recorder__btn--record" (click)="startRecording()">
+        <span class="recorder__red-dot"></span>
+        Record audio
+      </button>
+      @if (maxDuration) {
+        <span class="recorder__hint">Max {{ maxDisplay() }}</span>
+      }
+    }
+
+    @case ('recording') {
+      <div class="recorder__live">
+        <span class="recorder__pulse"></span>
+        <span class="recorder__time">{{ elapsedDisplay() }}@if (maxDuration) { / {{ maxDisplay() }} }</span>
+        <button type="button" class="recorder__btn recorder__btn--stop" (click)="stopRecording()">
+          <span class="recorder__icon">&#9724;</span>
+          Stop
+        </button>
+      </div>
+    }
+
+    @case ('preview') {
+      <div class="recorder__preview">
+        <audio [src]="previewUrl!" controls controlsList="nodownload"></audio>
+        <div class="recorder__preview-actions">
+          <button type="button" class="recorder__btn recorder__btn--discard" (click)="discardRecording()">
+            Discard
+          </button>
+          <button type="button" class="recorder__btn recorder__btn--confirm" (click)="confirmRecording()">
+            Use recording
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

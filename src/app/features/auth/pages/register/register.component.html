@@ -1,0 +1,63 @@
+<div class="auth-page">
+  <div class="auth-layout">
+    <div class="auth-layout__image" style="background-image: url('assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg')">
+      <div class="auth-layout__image-overlay">
+        <h2>Share your knowledge.<br>Earn from your stories.</h2>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card__brand">
+        <h1>Join Constantine</h1>
+        <p>Create, discover, and share tours worldwide</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
+        @if (error()) {
+          <div class="auth-form__error" role="alert">{{ error() }}</div>
+        }
+
+        <app-input
+          label="Display name"
+          formControlName="display_name"
+          [invalid]="form.controls.display_name.invalid && form.controls.display_name.touched"
+          errorMessage="Display name is required"
+        />
+
+        <app-input
+          label="Username"
+          formControlName="username"
+          hint="3-30 characters, lowercase letters, numbers, _ and - only"
+          [invalid]="form.controls.username.invalid && form.controls.username.touched"
+          errorMessage="Choose a valid username (a-z, 0-9, _, -)"
+        />
+
+        <app-input
+          label="Email"
+          type="email"
+          formControlName="email"
+          [invalid]="form.controls.email.invalid && form.controls.email.touched"
+          errorMessage="Enter a valid email address"
+        />
+
+        <app-input
+          label="Password"
+          type="password"
+          formControlName="password"
+          hint="Minimum 8 characters"
+          [invalid]="form.controls.password.invalid && form.controls.password.touched"
+          errorMessage="Password must be at least 8 characters"
+        />
+
+        <app-button type="submit" variant="primary" size="lg" [loading]="loading()" [block]="true">
+          Create account
+        </app-button>
+      </form>
+
+      <p class="auth-card__switch">
+        Already have an account?
+        <a routerLink="/auth/login">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

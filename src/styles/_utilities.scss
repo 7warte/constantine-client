@@ -1,0 +1,72 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// ── Display ───────────────────────────────────────────────────────────────────
+.d-flex         { display: flex; }
+.d-grid         { display: grid; }
+.d-block        { display: block; }
+.d-none         { display: none; }
+.flex-center    { @include flex-center; }
+.flex-between   { @include flex-between; }
+.flex-col       { flex-direction: column; }
+.flex-wrap      { flex-wrap: wrap; }
+.gap-2          { gap: $space-2; }
+.gap-4          { gap: $space-4; }
+.gap-6          { gap: $space-6; }
+.gap-8          { gap: $space-8; }
+
+// ── Container ────────────────────────────────────────────────────────────────
+.container { @include container; }
+
+// ── Spacing ───────────────────────────────────────────────────────────────────
+.mt-4  { margin-top: $space-4; }
+.mt-8  { margin-top: $space-8; }
+.mt-12 { margin-top: $space-12; }
+.mb-4  { margin-bottom: $space-4; }
+.mb-8  { margin-bottom: $space-8; }
+.mb-12 { margin-bottom: $space-12; }
+.pt-8  { padding-top: $space-8; }
+.pt-16 { padding-top: $space-16; }
+.pb-8  { padding-bottom: $space-8; }
+.pb-16 { padding-bottom: $space-16; }
+
+// ── Backgrounds ───────────────────────────────────────────────────────────────
+.bg-base    { background-color: $bg-base; }
+.bg-surface { background-color: $bg-surface; }
+.bg-light   { background-color: $bg-light; }
+.bg-accent  { background-color: $accent-primary; }
+
+// ── Borders ───────────────────────────────────────────────────────────────────
+.rounded-sm   { border-radius: $radius-sm; }
+.rounded-md   { border-radius: $radius-md; }
+.rounded-lg   { border-radius: $radius-lg; }
+.rounded-full { border-radius: $radius-full; }
+
+// ── Cards ─────────────────────────────────────────────────────────────────────
+.card       { @include card; }
+.card-light { @include card-light; }
+
+// ── Misc ──────────────────────────────────────────────────────────────────────
+.truncate   { @include truncate; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Loading / decorative animation using the ornamental fonts
+.font-decorative-animate {
+  font-family: $font-family-decorative;
+  animation: glyph-fade 2s ease-in-out infinite alternate;
+}
+
+@keyframes glyph-fade {
+  from { opacity: 0.2; letter-spacing: 0.05em; }
+  to   { opacity: 0.8; letter-spacing: 0.2em; }
+}

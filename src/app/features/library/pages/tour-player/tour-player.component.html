@@ -1,0 +1,237 @@
+<div class="player">
+  @if (loading()) {
+    <div class="player__loading">
+      <span class="font-decorative font-decorative-animate" aria-hidden="true">&#x10980;&#x10981;&#x10982;</span>
+      <p>Loading tour…</p>
+    </div>
+  } @else if (showReview()) {
+    <!-- ── Review screen ─────────────────────────────────────────── -->
+    <div class="player__review">
+      @if (reviewSubmitted()) {
+        <div class="player__review-done">
+          <span class="player__review-icon">&#10003;</span>
+          <h2>Thank you!</h2>
+          <p class="text-secondary">Your feedback helps other travellers and the creator.</p>
+          <a routerLink="/library" class="btn btn--primary">Back to library</a>
+        </div>
+      } @else {
+        <h2>How was the tour?</h2>
+        <p class="text-secondary">Rate your experience with <strong>{{ variant()!.tour_title }}</strong></p>
+
+        <div class="player__review-stars">
+          <app-star-rating
+            [rating]="reviewRating()"
+            [interactive]="true"
+            (ratingChange)="onRatingChange($event)"
+          />
+        </div>
+
+        @if (bodyRequired()) {
+          <p class="player__review-hint">Please explain your rating (at least {{ MIN_BODY_LENGTH }} characters)</p>
+        }
+
+        <textarea
+          class="player__review-textarea"
+          [ngModel]="reviewBody()"
+          (ngModelChange)="reviewBody.set($event)"
+          placeholder="Tell others about your experience (optional for 4-5 stars)…"
+          rows="4"
+          maxlength="2000"
+        ></textarea>
+
+        @if (bodyTooShort()) {
+          <p class="player__review-char-count">{{ reviewBody().trim().length }} / {{ MIN_BODY_LENGTH }} characters minimum</p>
+        }
+
+        @if (reviewError()) {
+          <div class="player__review-error" role="alert">{{ reviewError() }}</div>
+        }
+
+        <div class="player__review-actions">
+          <button class="btn btn--ghost" (click)="skipReview()">Skip</button>
+          <button class="btn btn--primary" [disabled]="submittingReview() || reviewRating() === 0" (click)="submitReview()">
+            {{ submittingReview() ? 'Submitting…' : 'Submit review' }}
+          </button>
+        </div>
+      }
+    </div>
+  } @else if (variant()) {
+    <aside class="player__sidebar">
+      <div class="player__sidebar-header">
+        <h2 class="player__tour-title">{{ variant()!.tour_title }}</h2>
+        @if (variant()!.cover_image_url || variant()!.map_image_url) {
+          <button type="button" class="player__map-thumb" (click)="openMap()">
+            <img [src]="variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />
+          </button>
+        }
+      </div>
+      <div class="player__stop-list">
+        @for (group of groupedStops(); track group.spaceId; let gi = $index; let lastGroup = $last) {
+          @if (group.spaceName) {
+            <div class="player__space-label">{{ group.spaceName }}</div>
+          }
+          <div class="player__space-group" [class.player__space-group--has-line]="group.spaceName">
+            @for (stop of group.stops; track stop.id) {
+              <button
+                class="player__stop-item"
+                [class.player__stop-item--active]="currentStop()?.id === stop.id"
+                (click)="goToStop(stops().indexOf(stop))"
+              >
+                <span class="player__stop-num">{{ stops().indexOf(stop) + 1 }}</span>
+                <span class="player__stop-title">{{ stop.title }}</span>
+              </button>
+            }
+          </div>
+          @if (!lastGroup && group.spaceName) {
+            <div class="player__space-direction">
+              <mat-icon class="player__direction-icon">directions_walk</mat-icon>
+              @if (group.stops[0]?.space_transition_duration) {
+                <span class="player__direction-text">{{ group.stops[0].space_transition_duration }} min</span>
+              }
+            </div>
+          }
+        }
+      </div>
+    </aside>
+
+    <!-- Mobile map button -->
+    @if (variant()?.map_image_url) {
+      <button type="button" class="player__mobile-map-btn" (click)="openMap()">
+        <mat-icon>map</mat-icon>
+      </button>
+    }
+
+    <main class="player__stage">
+      @if (currentStop(); as stop) {
+        <!-- 1. TITLE -->
+        <div class="player__stop-header">
+          @if (stop.space_name) {
+            <span class="player__space-watermark">{{ stop.space_name }}</span>
+          }
+          <h1 class="player__stop-name">{{ stop.title }}</h1>
+        </div>
+
+        <!-- 2. AUDIO PLAYER -->
+        @if (getAudio(stop); as audio) {
+          <div class="player__audio-hero">
+            <audio #mainAudio [src]="audio.url" (ended)="onAudioEnded()" preload="metadata"></audio>
+            <div class="player__audio-controls">
+              <button type="button" class="player__skip-btn" (click)="skip(-10)">-10s</button>
+              <button type="button" class="player__play-btn" (click)="togglePlay()">
+                @if (isPlaying()) {
+                  <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                }
+              </button>
+              <button type="button" class="player__skip-btn" (click)="skip(10)">+10s</button>
+            </div>
+            <div class="player__audio-track">
+              <div class="player__audio-bar">
+                <div class="player__audio-progress" [style.width.%]="audioProgress()"></div>
+              </div>
+              <div class="player__audio-times">
+                <span>{{ formatTime(audioCurrent()) }}</span>
+                <span>{{ formatTime(audioDuration()) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- 3. DESCRIPTION -->
+        @if (stop.description) {
+          <p class="player__stop-desc">{{ stop.description }}</p>
+        }
+
+        <!-- 3. ATTACHMENTS — thumbnails for images, link for PDFs -->
+        @if (getImages(stop).length > 0 || getPdfs(stop).length > 0) {
+          <div class="player__attachments">
+            <h3 class="player__attachments-title">Attachments</h3>
+            <div class="player__attachments-grid">
+              @for (img of getImages(stop); track img.id; let i = $index) {
+                <button type="button" class="player__thumb" (click)="openImageModal(getImages(stop), i)">
+                  <img [src]="img.url" [alt]="stop.title" />
+                </button>
+              }
+              @for (pdf of getPdfs(stop); track pdf.id) {
+                <a [href]="pdf.url" target="_blank" class="player__thumb player__thumb--pdf">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span>PDF</span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Map modal -->
+        @if (showMapModal()) {
+          <div class="player__map-backdrop" (click)="showMapModal.set(false)">
+            <div class="player__map-frame" #mapFrame (click)="$event.stopPropagation()">
+              <button type="button" class="player__map-close" (click)="showMapModal.set(false)">&times;</button>
+              <img [src]="variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />
+
+              <!-- Dots -->
+              @for (sp of mapSpaces(); track sp.id; let i = $index) {
+                @if (sp.map_x != null) {
+                  <div class="player__map-dot"
+                    [class.player__map-dot--active]="currentStop()?.space_id === sp.id"
+                    [style.left.%]="sp.map_x"
+                    [style.top.%]="sp.map_y">
+                    {{ getRomanNumeral(i) }}
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Image carousel modal -->
+        @if (modalImages().length > 0) {
+          <div class="player__modal-backdrop" (click)="closeImageModal()">
+            <div class="player__modal" (click)="$event.stopPropagation()">
+              <button type="button" class="player__modal-close" (click)="closeImageModal()">&times;</button>
+              <img [src]="modalImages()[modalImageIdx()].url" class="player__modal-img" />
+              @if (modalImages().length > 1) {
+                <div class="player__modal-nav">
+                  <button type="button" (click)="prevImage()">&#8592;</button>
+                  <span>{{ modalImageIdx() + 1 }} / {{ modalImages().length }}</span>
+                  <button type="button" (click)="nextImage()">&#8594;</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (!isLastStop() && (stop.transition_duration || stop.transition_description)) {
+          <div class="player__transition">
+            <mat-icon class="player__transition-icon">directions_walk</mat-icon>
+            <div class="player__transition-info">
+              <strong>Directions to next stop</strong>
+              @if (stop.transition_duration) {
+                <span class="player__transition-duration">{{ stop.transition_duration }} min walk</span>
+              }
+              @if (stop.transition_description) {
+                <p class="player__transition-desc">{{ stop.transition_description }}</p>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="player__nav">
+          <button class="player__nav-btn" [disabled]="currentStopIndex() === 0" (click)="prev()">
+            ← Previous
+          </button>
+          @if (isLastStop()) {
+            <button class="player__nav-btn player__nav-btn--finish" (click)="finishTour()">
+              Finish tour ★
+            </button>
+          } @else {
+            <button class="player__nav-btn player__nav-btn--next" (click)="next()">
+              Next →
+            </button>
+          }
+        </div>
+      }
+    </main>
+  }
+</div>

@@ -1,0 +1,125 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.library {
+  @include container;
+  padding-block: $space-8;
+
+  &__header {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $space-4;
+    margin-bottom: $space-8;
+  }
+
+  &__empty {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: $space-16;
+    gap: $space-4;
+
+    h2 { @include heading($font-size-xl); }
+    p  { color: $text-secondary; }
+  }
+
+  &__empty-icon { font-size: $font-size-3xl; }
+}
+
+.page-title  { @include heading($font-size-2xl); }
+.page-sub    { color: $text-secondary; margin-top: $space-1; }
+.page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
+
+.purchase-grid {
+  display: grid;
+  gap: $space-4;
+  grid-template-columns: 1fr;
+
+  @include sm { grid-template-columns: repeat(2, 1fr); }
+  @include lg { grid-template-columns: repeat(3, 1fr); }
+}
+
+.purchase-card {
+  @include card;
+  @include hover-lift;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+
+  &__cover {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+
+    &--placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-3xl;
+      background: $bg-surface-alt;
+      color: $text-muted;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    padding: $space-5;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-family: $font-family-primary;
+    color: $text-primary;
+    margin-bottom: $space-2;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    margin-bottom: $space-2;
+  }
+
+  &__waypoints { font-size: $font-size-xs; color: $text-muted; }
+
+  &__creator { font-size: $font-size-sm; color: $text-secondary; }
+
+  &__footer {
+    padding: $space-4 $space-5;
+    border-top: 1px solid $border-default;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+}
+
+.lang-badge {
+  padding: $space-1 $space-3;
+  border-radius: $radius-sm;
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  color: $text-secondary;
+  letter-spacing: 0.05em;
+}
+
+.btn {
+  display: inline-block;
+  padding: $space-2 $space-5;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all $transition-fast;
+
+  &--primary { background: $accent-primary; color: $white; border-color: $accent-primary; &:hover { background: $accent-hover; } }
+  &--ghost   { background: transparent; color: $text-secondary; border-color: $border-default; &:hover { color: $text-primary; border-color: $text-primary; } }
+  &--block   { width: 100%; text-align: center; }
+}

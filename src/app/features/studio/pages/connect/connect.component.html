@@ -1,0 +1,61 @@
+<section class="connect-page">
+  <a routerLink="/studio" class="back-link">← Back to Studio</a>
+
+  <div class="connect-card">
+    <h1 class="connect-card__title">Stripe Payments</h1>
+    <p class="connect-card__desc">Connect your Stripe account to receive payments from tour sales.</p>
+
+    @if (loading()) {
+      <p class="text-secondary">Loading…</p>
+    } @else if (status()) {
+
+      @if (error()) {
+        <div class="connect-card__error" role="alert">{{ error() }}</div>
+      }
+
+      @if (!status()!.connected) {
+        <!-- Not connected yet -->
+        <div class="connect-card__status connect-card__status--pending">
+          <span class="connect-card__status-icon">&#9888;</span>
+          <div>
+            <strong>Not connected</strong>
+            <p>Set up your Stripe account to start earning from your tours.</p>
+          </div>
+        </div>
+        <button class="btn btn--primary" (click)="startOnboarding()">Connect with Stripe</button>
+      } @else if (!status()!.details_submitted) {
+        <!-- Onboarding started but incomplete -->
+        <div class="connect-card__status connect-card__status--pending">
+          <span class="connect-card__status-icon">&#9888;</span>
+          <div>
+            <strong>Onboarding incomplete</strong>
+            <p>You started the Stripe setup but haven't finished. Continue to complete it.</p>
+          </div>
+        </div>
+        <button class="btn btn--primary" (click)="startOnboarding()">Continue setup</button>
+      } @else if (!status()!.charges_enabled) {
+        <!-- Submitted but not yet approved -->
+        <div class="connect-card__status connect-card__status--pending">
+          <span class="connect-card__status-icon">&#8987;</span>
+          <div>
+            <strong>Under review</strong>
+            <p>Stripe is reviewing your account. This usually takes a few minutes.</p>
+          </div>
+        </div>
+      } @else {
+        <!-- Fully connected -->
+        <div class="connect-card__status connect-card__status--active">
+          <span class="connect-card__status-icon">&#10003;</span>
+          <div>
+            <strong>Connected</strong>
+            <p>Your Stripe account is active. You can receive payments and request payouts.</p>
+          </div>
+        </div>
+        <div class="connect-card__actions">
+          <button class="btn btn--primary" (click)="openDashboard()">Open Stripe Dashboard</button>
+          <a routerLink="/studio/earnings" class="btn btn--ghost">View earnings</a>
+        </div>
+      }
+    }
+  </div>
+</section>

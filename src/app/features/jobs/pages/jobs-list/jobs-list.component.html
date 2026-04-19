@@ -1,0 +1,107 @@
+<section class="jobs-list">
+  <div class="jobs-list__header">
+    <div>
+      <h1 class="page-title">Translation Jobs</h1>
+      <p class="page-sub">Earn by translating tours into your languages</p>
+    </div>
+    <a routerLink="/jobs/earnings" class="btn btn--secondary">My earnings</a>
+  </div>
+
+  <div class="jobs-list__tabs">
+    <button
+      class="tab-btn"
+      [class.tab-btn--active]="tab() === 'available'"
+      (click)="setTab('available')"
+    >Available jobs</button>
+    <button
+      class="tab-btn"
+      [class.tab-btn--active]="tab() === 'mine'"
+      (click)="setTab('mine')"
+    >My accepted jobs</button>
+    <button
+      class="tab-btn"
+      [class.tab-btn--active]="tab() === 'requests'"
+      (click)="setTab('requests')"
+    >My requests</button>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading…</div>
+  } @else if (tab() === 'requests') {
+    <!-- My requests tab -->
+    @if (requests().length === 0) {
+      <div class="page-empty">
+        <p>You haven't posted any translation requests yet.</p>
+      </div>
+    } @else {
+      <div class="job-cards">
+        @for (r of requests(); track r.id) {
+          <div class="job-card">
+            <div class="job-card__left">
+              <div class="job-card__langs">
+                <span class="lang-badge lang-badge--target">{{ r.target_language_code | uppercase }}</span>
+              </div>
+              <h2 class="job-card__title">{{ r.tour_title }}</h2>
+              <p class="job-card__meta">
+                <span class="status-badge" [class]="'status-badge--' + r.status">{{ r.status }}</span>
+                @if (r.assigned_translator_name) {
+                  <span class="separator" aria-hidden="true">·</span>
+                  Assigned to <strong>{{ r.assigned_translator_name }}</strong>
+                }
+              </p>
+              @if (r.description) {
+                <p class="job-card__desc">{{ r.description }}</p>
+              }
+            </div>
+            <div class="job-card__right">
+              <div class="job-card__reward">
+                <span class="job-card__reward-label">Compensation</span>
+                <span class="job-card__reward-value">{{ getCompensation(r) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else if (jobs().length === 0) {
+    <div class="page-empty">
+      @if (tab() === 'available') {
+        <p>No jobs available right now. Check back soon as creators post new translation requests.</p>
+      } @else {
+        <p>You haven't accepted any jobs yet. Browse available jobs to get started.</p>
+      }
+    </div>
+  } @else {
+    <div class="job-cards">
+      @for (job of jobs(); track job.id) {
+        <div class="job-card">
+          <div class="job-card__left">
+            <div class="job-card__langs">
+              <span class="lang-badge lang-badge--target">{{ job.target_language_code | uppercase }}</span>
+            </div>
+            <h2 class="job-card__title">{{ job.tour_title }}</h2>
+            <p class="job-card__meta">
+              by {{ job.creator_name || job.creator_username }}
+              @if (job.status) {
+                <span class="separator" aria-hidden="true">·</span>
+                <span class="status-badge" [class]="'status-badge--' + job.status">{{ job.status }}</span>
+              }
+            </p>
+            @if (job.description) {
+              <p class="job-card__desc">{{ job.description }}</p>
+            }
+          </div>
+          <div class="job-card__right">
+            <div class="job-card__reward">
+              <span class="job-card__reward-label">Reward</span>
+              <span class="job-card__reward-value">{{ getCompensation(job) }}</span>
+            </div>
+            <a [routerLink]="['/jobs', job.id]" class="btn btn--primary">
+              {{ tab() === 'mine' ? 'Continue' : 'View job' }}
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

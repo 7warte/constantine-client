@@ -1,0 +1,134 @@
+<!-- ── Hero with slideshow ──────────────────────────────────────── -->
+<section class="hero">
+  @for (img of heroImages; track $index) {
+    <div
+      class="hero__slide"
+      [class.hero__slide--active]="activeSlide() === $index"
+      [style.backgroundImage]="'url(' + img + ')'"
+    ></div>
+  }
+  <div class="hero__overlay"></div>
+  <div class="hero__content container">
+    <h1 class="hero__title">Discover the world<br>through its stories</h1>
+    <p class="hero__sub">
+      Audio-guided tours created by people who truly know the places.
+      Explore museums, landmarks, cities — on your terms.
+    </p>
+    <div class="hero__actions">
+      <app-button routerLink="/explore" variant="primary" size="lg">
+        Explore Tours
+      </app-button>
+      <app-button routerLink="/auth/register" variant="outline" size="lg">
+        Become a Creator
+      </app-button>
+    </div>
+    <div class="hero__dots">
+      @for (img of heroImages; track $index) {
+        <span
+          class="hero__dot"
+          [class.hero__dot--active]="activeSlide() === $index"
+        ></span>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Categories ─────────────────────────────────────────────── -->
+<section class="categories section">
+  <div class="container">
+    <h2 class="section__title">Browse by category</h2>
+    <ul class="categories__grid">
+      @for (cat of categories(); track cat.id) {
+        <li>
+          <a [routerLink]="['/explore']" [queryParams]="{ category: cat.slug }" class="category-chip">
+            {{ cat.name }}
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- ── Featured tours ─────────────────────────────────────────── -->
+<section class="featured section">
+  <div class="container">
+    <h2 class="section__title">Top rated tours</h2>
+    <div class="featured__grid">
+      @for (tour of featuredTours(); track tour.id) {
+        <app-card [tour]="tour" />
+      } @empty {
+        <p class="text-secondary">Loading tours…</p>
+      }
+    </div>
+    <div class="featured__cta">
+      <app-button routerLink="/explore" variant="ghost">
+        View all tours →
+      </app-button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quote ──────────────────────────────────────────────────── -->
+<section class="quote-section">
+  <div class="container">
+    <blockquote class="quote">
+      <p class="quote__text">"{{ activeQuote.text }}"</p>
+      <cite class="quote__author">— {{ activeQuote.author }}</cite>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ── How it works ───────────────────────────────────────────── -->
+<section class="how-it-works section">
+  <div class="container">
+    <h2 class="section__title">How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step__image">
+          <img [src]="heroImages[1]" alt="Explore destinations" loading="lazy" />
+        </div>
+        <div class="step__content">
+          <span class="step__number">01</span>
+          <h3>Find a tour</h3>
+          <p>Browse hundreds of audio-guided tours across cities, museums, and landmarks worldwide.</p>
+        </div>
+      </div>
+      <div class="step step--reverse">
+        <div class="step__image">
+          <img [src]="heroImages[3]" alt="Listen and explore" loading="lazy" />
+        </div>
+        <div class="step__content">
+          <span class="step__number">02</span>
+          <h3>Listen and explore</h3>
+          <p>Play the tour on your phone as you walk. Audio, images, and directions guide you at every stop.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step__image">
+          <img [src]="heroImages[4]" alt="Create and earn" loading="lazy" />
+        </div>
+        <div class="step__content">
+          <span class="step__number">03</span>
+          <h3>Create and earn</h3>
+          <p>Know a place well? Record your own tour, set your price, and earn from every download.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Creator CTA ────────────────────────────────────────────── -->
+<section class="creators-cta section">
+  <div class="container creators-cta__inner">
+    <div class="creators-cta__text">
+      <h2>Share your knowledge.<br>Earn from your stories.</h2>
+      <p>
+        Create tours in any language, collaborate with translators,
+        and build passive income from every download.
+      </p>
+    </div>
+    <app-button routerLink="/auth/register" variant="primary" size="lg">
+      Start creating for free
+    </app-button>
+  </div>
+</section>

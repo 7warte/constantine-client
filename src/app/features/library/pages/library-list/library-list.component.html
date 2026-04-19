@@ -1,0 +1,55 @@
+<section class="library">
+  <div class="library__header">
+    <div>
+      <h1 class="page-title">My Library</h1>
+      <p class="page-sub">Your purchased audio tours</p>
+    </div>
+    <a routerLink="/explore" class="btn btn--primary">Explore more tours</a>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading your library…</div>
+  } @else if (purchases().length === 0) {
+    <div class="library__empty">
+      <span class="library__empty-icon" aria-hidden="true">&#127911;</span>
+      <h2>Your library is empty</h2>
+      <p>Purchase audio tours to access them here.</p>
+      <a routerLink="/explore" class="btn btn--primary">Explore tours</a>
+    </div>
+  } @else {
+    <div class="purchase-grid">
+      @for (purchase of purchases(); track purchase.id) {
+        <div class="purchase-card">
+          @if (purchase.cover_url) {
+            <img
+              class="purchase-card__cover"
+              [src]="purchase.cover_url"
+              [alt]="purchase.tour_title"
+              loading="lazy"
+            />
+          } @else {
+            <div class="purchase-card__cover purchase-card__cover--placeholder" aria-hidden="true">
+              &#127911;
+            </div>
+          }
+          <div class="purchase-card__body">
+            <h2 class="purchase-card__title">{{ purchase.tour_title }}</h2>
+            <p class="purchase-card__meta">
+              <span class="lang-badge">{{ purchase.language | uppercase }}</span>
+              <span class="purchase-card__waypoints">{{ purchase.waypoint_count }} stops</span>
+            </p>
+            <p class="purchase-card__creator">by {{ purchase.creator_display_name }}</p>
+          </div>
+          <div class="purchase-card__footer">
+            <a [routerLink]="['/library', purchase.id, 'play']" class="btn btn--primary btn--block">
+              ▶ Start tour
+            </a>
+            <a [routerLink]="['/tours', purchase.tour_variant_id]" [queryParams]="{ tourId: purchase.tour_id }" class="btn btn--ghost btn--block">
+              Details
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

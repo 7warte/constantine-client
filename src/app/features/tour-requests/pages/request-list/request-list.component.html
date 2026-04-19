@@ -1,0 +1,47 @@
+<div class="request-page container">
+  <div class="request-page__header">
+    <div>
+      <h1>Tour Requests</h1>
+      <p class="text-secondary">
+        Can't find the tour you're looking for? Request one and let creators bring it to life.
+      </p>
+    </div>
+    <a routerLink="/tour-requests/new">
+      <app-button variant="primary">Request a Tour</app-button>
+    </a>
+  </div>
+
+  <div class="request-grid">
+    @if (loading()) {
+      <p class="text-secondary">Loading requests...</p>
+    } @else if (requests().length === 0) {
+      <p class="text-secondary">No tour requests yet. Be the first to request one!</p>
+    } @else {
+      @for (req of requests(); track req.id) {
+        <a [routerLink]="['/tour-requests', req.id]" class="request-card">
+          <div class="request-card__top">
+            <span class="request-card__title">{{ req.title }}</span>
+            <span class="request-card__status request-card__status--{{ req.status }}">
+              {{ req.status }}
+            </span>
+          </div>
+
+          <p class="request-card__desc">{{ req.description || 'No description provided.' }}</p>
+
+          @if (req.wishes) {
+            <p class="request-card__wishes">{{ req.wishes }}</p>
+          }
+
+          <div class="request-card__footer">
+            <span class="request-card__author">by {{ req.requester_username }}</span>
+            @if (req.status === 'fulfilled' && req.fulfilled_by_username) {
+              <span class="request-card__fulfilled">
+                Fulfilled by {{ req.fulfilled_by_username }}
+              </span>
+            }
+          </div>
+        </a>
+      }
+    }
+  </div>
+</div>

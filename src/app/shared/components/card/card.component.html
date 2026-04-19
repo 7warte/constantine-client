@@ -1,0 +1,32 @@
+<article class="tour-card" [routerLink]="['/tours', tour.variant_id]" [queryParams]="{ tourId: tour.tour_id }">
+  <div class="tour-card__cover">
+    @if (tour.cover_image_url) {
+      <img [src]="tour.cover_image_url" [alt]="tour.tour_title" loading="lazy" />
+    } @else {
+      <div class="tour-card__cover-placeholder">
+        <span class="font-decorative" aria-hidden="true">&#x10980;</span>
+      </div>
+    }
+    @if (tour.price_cents === 0) {
+      <span class="tour-card__badge tour-card__badge--free">Free</span>
+    }
+  </div>
+
+  <div class="tour-card__body">
+    <span class="tour-card__lang">{{ tour.language_code | uppercase }}</span>
+    <h3 class="tour-card__title">{{ tour.tour_title }}</h3>
+    <p class="tour-card__creator">
+      by {{ tour.creator_username }}@if (tour.translator_username) {
+        <span class="tour-card__translated"> · translated by {{ tour.translator_username }}</span>
+      }
+    </p>
+
+    <div class="tour-card__footer">
+      <app-star-rating [rating]="tour.average_rating" [count]="tour.review_count" />
+      <span class="tour-card__price">
+        @if (tour.price_cents === 0) { Free }
+        @else { {{ tour.price_cents / 100 | currency:'EUR' }} }
+      </span>
+    </div>
+  </div>
+</article>

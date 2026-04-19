@@ -1,0 +1,25 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.account-page {
+  padding-block: $space-12;
+  max-width: 640px;
+
+  &__title { font-size: $font-size-2xl; margin-bottom: $space-8; }
+}
+
+.settings-section {
+  @include card;
+  border: 1px solid rgba($color-error, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  h2 { font-size: $font-size-xl; color: $color-error; }
+
+  &__confirm-msg {
+    color: $color-warning;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+}

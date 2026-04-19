@@ -1,0 +1,98 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.connect-page {
+  @include container;
+  padding-block: $space-8;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: $space-6;
+  &:hover { color: $text-primary; }
+}
+
+.connect-card {
+  @include card;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+
+  &__title {
+    @include heading($font-size-2xl);
+  }
+
+  &__desc {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__status {
+    display: flex;
+    gap: $space-4;
+    align-items: flex-start;
+    padding: $space-4;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+
+    p { color: $text-secondary; margin-top: $space-1; }
+
+    &--pending {
+      background: rgba($color-warning, 0.1);
+      border: 1px solid rgba($color-warning, 0.3);
+    }
+
+    &--active {
+      background: rgba($color-success, 0.1);
+      border: 1px solid rgba($color-success, 0.3);
+    }
+  }
+
+  &__status-icon {
+    font-size: $font-size-xl;
+    flex-shrink: 0;
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-3;
+    flex-wrap: wrap;
+  }
+}
+
+.btn {
+  display: inline-block;
+  padding: $space-3 $space-6;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all $transition-fast;
+
+  &--primary {
+    background: $accent-primary;
+    color: $white;
+    &:hover { background: $accent-hover; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $text-secondary;
+    border: 1px solid $border-default;
+    &:hover { color: $text-primary; }
+  }
+}

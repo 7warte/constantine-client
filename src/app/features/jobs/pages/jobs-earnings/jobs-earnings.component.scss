@@ -1,0 +1,120 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.jobs-earnings {
+  @include container;
+  padding-block: $space-8;
+
+  &__header {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $space-4;
+    margin-bottom: $space-8;
+  }
+
+  &__nav { display: flex; gap: $space-3; }
+
+  &__section { margin-top: $space-10; }
+}
+
+.page-title  { @include heading($font-size-2xl); }
+.page-sub    { color: $text-secondary; margin-top: $space-1; }
+.page-loading { text-align: center; padding: $space-12; color: $text-secondary; }
+.section-title { @include heading($font-size-xl); margin-bottom: $space-5; }
+
+.summary-row {
+  display: grid;
+  gap: $space-4;
+  grid-template-columns: repeat(3, 1fr);
+
+  @include sm { /* already 3 col */ }
+}
+
+.summary-stat {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  text-align: center;
+
+  &--accent { background: $gradient-brand-v; border-color: $accent-primary; }
+
+  &__value { font-size: $font-size-2xl; font-family: $font-family-primary; font-weight: $font-weight-bold; color: $text-primary; }
+  &__label { font-size: $font-size-sm; color: $text-secondary; }
+}
+
+.empty-state {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-6;
+  text-align: center;
+  padding: $space-12;
+  color: $text-secondary;
+}
+
+.payments-table {
+  @include card;
+  padding: 0;
+  overflow: hidden;
+
+  &__head,
+  &__row {
+    display: grid;
+    grid-template-columns: 120px 1fr 120px 80px 100px;
+    gap: $space-4;
+    padding: $space-4 $space-6;
+    align-items: center;
+  }
+
+  &__head {
+    background: $bg-surface-alt;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__row {
+    border-top: 1px solid $border-default;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    &:hover { background: rgba($bg-surface-alt, 0.5); }
+  }
+}
+
+.col-date  { color: $text-muted; }
+.col-job   { @include truncate; font-weight: $font-weight-semibold; }
+.col-langs { font-size: $font-size-xs; font-weight: $font-weight-bold; color: $text-secondary; letter-spacing: 0.05em; }
+.col-amount { text-align: right; color: $color-success; font-weight: $font-weight-semibold; }
+
+.status-badge {
+  display: inline-block;
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: capitalize;
+
+  &--paid    { background: rgba($color-success, 0.15); color: $color-success; }
+  &--pending { background: rgba($color-warning, 0.15); color: $color-warning; }
+  &--failed  { background: rgba($color-error, 0.15); color: $color-error; }
+}
+
+.btn {
+  display: inline-block;
+  padding: $space-2 $space-5;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all $transition-fast;
+
+  &--primary   { background: $accent-primary; color: $white; border-color: $accent-primary; &:hover { background: $accent-hover; } }
+  &--secondary { background: transparent; color: $text-primary; border-color: $border-strong; &:hover { border-color: $text-primary; } }
+  &--ghost     { background: transparent; color: $text-secondary; border-color: $border-default; &:hover { color: $text-primary; } }
+}

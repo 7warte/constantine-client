@@ -1,0 +1,32 @@
+<div class="marketplace-page container">
+  <div class="marketplace-page__header">
+    <h1>Translation Marketplace</h1>
+    <p class="text-secondary">
+      Creators are looking for translators and voice artists. Apply to earn for every job
+      — fixed fee or a percentage of each download.
+    </p>
+  </div>
+
+  <div class="marketplace-grid">
+    @if (loading()) {
+      <p class="text-secondary">Loading requests…</p>
+    } @else if (requests().length === 0) {
+      <p class="text-secondary">No open requests right now. Check back soon.</p>
+    } @else {
+      @for (req of requests(); track req.id) {
+        <a [routerLink]="['/translation-marketplace', req.id]" class="request-card">
+          <div class="request-card__top">
+            <span class="request-card__lang">→ {{ req.target_language_code | uppercase }}</span>
+            <span class="request-card__comp request-card__comp--{{ req.compensation_type }}">
+              {{ req.compensation_type === 'fixed'
+                  ? (req.compensation_value / 100 | currency:'EUR')
+                  : req.compensation_value + '% per sale' }}
+            </span>
+          </div>
+          <p class="request-card__desc">{{ req.description || 'No description provided.' }}</p>
+          <span class="request-card__status">{{ req.status }}</span>
+        </a>
+      }
+    }
+  </div>
+</div>

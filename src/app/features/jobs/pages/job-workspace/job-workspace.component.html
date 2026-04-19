@@ -1,0 +1,111 @@
+<section class="workspace">
+  <div class="workspace__topbar">
+    <a routerLink="/jobs" class="back-link">← All jobs</a>
+    @if (job(); as j) {
+      <div class="workspace__job-info">
+        <h1 class="workspace__title">{{ j.tour_title }}</h1>
+        <div class="workspace__langs">
+          <span class="lang-badge lang-badge--target">{{ j.target_language_code | uppercase }}</span>
+          <span class="status-badge" [class]="'status-badge--' + j.status">{{ j.status }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading workspace…</div>
+  } @else {
+    <div class="workspace__layout">
+      <!-- ── Stop sidebar ──────────────────────────────────────── -->
+      <aside class="workspace__sidebar">
+        <h2 class="sidebar-title">Stops ({{ originalStops().length }})</h2>
+        <ul class="stop-nav">
+          @for (stop of originalStops(); track stop.id; let i = $index) {
+            <li>
+              <button
+                class="stop-nav__item"
+                [class.stop-nav__item--active]="activeIdx() === i"
+                [class.stop-nav__item--done]="getTranslatedStop(stop.order_index)"
+                (click)="selectStop(i)"
+              >
+                <span class="stop-nav__num">{{ i + 1 }}</span>
+                <span class="stop-nav__name">{{ stop.title }}</span>
+                @if (getTranslatedStop(stop.order_index)) {
+                  <span class="stop-nav__check" aria-label="Translated">&#10003;</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </aside>
+
+      <!-- ── Translation editor ────────────────────────────────── -->
+      <div class="workspace__editor">
+        @if (activeStop(); as stop) {
+          <div class="editor-card">
+            <div class="editor-panels">
+              <!-- Original -->
+              <div class="editor-panel">
+                <h3 class="editor-panel__label">Original</h3>
+                <div class="editor-panel__content editor-panel__content--source">
+                  <strong>{{ stop.title }}</strong>
+                  @if (stop.description) {
+                    <p>{{ stop.description }}</p>
+                  }
+                  @if (stop.media && stop.media.length > 0) {
+                    @for (m of stop.media; track m.id) {
+                      @if (m.media_type === 'audio') {
+                        <audio [src]="m.url" controls controlsList="nodownload" class="editor-audio"></audio>
+                      }
+                      @if (m.media_type === 'image') {
+                        <img [src]="m.url" [alt]="stop.title" class="editor-image" />
+                      }
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Translation -->
+              <div class="editor-panel">
+                <h3 class="editor-panel__label">Translation</h3>
+                <form [formGroup]="translationForm" (ngSubmit)="saveTranslation()" class="editor-form">
+                  <div class="form-field">
+                    <label class="form-field__label">Title</label>
+                    <input type="text" formControlName="title" class="form-field__input"
+                      placeholder="Translated title…" />
+                  </div>
+                  <div class="form-field">
+                    <label class="form-field__label">Description</label>
+                    <textarea formControlName="description" class="form-field__textarea"
+                      placeholder="Translated description…" rows="6"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn--primary" [disabled]="saving()">
+                    {{ saving() ? 'Saving…' : 'Save translation' }}
+                  </button>
+                </form>
+
+                <!-- Audio for translated stop -->
+                @if (getTranslatedStop(stop.order_index); as ts) {
+                  <div class="editor-panel__media">
+                    @if (ts.media && ts.media.length > 0) {
+                      @for (m of ts.media; track m.id) {
+                        @if (m.media_type === 'audio') {
+                          <audio [src]="m.url" controls controlsList="nodownload" class="editor-audio"></audio>
+                        }
+                      }
+                    }
+                    <app-audio-recorder (recorded)="onRecordedAudio($event)" />
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="editor-empty">
+            <p>No stops found for this tour.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>

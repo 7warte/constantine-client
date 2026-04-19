@@ -1,0 +1,14 @@
+<div class="account-page container">
+  <h1 class="account-page__title">Account Settings</h1>
+
+  <section class="settings-section">
+    <h2>Danger Zone</h2>
+    <p class="text-secondary">Permanently delete your account and all your data. This cannot be undone.</p>
+    @if (confirm()) {
+      <p class="settings-section__confirm-msg">Are you sure? Click again to confirm deletion.</p>
+    }
+    <app-button variant="danger" [loading]="deleting()" (click)="deleteAccount()">
+      {{ confirm() ? 'Confirm — delete my account' : 'Delete account' }}
+    </app-button>
+  </section>
+</div>

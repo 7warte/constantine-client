@@ -1,0 +1,62 @@
+<div class="explore container">
+  <div class="explore__hero">
+    <h1>Explore Tours</h1>
+    <p class="text-secondary">Discover guided audio, image, and video tours for any place in the world.</p>
+  </div>
+
+  <div class="explore__filters">
+    <form [formGroup]="filters" (ngSubmit)="search()" class="filter-bar" novalidate>
+      <input
+        formControlName="search"
+        class="filter-bar__search"
+        type="search"
+        placeholder="Search tours…"
+      />
+
+      <input
+        formControlName="tag"
+        class="filter-bar__input"
+        type="text"
+        placeholder="Filter by tag…"
+      />
+
+      <input
+        formControlName="language"
+        class="filter-bar__input"
+        type="text"
+        placeholder="Language (e.g. en)"
+        maxlength="10"
+      />
+
+      <select formControlName="sort" class="filter-bar__select">
+        <option value="newest">Newest</option>
+        <option value="top_rated">Top rated</option>
+        <option value="price_asc">Price: low to high</option>
+        <option value="price_desc">Price: high to low</option>
+      </select>
+
+      <app-button type="submit" variant="primary">Search</app-button>
+    </form>
+  </div>
+
+  <div class="explore__results">
+    @if (loading()) {
+      <p class="text-secondary">Loading tours…</p>
+    } @else if (tours().length === 0) {
+      <p class="text-secondary">No tours found. Try adjusting your filters.</p>
+    } @else {
+      <div class="explore__grid">
+        @for (tour of tours(); track tour.id) {
+          <app-card [tour]="tour" />
+        }
+      </div>
+    }
+  </div>
+
+  <div class="explore__cta">
+    <p>Can't find what you're looking for?</p>
+    <a routerLink="/tour-requests/new">
+      <app-button variant="outline">Request a Tour</app-button>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="page container">
+  <h1 class="page__title">Request a Tour</h1>
+  <p class="page__subtitle text-secondary">
+    Describe the tour you'd like to see created. Creators will be able to view your request and bring it to life.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
+    @if (error()) {
+      <div class="form__error" role="alert">{{ error() }}</div>
+    }
+
+    <app-input
+      label="Title"
+      formControlName="title"
+      hint="A short, descriptive title (e.g. 'Walking tour of Bruges old town')"
+    />
+
+    <div class="field">
+      <label class="field__label" for="description">Description</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="field__textarea"
+        rows="4"
+        placeholder="Describe what you'd like the tour to cover..."
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="wishes">Wishes</label>
+      <textarea
+        id="wishes"
+        formControlName="wishes"
+        class="field__textarea"
+        rows="3"
+        placeholder="Any preferences? Language, accessibility, indoor/outdoor, duration..."
+      ></textarea>
+      <span class="field__hint">Optional — let creators know about your preferences</span>
+    </div>
+
+    <app-button type="submit" variant="primary" [loading]="loading()">Submit request</app-button>
+  </form>
+</div>

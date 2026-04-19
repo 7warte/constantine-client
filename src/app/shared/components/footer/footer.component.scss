@@ -1,0 +1,58 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.footer {
+  border-top: 1px solid $border-default;
+  padding-block: $space-10;
+  background: $bg-surface-alt;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-6;
+    text-align: center;
+
+    @include md {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__glyph {
+    font-size: $font-size-xl;
+    color: $accent-primary;
+  }
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    color: $text-primary;
+  }
+
+  &__nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-6;
+
+    a {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      transition: color $transition-fast;
+      &:hover { color: $text-primary; }
+    }
+  }
+
+  &__copy {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}

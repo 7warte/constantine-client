@@ -1,0 +1,74 @@
+<div class="detail container">
+  @if (loading()) {
+    <p class="text-secondary">Loading...</p>
+  } @else {
+    @if (request(); as req) {
+      <div class="detail__header">
+        <h1>{{ req.title }}</h1>
+        <span class="detail__status detail__status--{{ req.status }}">{{ req.status }}</span>
+      </div>
+
+      <div class="detail__meta">
+        Requested by <strong>{{ req.requester_name || req.requester_username }}</strong>
+      </div>
+
+      <div class="detail__body card">
+        @if (req.description) {
+          <div class="detail__section">
+            <h3>Description</h3>
+            <p>{{ req.description }}</p>
+          </div>
+        }
+
+        @if (req.wishes) {
+          <div class="detail__section">
+            <h3>Wishes</h3>
+            <p>{{ req.wishes }}</p>
+          </div>
+        }
+      </div>
+
+      @if (req.status === 'fulfilled') {
+        <div class="detail__fulfilled-info">
+          <h3>Fulfilled</h3>
+          <p>
+            This request was fulfilled by <strong>{{ req.fulfilled_by_username }}</strong>
+            @if (req.fulfilled_tour_title) {
+              with the tour <em>{{ req.fulfilled_tour_title }}</em>
+            }
+          </p>
+        </div>
+      }
+
+      @if (req.status === 'open' && auth.isLoggedIn()) {
+        @if (fulfilled()) {
+          <div class="detail__success">Request fulfilled! Thank you for creating this tour.</div>
+        } @else if (myTours().length > 0) {
+          <form [formGroup]="fulfillForm" (ngSubmit)="fulfill()" class="detail__fulfill" novalidate>
+            <h2>Fulfill this request</h2>
+            <p class="text-secondary">Select one of your published tours to link to this request.</p>
+
+            @if (error()) {
+              <div class="detail__error" role="alert">{{ error() }}</div>
+            }
+
+            <select formControlName="tour_id" class="field__select">
+              <option value="">Select a tour...</option>
+              @for (tour of myTours(); track tour.id) {
+                <option [value]="tour.id">{{ tour.title }}</option>
+              }
+            </select>
+
+            <app-button type="submit" variant="primary" [loading]="fulfilling()">Fulfill request</app-button>
+          </form>
+        }
+      } @else if (req.status === 'open' && !auth.isLoggedIn()) {
+        <p class="detail__auth-hint">
+          <a routerLink="/auth/login">Sign in</a> to fulfill this request with one of your tours.
+        </p>
+      }
+    } @else {
+      <p class="text-secondary">Tour request not found.</p>
+    }
+  }
+</div>

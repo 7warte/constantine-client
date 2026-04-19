@@ -1,0 +1,82 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.checkout-page {
+  min-height: calc(100dvh - 64px);
+  @include flex-center;
+  padding: $space-6;
+  background: $bg-base;
+}
+
+.checkout-card {
+  @include card-light;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+
+  &__header h1 {
+    font-size: $font-size-2xl;
+    color: $text-primary;
+    margin-bottom: $space-2;
+  }
+
+  &__summary {
+    display: flex;
+    gap: $space-4;
+    align-items: center;
+    padding: $space-4;
+    background: $bg-surface-alt;
+    border-radius: $radius-md;
+  }
+
+  &__cover {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: $radius-sm;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    color: $text-primary;
+    @include line-clamp(2);
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: $text-dark;
+    margin-top: $space-1;
+  }
+
+  &__price {
+    @include flex-between;
+    padding-block: $space-4;
+    border-top: 1px solid $border-light;
+    border-bottom: 1px solid $border-light;
+    color: $text-dark;
+
+    strong {
+      font-size: $font-size-xl;
+      color: $text-primary;
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+
+  &__payment {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+  }
+}

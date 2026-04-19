@@ -1,0 +1,42 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.confirmation-page {
+  min-height: calc(100dvh - 64px);
+  @include flex-center;
+  padding: $space-6;
+}
+
+.confirmation-card {
+  @include card-light;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-5;
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+    background: $color-success;
+    color: white;
+    font-size: $font-size-2xl;
+    @include flex-center;
+  }
+
+  h1 {
+    font-size: $font-size-2xl;
+    color: $text-primary;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    width: 100%;
+    margin-top: $space-2;
+  }
+}

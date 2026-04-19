@@ -1,0 +1,315 @@
+<section class="variant-edit">
+  <div class="variant-edit__header">
+    <a [routerLink]="['/studio/tours', tourId()]" class="back-link">← Back to tour</a>
+    <h1 class="page-title">{{ isNew() ? 'Add language variant' : 'Edit variant' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading variant…</div>
+  } @else {
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+
+    @if (isNew()) {
+      <!-- ── Create variant form ──────────────────────────────────── -->
+      <div class="edit-card">
+        <h2 class="edit-card__title">New language variant</h2>
+
+        <form [formGroup]="form" (ngSubmit)="save()" class="edit-form" novalidate>
+          @if (tourData()?.title) {
+            <p class="edit-card__original-title">Original title: <strong>{{ tourData()!.title }}</strong></p>
+          }
+          <div class="form-row">
+            <div class="form-field">
+              <label for="v-language" class="form-field__label">Language <span class="required">*</span></label>
+              <select id="v-language" formControlName="language_code" class="form-field__select">
+                <option value="">Select language…</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="es">Spanish</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ja">Japanese</option>
+                <option value="zh">Chinese</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="v-title" class="form-field__label">Title in this language <span class="required">*</span></label>
+              <input id="v-title" type="text" formControlName="title" class="form-field__input"
+                placeholder="Translated tour title" />
+            </div>
+          </div>
+
+          <div class="edit-form__actions">
+            <a [routerLink]="['/studio/tours', tourId()]" class="btn btn--ghost">Cancel</a>
+            <button type="submit" class="btn btn--primary" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : 'Create variant' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── Request translation ──────────────────────────────────── -->
+      <div class="edit-card edit-card--mt">
+        <h2 class="edit-card__title">Request a translation</h2>
+        <p class="edit-card__desc">Prefer another creator to translate this tour? Post a request on the marketplace or invite someone directly.</p>
+
+        @if (requestSuccess()) {
+          <div class="request-success">
+            <span class="request-success__icon">&#10003;</span>
+            <p>Translation request posted! You can track it in <a routerLink="/jobs">Jobs</a>.</p>
+          </div>
+        } @else {
+          <form [formGroup]="requestForm" (ngSubmit)="submitTranslationRequest()" class="edit-form" novalidate>
+            @if (requestError()) {
+              <div class="form-error" role="alert">{{ requestError() }}</div>
+            }
+
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label">Target language <span class="required">*</span></label>
+                <select formControlName="target_language_code" class="form-field__select">
+                  <option value="">Select language…</option>
+                  <option value="en">English</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="es">Spanish</option>
+                  <option value="it">Italian</option>
+                  <option value="pt">Portuguese</option>
+                  <option value="ja">Japanese</option>
+                  <option value="zh">Chinese</option>
+                  <option value="ar">Arabic</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-field__label">Compensation <span class="required">*</span></label>
+                <select formControlName="compensation_type" class="form-field__select">
+                  <option value="percentage">Percentage per sale</option>
+                  <option value="fixed">Fixed fee</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label">
+                @if (requestForm.controls.compensation_type.value === 'fixed') {
+                  Amount (EUR)
+                } @else {
+                  Percentage per sale (%)
+                }
+              </label>
+              <input type="number" formControlName="compensation_value" class="form-field__input"
+                [placeholder]="requestForm.controls.compensation_type.value === 'fixed' ? 'e.g. 50' : 'e.g. 15'"
+                min="0" [max]="requestForm.controls.compensation_type.value === 'percentage' ? 100 : 99999" />
+              <span class="form-field__hint">
+                @if (requestForm.controls.compensation_type.value === 'percentage') {
+                  The translator will earn this % on every sale of the translated variant
+                } @else {
+                  One-time payment to the translator upon completion
+                }
+              </span>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label">Description</label>
+              <textarea formControlName="description" class="form-field__textarea" rows="3"
+                placeholder="Tell translators about the tour and what you expect…"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-field__label">Visibility</label>
+                <select formControlName="visibility" class="form-field__select">
+                  <option value="public">Public — anyone can apply</option>
+                  <option value="direct">Direct — invite a specific creator</option>
+                </select>
+              </div>
+
+              @if (requestForm.controls.visibility.value === 'direct') {
+                <div class="form-field">
+                  <label class="form-field__label">Translator's email</label>
+                  <input type="email" formControlName="invite_email" class="form-field__input"
+                    placeholder="translator@example.com" />
+                  <span class="form-field__hint">We'll send them an email explaining the job and compensation. They can accept and create an account if needed.</span>
+                </div>
+              }
+            </div>
+
+            <div class="edit-form__actions">
+              <button type="submit" class="btn btn--primary" [disabled]="postingRequest()">
+                {{ postingRequest() ? 'Posting…' : 'Post translation request' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    } @else {
+      <!-- ── Existing variant header ──────────────────────────────── -->
+      <div class="edit-card">
+        <p class="variant-header__original-title">{{ tourData()?.title }}</p>
+        <div class="variant-header">
+          <div class="variant-header__info">
+            @if (!isOriginal()) {
+              <span class="lang-badge">
+                {{ originalLang() }} → {{ variant()?.language_code?.toUpperCase() }}
+              </span>
+            } @else {
+              <span class="lang-badge lang-badge--original">
+                {{ variant()?.language_code?.toUpperCase() }} · Original
+              </span>
+            }
+          </div>
+          <div class="variant-header__actions">
+            @if (variant()?.status !== 'published') {
+              <button class="btn btn--publish" [disabled]="publishing()" (click)="publishVariant()">
+                {{ publishing() ? 'Publishing…' : 'Publish variant' }}
+              </button>
+            } @else {
+              <span class="publish-badge">Published</span>
+            }
+            <a [routerLink]="['/studio/tours', tourId()]" class="btn btn--ghost">Back to tour</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Title & description translation ──────────────────────── -->
+      @if (!isOriginal()) {
+        <div class="edit-card edit-card--mt">
+          <h2 class="edit-card__title">Tour info translation</h2>
+
+          <div class="translation-row">
+            <div class="translation-col translation-col--original">
+              <label class="col-label">Original title</label>
+              <p class="original-text">{{ tourData()?.title }}</p>
+              @if (tourData()?.description) {
+                <label class="col-label">Original description</label>
+                <p class="original-text">{{ tourData()?.description }}</p>
+              }
+            </div>
+            <div class="translation-col translation-col--translated">
+              <label class="col-label">Translated title</label>
+              <input #metaTitle type="text" class="form-field__input" [value]="variant()?.title || ''"
+                placeholder="Title in {{ variant()?.language_code?.toUpperCase() }}" />
+              <label class="col-label">Translated description</label>
+              <textarea #metaDesc class="form-field__textarea" rows="4" [value]="variant()?.description || ''"
+                placeholder="Description in {{ variant()?.language_code?.toUpperCase() }}"></textarea>
+              @if (metaSaved()) {
+                <span class="saved-label">&#10003; Saved</span>
+              }
+              <button type="button" class="btn btn--primary btn--sm" [disabled]="savingMeta()"
+                (click)="saveMetaTranslation(metaTitle.value, metaDesc.value)">
+                {{ savingMeta() ? 'Saving…' : 'Save' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ── Translation workspace (only for non-original, saved variants) ── -->
+    @if (!isNew() && !isOriginal() && originalStops().length > 0) {
+      <div class="edit-card edit-card--mt">
+        <h2 class="edit-card__title">Translation workspace</h2>
+        <p class="edit-card__desc">
+          Translate each stop from the original version. You can listen to the original audio and provide your translated text and audio.
+        </p>
+
+        <div class="translation-list">
+          @for (stop of originalStops(); track stop.id; let i = $index) {
+            <div class="translation-row">
+              <!-- Original (left) -->
+              <div class="translation-col translation-col--original">
+                <div class="translation-col__header">
+                  <span class="stop-num">{{ i + 1 }}</span>
+                  <span class="stop-lang">Original</span>
+                </div>
+                <h4 class="stop-title">{{ stop.title }}</h4>
+                @if (stop.description) {
+                  <p class="stop-desc">{{ stop.description }}</p>
+                }
+                @if (stop.media && stop.media.length > 0) {
+                  @for (m of stop.media; track m.id) {
+                    @if (m.media_type === 'audio') {
+                      <audio [src]="m.url" controls controlsList="nodownload" class="stop-audio"></audio>
+                    }
+                  }
+                }
+              </div>
+
+              <!-- Translated (right) -->
+              <div class="translation-col translation-col--translated">
+                <div class="translation-col__header">
+                  <span class="stop-num">{{ i + 1 }}</span>
+                  <span class="stop-lang">{{ form.controls.language_code.value | uppercase }}</span>
+                </div>
+
+                @if (getTranslatedStop(stop.order_index); as ts) {
+                  <!-- Existing translation -->
+                  <div class="translated-content">
+                    <h4 class="stop-title">{{ ts.title }}</h4>
+                    @if (ts.description) {
+                      <p class="stop-desc">{{ ts.description }}</p>
+                    }
+                    @if (ts.media && ts.media.length > 0) {
+                      @for (m of ts.media; track m.id) {
+                        @if (m.media_type === 'audio') {
+                          <div class="stop-audio-row">
+                            <audio [src]="m.url" controls controlsList="nodownload" class="stop-audio"></audio>
+                            <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(ts.id, m.id)">&times;</button>
+                          </div>
+                        }
+                      }
+                    }
+                    <div class="stop-upload-actions">
+                      <label class="audio-upload">
+                        <input type="file" accept="audio/*" (change)="onAudioSelect(ts.id, $event)" hidden />
+                        <span class="btn btn--ghost btn--sm">+ Audio file</span>
+                      </label>
+                    </div>
+                    <app-audio-recorder (recorded)="uploadRecordedAudio(ts.id, $event)" />
+                  </div>
+
+                  <!-- Edit form (inline) -->
+                  <details class="edit-inline">
+                    <summary class="btn btn--ghost btn--sm">Edit translation</summary>
+                    <div class="edit-inline__form">
+                      <input #editTitle type="text" class="form-field__input" [value]="ts.title" placeholder="Translated title" />
+                      <textarea #editDesc class="form-field__textarea" rows="3" [value]="ts.description || ''" placeholder="Translated description"></textarea>
+                      <button type="button" class="btn btn--primary btn--sm"
+                        (click)="saveTranslation(stop, editTitle.value, editDesc.value)">
+                        Update
+                      </button>
+                    </div>
+                  </details>
+                } @else {
+                  <!-- No translation yet -->
+                  <div class="translation-form">
+                    <input #newTitle type="text" class="form-field__input" placeholder="Translated title" />
+                    <textarea #newDesc class="form-field__textarea" rows="3" placeholder="Translated description"></textarea>
+                    <button type="button" class="btn btn--primary btn--sm"
+                      (click)="saveTranslation(stop, newTitle.value, newDesc.value); newTitle.value = ''; newDesc.value = ''">
+                      Save translation
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Info for original variant -->
+    @if (!isNew() && isOriginal()) {
+      <div class="edit-card edit-card--mt">
+        <p class="empty-hint">This is the original variant. Edit stops in the <a [routerLink]="['/studio/tours', tourId()]">tour editor</a>.</p>
+      </div>
+    }
+  }
+</section>

@@ -1,0 +1,46 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.account-page {
+  padding-block: $space-12;
+  max-width: 700px;
+  &__title { font-size: $font-size-2xl; margin-bottom: $space-4; }
+}
+
+.payouts-list {
+  margin-top: $space-8;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.payout-row {
+  @include flex-between;
+  @include card;
+  padding: $space-4 $space-5;
+
+  &__amount {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    display: block;
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__status {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+
+    &--paid    { background: rgba($color-success, 0.15); color: $color-success; }
+    &--pending { background: rgba($color-warning, 0.15); color: $color-warning; }
+    &--failed  { background: rgba($color-error, 0.15);   color: $color-error;   }
+  }
+}

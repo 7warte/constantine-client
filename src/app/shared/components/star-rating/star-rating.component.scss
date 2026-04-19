@@ -1,0 +1,31 @@
+@use '../../../../styles/variables' as *;
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+
+  &--interactive .stars__star {
+    cursor: pointer;
+    font-size: $font-size-2xl;
+    transition: color $transition-fast, transform $transition-fast;
+
+    &:hover { transform: scale(1.15); }
+  }
+
+  &__star {
+    color: $border-default;
+    font-size: $font-size-lg;
+    line-height: 1;
+    transition: color $transition-fast;
+
+    &--filled { color: #e6a817; }
+    &--hover  { color: #e6a817; }
+  }
+
+  &__count {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    margin-left: $space-1;
+  }
+}

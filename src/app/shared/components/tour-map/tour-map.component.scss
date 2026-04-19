@@ -1,0 +1,56 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.tour-map {
+  width: 100%;
+  height: 320px;
+  border-radius: $radius-lg;
+  border: 1px solid $border-default;
+  overflow: hidden;
+
+  @include sm  { height: 380px; }
+  @include lg  { height: 480px; }
+}
+
+:host ::ng-deep {
+  .leaflet-popup-content-wrapper {
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+  }
+
+  .map-popup {
+    font-family: $font-family-secondary;
+    max-width: 220px;
+
+    &__img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: $space-2;
+    }
+
+    &__title {
+      font-family: $font-family-primary;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      display: block;
+      margin-bottom: $space-1;
+    }
+
+    &__meta {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+      margin-bottom: $space-2;
+    }
+
+    &__link {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      color: $accent-primary;
+      text-decoration: none;
+
+      &:hover { color: $accent-hover; }
+    }
+  }
+}

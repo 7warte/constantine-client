@@ -1,0 +1,99 @@
+@use 'variables' as *;
+
+// ── Breakpoints ───────────────────────────────────────────────────────────────
+@mixin sm  { @media (min-width: $bp-sm)  { @content; } }
+@mixin md  { @media (min-width: $bp-md)  { @content; } }
+@mixin lg  { @media (min-width: $bp-lg)  { @content; } }
+@mixin xl  { @media (min-width: $bp-xl)  { @content; } }
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+@mixin container {
+  width: 100%;
+  max-width: $container-max-width;
+  margin-inline: auto;
+  padding-inline: $container-padding;
+
+  @include sm  { padding-inline: $space-6; }
+  @include xl  { padding-inline: $space-8; }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ── Typography ────────────────────────────────────────────────────────────────
+@mixin heading($size: $font-size-2xl) {
+  font-family: $font-family-primary;
+  font-size: $size;
+  line-height: $line-height-tight;
+  color: $text-primary;
+}
+
+@mixin body-text($size: $font-size-base) {
+  font-family: $font-family-secondary;
+  font-size: $size;
+  line-height: $line-height-normal;
+  color: $text-primary;
+}
+
+// ── Surfaces ──────────────────────────────────────────────────────────────────
+@mixin card {
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-lg;
+  padding: $space-6;
+}
+
+@mixin card-light {
+  background: $bg-light;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: $space-6;
+}
+
+// ── Interactive ───────────────────────────────────────────────────────────────
+@mixin focus-ring {
+  outline: 2px solid $accent-primary;
+  outline-offset: 2px;
+}
+
+@mixin hover-lift {
+  transition: transform $transition-normal, box-shadow $transition-normal;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+// ── Truncate text ─────────────────────────────────────────────────────────────
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ── Overlay ───────────────────────────────────────────────────────────────────
+@mixin gradient-overlay {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: $gradient-overlay;
+    pointer-events: none;
+  }
+}

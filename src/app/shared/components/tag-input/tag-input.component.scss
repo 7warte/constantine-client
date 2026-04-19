@@ -1,0 +1,97 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.tag-input {
+  position: relative;
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    background: $bg-surface-alt;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    min-height: 44px;
+    align-items: center;
+    cursor: text;
+    transition: border-color $transition-fast;
+
+    &:focus-within {
+      border-color: $accent-primary;
+    }
+  }
+
+  &__field {
+    flex: 1;
+    min-width: 120px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    padding: $space-1 $space-2;
+
+    &::placeholder { color: $text-muted; }
+  }
+
+  &__suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: $space-1;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    box-shadow: $shadow-md;
+    list-style: none;
+    padding: $space-1 0;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+
+    li {
+      padding: $space-2 $space-4;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      cursor: pointer;
+
+      &:hover {
+        background: $bg-surface;
+      }
+    }
+  }
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-1 $space-3;
+  background: $accent-primary;
+  color: $text-on-dark;
+  border-radius: $radius-full;
+  font-family: $font-family-secondary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+
+  &__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: $text-on-dark;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+
+    &:hover { opacity: 1; }
+  }
+}

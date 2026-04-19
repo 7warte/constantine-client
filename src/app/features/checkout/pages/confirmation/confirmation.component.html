@@ -1,0 +1,28 @@
+<div class="confirmation-page">
+  <div class="confirmation-card">
+    @if (status() === 'loading') {
+      <p class="text-secondary">Verifying payment…</p>
+    } @else if (status() === 'success') {
+      <span class="confirmation-card__icon" aria-hidden="true">&#x2713;</span>
+      <h1>Tour unlocked!</h1>
+      <p class="text-secondary">Your purchase is confirmed. Head to your library to start the tour.</p>
+      <div class="confirmation-card__actions">
+        <app-button routerLink="/library" variant="primary" size="lg">
+          Go to library
+        </app-button>
+        <app-button routerLink="/explore" variant="outline" size="lg">
+          Explore more tours
+        </app-button>
+      </div>
+    } @else {
+      <span class="confirmation-card__icon confirmation-card__icon--error" aria-hidden="true">&#x2717;</span>
+      <h1>Payment failed</h1>
+      <p class="text-secondary">Something went wrong with your payment. Please try again.</p>
+      <div class="confirmation-card__actions">
+        <app-button routerLink="/explore" variant="primary" size="lg">
+          Back to tours
+        </app-button>
+      </div>
+    }
+  </div>
+</div>

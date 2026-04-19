@@ -1,0 +1,51 @@
+<div class="auth-page">
+  <div class="auth-layout">
+    <div class="auth-layout__image" style="background-image: url('assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg')">
+      <div class="auth-layout__image-overlay">
+        <h2>Discover the world<br>through its stories</h2>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card__brand">
+        <h1>Welcome back</h1>
+        <p>Sign in to continue your journey</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
+        @if (error()) {
+          <div class="auth-form__error" role="alert">{{ error() }}</div>
+        }
+
+        <app-input
+          label="Email"
+          type="email"
+          formControlName="email"
+          [invalid]="form.controls.email.invalid && form.controls.email.touched"
+          errorMessage="Enter a valid email address"
+        />
+
+        <app-input
+          label="Password"
+          type="password"
+          formControlName="password"
+          [invalid]="form.controls.password.invalid && form.controls.password.touched"
+          errorMessage="Password is required"
+        />
+
+        <div class="auth-form__forgot">
+          <a routerLink="/auth/forgot-password">Forgot password?</a>
+        </div>
+
+        <app-button type="submit" variant="primary" size="lg" [loading]="loading()" [block]="true">
+          Sign in
+        </app-button>
+      </form>
+
+      <p class="auth-card__switch">
+        Don't have an account?
+        <a routerLink="/auth/register">Create one</a>
+      </p>
+    </div>
+  </div>
+</div>

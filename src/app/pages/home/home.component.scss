@@ -1,0 +1,291 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+// ── Hero with slideshow ──────────────────────────────────────────────────────
+.hero {
+  position: relative;
+  min-height: 85dvh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  &__slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+
+    &--active { opacity: 1; }
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(#000, 0.35) 0%,
+      rgba(#000, 0.55) 100%
+    );
+    pointer-events: none;
+  }
+
+  &__content {
+    position: relative;
+    z-index: $z-raised;
+    padding-block: $space-10;
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    font-family: $font-family-primary;
+    font-weight: $font-weight-bold;
+    color: #ffffff;
+    margin-bottom: $space-5;
+    line-height: $line-height-tight;
+
+    @include md { font-size: $font-size-4xl; }
+    @include lg { font-size: 3.5rem; }
+  }
+
+  &__sub {
+    font-size: $font-size-md;
+    color: rgba(#fff, 0.85);
+    max-width: 520px;
+    margin-bottom: $space-8;
+    line-height: $line-height-loose;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-4;
+    margin-bottom: $space-6;
+  }
+
+  // Make outline button readable on dark hero backgrounds
+  ::ng-deep .btn--outline {
+    background: rgba(#fff, 0.15);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    border-color: rgba(#fff, 0.4);
+
+    &:hover {
+      background: rgba(#fff, 0.25);
+      border-color: #ffffff;
+    }
+  }
+
+  &__dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(#fff, 0.4);
+    transition: all $transition-normal;
+
+    &--active {
+      background: #ffffff;
+      width: 24px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// ── Sections ─────────────────────────────────────────────────────────────────
+.section {
+  padding-block: $space-10;
+  border-top: 1px solid $border-light;
+
+  @include lg { padding-block: $space-12; }
+}
+
+.section__title {
+  font-family: $font-family-primary;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: #1a1a1a;
+  margin-bottom: $space-6;
+}
+
+// ── Categories ───────────────────────────────────────────────────────────────
+.categories__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+}
+
+.category-chip {
+  display: inline-block;
+  padding: $space-2 $space-5;
+  border: 1px solid #e5e5e5;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-family: $font-family-secondary;
+  color: #666666;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $accent-primary;
+    color: $accent-primary;
+    background: rgba($accent-primary, 0.06);
+  }
+}
+
+// ── Featured Grid ────────────────────────────────────────────────────────────
+.featured__grid {
+  display: grid;
+  gap: $space-4;
+  grid-template-columns: 1fr;
+
+  @include sm  { grid-template-columns: repeat(2, 1fr); }
+  @include lg  { grid-template-columns: repeat(3, 1fr); }
+}
+
+.featured__cta {
+  margin-top: $space-8;
+  text-align: center;
+}
+
+// ── Quote ────────────────────────────────────────────────────────────────────
+.quote-section {
+  padding-block: $space-10;
+  background: #fafafa;
+  border-top: 1px solid $border-light;
+  border-bottom: 1px solid $border-light;
+
+  @include lg { padding-block: $space-12; }
+}
+
+.quote {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+
+  &__text {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-light;
+    font-style: italic;
+    color: #1a1a1a;
+    line-height: $line-height-loose;
+    margin-bottom: $space-4;
+
+    @include md { font-size: $font-size-2xl; }
+  }
+
+  &__author {
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-style: normal;
+    color: #999999;
+    letter-spacing: 0.05em;
+  }
+}
+
+// ── How it works ─────────────────────────────────────────────────────────────
+.how-it-works {
+  background: #ffffff;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+}
+
+.step {
+  display: flex;
+  gap: $space-6;
+  align-items: center;
+  flex-direction: column;
+
+  @include md {
+    flex-direction: row;
+  }
+
+  &--reverse {
+    @include md { flex-direction: row-reverse; }
+  }
+
+  &__image {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+
+      @include md { height: 320px; }
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__number {
+    display: block;
+    font-family: $font-family-primary;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: #eeeeee;
+    line-height: 1;
+    margin-bottom: $space-3;
+  }
+
+  h3 {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: #1a1a1a;
+    margin-bottom: $space-3;
+  }
+
+  p {
+    color: #666666;
+    line-height: $line-height-loose;
+    max-width: 400px;
+  }
+}
+
+// ── Creators CTA ─────────────────────────────────────────────────────────────
+.creators-cta {
+  background: #fafafa;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+    align-items: flex-start;
+
+    @include md {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__text {
+    h2 {
+      font-family: $font-family-primary;
+      font-size: $font-size-2xl;
+      color: #1a1a1a;
+      margin-bottom: $space-4;
+    }
+    p {
+      max-width: 480px;
+      color: #666666;
+      line-height: $line-height-normal;
+    }
+  }
+}

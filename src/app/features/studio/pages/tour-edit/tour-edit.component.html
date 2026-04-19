@@ -1,0 +1,640 @@
+<section class="tour-edit">
+  <div class="tour-edit__header">
+    <a routerLink="/studio/tours" class="back-link">← My tours</a>
+    <h1 class="page-title">{{ pageTitle() }}</h1>
+  </div>
+
+  <!-- ── Stepper indicator ──────────────────────────────────────────── -->
+  <div class="stepper">
+    <button class="stepper__step" [class.stepper__step--active]="step() === 1" [class.stepper__step--done]="step() > 1" (click)="goToStep(1)" type="button">
+      <span class="stepper__num">1</span> Basics
+    </button>
+    <span class="stepper__line"></span>
+    <button class="stepper__step" [class.stepper__step--active]="step() === 2" [class.stepper__step--done]="step() > 2" [disabled]="!tour()" (click)="goToStep(2)" type="button">
+      <span class="stepper__num">2</span> Location
+    </button>
+    <span class="stepper__line"></span>
+    <button class="stepper__step" [class.stepper__step--active]="step() === 3" [disabled]="!tour()" (click)="goToStep(3)" type="button">
+      <span class="stepper__num">3</span> Stops
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading tour…</div>
+  } @else {
+
+    @if (error()) {
+      <div class="form-error" role="alert">{{ error() }}</div>
+    }
+
+    <!-- ═══════════════ STEP 1: BASICS ═══════════════════════════════ -->
+    @if (step() === 1) {
+      <div class="edit-card">
+        <h2 class="edit-card__title">Tour details</h2>
+
+        <form [formGroup]="form" (ngSubmit)="saveBasics()" class="edit-form" novalidate>
+          <div class="form-field">
+            <label for="tour-title" class="form-field__label">Title <span class="required">*</span></label>
+            <input id="tour-title" type="text" formControlName="title" class="form-field__input"
+              [class.form-field__input--invalid]="form.controls.title.invalid && form.controls.title.touched"
+              placeholder="e.g. Ancient Rome Walking Tour" maxlength="200" />
+            @if (form.controls.title.invalid && form.controls.title.touched) {
+              <span class="form-field__error">Title is required (max 200 characters)</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label for="tour-desc" class="form-field__label">Description</label>
+            <textarea id="tour-desc" formControlName="description" class="form-field__textarea"
+              placeholder="Describe what travellers will experience…" rows="5" maxlength="2000"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">Cover image</label>
+            @if (coverUrl()) {
+              <div class="cover-preview">
+                <img [src]="coverUrl()" alt="Tour cover" class="cover-preview__img" />
+                <label class="btn btn--ghost btn--sm cover-preview__change">
+                  Change
+                  <input type="file" accept="image/*" (change)="onCoverSelect($event)" hidden />
+                </label>
+              </div>
+            } @else if (!isNew()) {
+              <label class="cover-upload">
+                <input type="file" accept="image/*" (change)="onCoverSelect($event)" hidden />
+                <span class="cover-upload__area">
+                  @if (uploading()) {
+                    Uploading…
+                  } @else {
+                    Click to upload a cover image
+                  }
+                </span>
+              </label>
+            } @else {
+              <span class="form-field__hint">Save the tour first, then you can upload a cover image.</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">Presentation audio</label>
+            <span class="form-field__hint">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
+            @if (presentationAudioUrl()) {
+              <div class="audio-preview">
+                <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+                <div class="audio-preview__actions">
+                  <label class="btn btn--ghost btn--sm">
+                    Replace
+                    <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                  </label>
+                  <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
+                </div>
+              </div>
+            } @else if (!isNew()) {
+              <label class="cover-upload">
+                <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                <span class="cover-upload__area">
+                  @if (uploadingAudio()) {
+                    Uploading…
+                  } @else {
+                    Click to upload presentation audio (max 60s)
+                  }
+                </span>
+              </label>
+              <div class="form-field__or">or</div>
+              <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
+            } @else {
+              <span class="form-field__hint">Save the tour first, then you can upload a presentation audio.</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">Tags</label>
+            <app-tag-input [tags]="tourTags()" (tagsChange)="tourTags.set($event)" />
+            <span class="form-field__hint">Type and press Enter, comma, or space to add.</span>
+          </div>
+
+          <div class="form-field">
+            <label for="tour-price" class="form-field__label">Price (EUR)</label>
+            <div class="price-input">
+              <span class="price-input__symbol">&euro;</span>
+              <input id="tour-price" type="number" formControlName="price_euros" class="form-field__input price-input__field"
+                min="0" step="0.01" placeholder="0.00 = free" />
+            </div>
+            <span class="form-field__hint">Set to 0 for a free tour</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="tour-setting" class="form-field__label">Setting</label>
+              <select id="tour-setting" formControlName="setting" class="form-field__select">
+                <option value="">Not specified</option>
+                <option value="indoor">Indoor</option>
+                <option value="outdoor">Outdoor</option>
+                <option value="mixed">Indoor / Outdoor</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="tour-duration" class="form-field__label">Avg. duration (minutes)</label>
+              <input id="tour-duration" type="number" formControlName="duration_minutes" class="form-field__input"
+                min="1" placeholder="e.g. 90" />
+            </div>
+          </div>
+
+          <div class="edit-form__actions">
+            <a routerLink="/studio/tours" class="btn btn--ghost">Cancel</a>
+            <button type="submit" class="btn btn--primary" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : (isNew() ? 'Save & continue' : 'Save & continue') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- ═══════════════ STEP 2: LOCATION ═════════════════════════════ -->
+    @if (step() === 2) {
+      <div class="edit-card">
+        <h2 class="edit-card__title">Tour location</h2>
+        <p class="edit-card__desc">Set the start and end addresses of your tour.</p>
+
+        <div class="form-field address-field">
+          <label class="form-field__label">Start address</label>
+          <input type="text" class="form-field__input" placeholder="e.g. Colosseum, Rome"
+            [value]="startAddress()" (input)="onAddressInput('start', $event)" />
+          @if (startSuggestions().length > 0) {
+            <ul class="address-suggestions">
+              @for (s of startSuggestions(); track s.display_name) {
+                <li (mousedown)="selectSuggestion('start', s)">{{ s.display_name }}</li>
+              }
+            </ul>
+          }
+        </div>
+
+        <label class="same-address-check">
+          <input type="checkbox" [checked]="sameAddress()" (change)="toggleSameAddress()" />
+          <span>The tour ends at the same location</span>
+        </label>
+
+        @if (!sameAddress()) {
+          <div class="form-field address-field">
+            <label class="form-field__label">End address</label>
+            <input type="text" class="form-field__input" placeholder="e.g. Vatican City"
+              [value]="endAddress()" (input)="onAddressInput('end', $event)" />
+            @if (endSuggestions().length > 0) {
+              <ul class="address-suggestions">
+                @for (s of endSuggestions(); track s.display_name) {
+                  <li (mousedown)="selectSuggestion('end', s)">{{ s.display_name }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        <!-- Map preview -->
+        @if (startCoords()) {
+          <div class="map-wrapper">
+            <div class="map-theme-picker">
+              <mat-icon class="map-theme-picker__icon">map</mat-icon>
+              @for (theme of mapThemes; track theme.id) {
+                <button type="button"
+                  class="map-theme-btn"
+                  [class.map-theme-btn--active]="activeTheme() === theme.id"
+                  (click)="changeMapTheme(theme.id)">
+                  {{ theme.label }}
+                </button>
+              }
+            </div>
+            <div class="map-container" id="tour-map"></div>
+          </div>
+        }
+
+        @if (showMapResetWarning()) {
+          <div class="map-reset-warning">
+            <mat-icon class="map-reset-warning__icon">warning</mat-icon>
+            <div class="map-reset-warning__text">
+              <strong>Map pins will be reset</strong>
+              <p>Saving a new map will remove all existing space pins. You'll need to re-pin them on the new map.</p>
+            </div>
+            <div class="map-reset-warning__actions">
+              <button type="button" class="btn btn--ghost btn--sm" (click)="showMapResetWarning.set(false)">Cancel</button>
+              <button type="button" class="btn btn--primary btn--sm" (click)="saveLocation(true)">Save anyway</button>
+            </div>
+          </div>
+        }
+
+        <div class="edit-form__actions">
+          <button type="button" class="btn btn--ghost" (click)="goToStep(1)">Back</button>
+          <button type="button" class="btn btn--primary" [disabled]="saving()" (click)="saveLocation()">
+            {{ saving() ? 'Saving…' : 'Save & continue' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════ STEP 3: SPACES & STOPS ═════════════════════ -->
+    @if (step() === 3) {
+      <div class="edit-card">
+        <h2 class="edit-card__title">Spaces & stops</h2>
+        <p class="edit-card__desc">Start by creating spaces (rooms, squares, areas), then add stops within each space.</p>
+
+        @if (spaces().length === 0 && stops().length === 0) {
+          <!-- No spaces yet — prompt to create the first one -->
+          <div class="space-empty">
+            <h3 class="space-empty__title">Where does your tour begin?</h3>
+            <p class="space-empty__desc">
+              A <strong>space</strong> is a place your visitors will stop at — a museum hall, a city square, a park entrance.
+              Each space can contain multiple stops (individual things to see or hear about).
+            </p>
+            <button type="button" class="space-empty__example-btn" (click)="showExample.set(true)">See an example</button>
+
+            <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
+              <div class="form-field">
+                <label class="form-field__label">Space name <span class="required">*</span></label>
+                <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Main Entrance Hall" />
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">Description</label>
+                <textarea formControlName="description" class="form-field__textarea" rows="3" placeholder="Describe this space…"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary">Create first space</button>
+            </form>
+          </div>
+
+          <!-- Example modal -->
+          @if (showExample()) {
+            <div class="example-backdrop" (click)="showExample.set(false)">
+              <div class="example-modal" (click)="$event.stopPropagation()">
+                <div class="example-modal__header">
+                  <h3>How spaces and stops work</h3>
+                  <button type="button" class="btn-icon" (click)="showExample.set(false)">&times;</button>
+                </div>
+                <div class="example-modal__body">
+                  <p class="example-modal__intro">
+                    A <strong>space</strong> is a physical area your visitors will be in — like a room, a square, or an outdoor area.
+                    Inside each space you add <strong>stops</strong> — the individual things visitors will look at, listen to, or learn about.
+                  </p>
+
+                  <p class="example-modal__label">SPACE</p>
+                  <div class="example-space">
+                    <div class="example-space__header">
+                      <strong>Hall of Sculptures</strong>
+                      <span>The main gallery on the ground floor featuring Roman and Greek works</span>
+                    </div>
+
+                    <p class="example-modal__label example-modal__label--stop">STOPS INSIDE THIS SPACE</p>
+
+                    <div class="example-stop">
+                      <span class="example-stop__num">1</span>
+                      <div>
+                        <strong>Venus de Milo</strong>
+                        <p>The iconic Greek sculpture from 130 BC. Notice the missing arms and the draping fabric…</p>
+                      </div>
+                    </div>
+                    <div class="example-stop">
+                      <span class="example-stop__num">2</span>
+                      <div>
+                        <strong>Apollo Belvedere</strong>
+                        <p>This Roman marble copy of a Greek bronze is considered a pinnacle of classical art…</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p class="example-modal__note">
+                    You'll create your first space now. After that, you'll be able to add stops to it — each with a title, description, audio, and images.
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
+          <!-- Spaces with their stops -->
+          <div class="spaces-timeline">
+          @for (space of spaces(); track space.id; let si = $index; let lastSpace = $last) {
+            <div class="space-block" [@slideIn]>
+              <div class="space-block__header">
+                <div class="space-block__info">
+                  <h3 class="space-block__name">{{ space.name }}</h3>
+                  @if (space.description) {
+                    <p class="space-block__desc">{{ space.description }}</p>
+                  }
+                </div>
+                <div class="space-block__actions">
+                  @if (tour()?.map_image_url) {
+                    <button type="button" class="space-block__pin-btn" [class.space-block__pin-btn--placed]="space.map_x != null" (click)="openPinModal(space)">
+                      <mat-icon>place</mat-icon>
+                      {{ space.map_x != null ? 'Pinned' : 'Pin on map' }}
+                    </button>
+                  }
+                  <button type="button" class="btn-icon btn-icon--danger" (click)="deleteSpace(space.id)">&times;</button>
+                </div>
+              </div>
+
+              <!-- Stops inside this space -->
+              <div class="stops-list">
+                @for (stop of getStopsForSpace(space.id); track stop.id; let i = $index; let lastStop = $last) {
+                  <div class="stop-card" [@slideIn]>
+                    <div class="stop-card__header">
+                      <span class="stop-card__num">{{ i + 1 }}</span>
+                      <div class="stop-card__info">
+                        <strong>{{ stop.title }}</strong>
+                        @if (stop.description) {
+                          <p class="stop-card__desc">{{ stop.description }}</p>
+                        }
+                        @if (stop.media && stop.media.length > 0) {
+                          @for (m of stop.media; track m.id) {
+                            @if (m.media_type === 'audio') {
+                              <div class="stop-card__audio">
+                                <audio [src]="m.url" controls controlsList="nodownload"></audio>
+                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
+                              </div>
+                            }
+                            @if (m.media_type === 'image') {
+                              <div class="stop-card__image">
+                                <img [src]="m.url" [alt]="stop.title" />
+                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
+                              </div>
+                            }
+                            @if (m.media_type === 'pdf') {
+                              <div class="stop-card__pdf">
+                                <mat-icon class="stop-card__pdf-icon">picture_as_pdf</mat-icon>
+                                <a [href]="m.url" target="_blank" class="stop-card__pdf-link">View PDF</a>
+                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
+                              </div>
+                            }
+                          }
+                        }
+                        <div class="stop-card__upload-actions">
+                          <label class="audio-upload">
+                            <input type="file" accept="audio/*" (change)="onMediaSelect(stop.id, 'audio', $event)" hidden />
+                            <span class="btn btn--ghost btn--sm">+ Audio file</span>
+                          </label>
+                          <label class="audio-upload">
+                            <input type="file" accept="image/*" (change)="onMediaSelect(stop.id, 'image', $event)" hidden />
+                            <span class="btn btn--ghost btn--sm">+ Image</span>
+                          </label>
+                          <label class="audio-upload">
+                            <input type="file" accept=".pdf" (change)="onMediaSelect(stop.id, 'pdf', $event)" hidden />
+                            <span class="btn btn--ghost btn--sm">+ PDF</span>
+                          </label>
+                        </div>
+                        <app-audio-recorder (recorded)="uploadRecordedAudio(stop.id, $event)" />
+                      </div>
+                      <div class="stop-card__actions">
+                        <button type="button" class="btn-icon" (click)="editStop(stop)">&#9998;</button>
+                        <button type="button" class="btn-icon btn-icon--danger" (click)="deleteStop(stop.id)">&times;</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Directions between stops -->
+                  @if (!lastStop) {
+                    <div class="transition-slot">
+                      @if (stop.transition_duration || stop.transition_description) {
+                        <div class="transition-card">
+                          <mat-icon class="transition-card__icon">directions_walk</mat-icon>
+                          <div class="transition-card__info">
+                            @if (stop.transition_duration) { <strong>{{ stop.transition_duration }} min</strong> }
+                            @if (stop.transition_description) { <span>{{ stop.transition_description }}</span> }
+                          </div>
+                          <button type="button" class="btn-icon btn-icon--danger" (click)="removeTransition(stop.id)">&times;</button>
+                        </div>
+                      } @else if (addingDirectionFor() === stop.id) {
+                        <div class="transition-form-block" [@slideIn]>
+                          <div class="transition-form-block__header">
+                            <span class="transition-form-block__title">Directions to next stop</span>
+                            <button type="button" class="btn-icon" (click)="addingDirectionFor.set(null)">&times;</button>
+                          </div>
+                          <div class="transition-form-block__fields">
+                            <input #transDur type="number" class="transition-form-block__input" placeholder="Duration (min)" min="0" />
+                            <input #transDesc type="text" class="transition-form-block__input" placeholder="e.g. Turn to the left wall…" />
+                            <button type="button" class="transition-form-block__save"
+                              (click)="saveTransition(stop.id, getStopsForSpace(space.id)[i + 1].id, transDur.value, transDesc.value); transDur.value = ''; transDesc.value = ''; addingDirectionFor.set(null)">
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      } @else {
+                        <button type="button" class="transition-add-btn" (click)="addingDirectionFor.set(stop.id)">
+                          <mat-icon class="transition-add-btn__icon">directions_walk</mat-icon> + Directions
+                        </button>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- Bottom of space: add stop form or button -->
+              @if (activeSpaceId() === space.id) {
+                <div class="space-block__inline-form" [@slideIn]>
+                  <h4 class="space-block__form-title">Add a stop to "{{ space.name }}"</h4>
+                  <form [formGroup]="stopForm" (ngSubmit)="addStop()" class="edit-form" novalidate>
+                    <div class="form-field">
+                      <label class="form-field__label">Stop title <span class="required">*</span></label>
+                      <input type="text" formControlName="title" class="form-field__input" placeholder="e.g. Venus de Milo" />
+                    </div>
+                    <div class="form-field">
+                      <label class="form-field__label">Description</label>
+                      <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What visitors will see or hear about…"></textarea>
+                    </div>
+                    <div class="edit-form__actions">
+                      <button type="button" class="btn btn--ghost btn--sm" (click)="activeSpaceId.set(null)">Done</button>
+                      <button type="submit" class="btn btn--primary btn--sm">Add stop</button>
+                    </div>
+                  </form>
+                </div>
+              } @else {
+                <div class="space-block__footer">
+                  <button type="button" class="space-block__add-link" (click)="activeSpaceId.set(space.id)">
+                    + Add {{ getStopsForSpace(space.id).length === 0 ? 'first' : 'another' }} stop
+                  </button>
+                  @if (getStopsForSpace(space.id).length >= 2) {
+                    <span class="space-block__footer-sep">|</span>
+                    <span class="space-block__footer-hint">Use the &#x1F6B6; controls between stops above to add directions</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Directions between spaces -->
+            @if (!lastSpace) {
+              <div class="space-transition">
+                @if (space.transition_duration || space.transition_description) {
+                  <div class="transition-card">
+                    <mat-icon class="transition-card__icon">directions_walk</mat-icon>
+                    <div class="transition-card__info">
+                      @if (space.transition_duration) { <strong>{{ space.transition_duration }} min</strong> }
+                      @if (space.transition_description) { <span>{{ space.transition_description }}</span> }
+                    </div>
+                    <button type="button" class="btn-icon btn-icon--danger" (click)="removeSpaceTransition(space.id)">&times;</button>
+                  </div>
+                } @else if (addingSpaceDirectionFor() === space.id) {
+                  <div class="transition-form-block" [@slideIn]>
+                    <div class="transition-form-block__header">
+                      <span class="transition-form-block__title">Directions to next space</span>
+                      <button type="button" class="btn-icon" (click)="addingSpaceDirectionFor.set(null)">&times;</button>
+                    </div>
+                    <div class="transition-form-block__fields">
+                      <input #spaceDur type="number" class="transition-form-block__input" placeholder="Duration (min)" min="0" />
+                      <input #spaceDesc type="text" class="transition-form-block__input" placeholder="e.g. Walk through the corridor…" />
+                      <button type="button" class="transition-form-block__save"
+                        (click)="saveSpaceTransition(space.id, spaces()[si + 1].id, spaceDur.value, spaceDesc.value); spaceDur.value = ''; spaceDesc.value = ''; addingSpaceDirectionFor.set(null)">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <button type="button" class="transition-add-btn" (click)="addingSpaceDirectionFor.set(space.id)">
+                    <mat-icon class="transition-add-btn__icon">directions_walk</mat-icon> + Directions to next space
+                  </button>
+                }
+              </div>
+            }
+          }
+          </div>
+
+          <!-- Unassigned stops (legacy) -->
+          @if (getStopsForSpace(null).length > 0) {
+            <div class="space-block space-block--unassigned">
+              <div class="space-block__header">
+                <h3 class="space-block__name">Stops without a space</h3>
+              </div>
+              <div class="stops-list">
+                @for (stop of getStopsForSpace(null); track stop.id; let i = $index) {
+                  <div class="stop-card">
+                    <div class="stop-card__header">
+                      <span class="stop-card__num">{{ i + 1 }}</span>
+                      <div class="stop-card__info"><strong>{{ stop.title }}</strong></div>
+                      <div class="stop-card__actions">
+                        <button type="button" class="btn-icon btn-icon--danger" (click)="deleteStop(stop.id)">&times;</button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Edit stop form (for editing existing stops) -->
+          @if (editingStopId()) {
+            <div class="stop-form edit-card edit-card--mt">
+              <h3>Edit stop</h3>
+              <form [formGroup]="stopForm" (ngSubmit)="saveStop()" class="edit-form" novalidate>
+                <div class="form-field">
+                  <label class="form-field__label">Stop title <span class="required">*</span></label>
+                  <input type="text" formControlName="title" class="form-field__input" />
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label">Description</label>
+                  <textarea formControlName="description" class="form-field__textarea" rows="3"></textarea>
+                </div>
+                <div class="edit-form__actions">
+                  <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancel</button>
+                  <button type="submit" class="btn btn--primary">Update stop</button>
+                </div>
+              </form>
+            </div>
+          }
+
+          <!-- Add space -->
+          @if (!addingSpace()) {
+            <button type="button" class="btn btn--ghost edit-card--mt" (click)="addingSpace.set(true)">+ Add another space</button>
+          } @else {
+            <div class="stop-form edit-card edit-card--mt">
+              <h3>New space</h3>
+              <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
+                <div class="form-field">
+                  <label class="form-field__label">Space name <span class="required">*</span></label>
+                  <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Hall of Statues" />
+                </div>
+                <div class="form-field">
+                  <label class="form-field__label">Description</label>
+                  <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What is this space about…"></textarea>
+                </div>
+                <div class="edit-form__actions">
+                  <button type="button" class="btn btn--ghost" (click)="addingSpace.set(false)">Cancel</button>
+                  <button type="submit" class="btn btn--primary">Add space</button>
+                </div>
+              </form>
+            </div>
+          }
+        }
+
+        <!-- Pin placement modal -->
+        @if (pinningSpace()) {
+          <div class="pin-modal-backdrop" (click)="pinningSpace.set(null)">
+            <div class="pin-modal" (click)="$event.stopPropagation()">
+              <div class="pin-modal__header">
+                <h3>Place "{{ pinningSpace()!.name }}" on the map</h3>
+                <button type="button" class="btn-icon" (click)="pinningSpace.set(null)">&times;</button>
+              </div>
+              <div class="pin-modal__map"
+                (mousemove)="onPinDragMove($event)"
+                (touchmove)="onPinDragMove($event)"
+                (mouseup)="onPinDragEnd()"
+                (touchend)="onPinDragEnd()"
+                (mouseleave)="onPinDragEnd()">
+                <img [src]="tour()!.map_image_url" alt="Tour map" />
+
+                <!-- All existing pins (dimmed) -->
+                @for (sp of spaces(); track sp.id) {
+                  @if (sp.map_x != null && sp.id !== pinningSpace()!.id) {
+                    <div class="pin-modal__dot pin-modal__dot--dimmed"
+                      [style.left.%]="sp.map_x"
+                      [style.top.%]="sp.map_y">
+                      {{ getSpaceRomanNumeral(sp) }}
+                    </div>
+                  }
+                }
+
+                <!-- Active draggable pin -->
+                <div class="pin-modal__dot pin-modal__dot--active"
+                  [style.left.%]="pinX()"
+                  [style.top.%]="pinY()"
+                  (mousedown)="onPinDragStart($event)"
+                  (touchstart)="onPinDragStart($event)">
+                  {{ getSpaceRomanNumeral(pinningSpace()!) }}
+                </div>
+
+                <!-- Dotted lines between pins -->
+                <svg class="pin-modal__lines">
+                  @for (sp of spaces(); track sp.id; let i = $index) {
+                    @if (i > 0 && getSpaceMapX(spaces()[i - 1]) != null && getSpaceMapX(sp) != null) {
+                      <line
+                        [attr.x1]="getSpaceMapX(spaces()[i - 1]) + '%'"
+                        [attr.y1]="getSpaceMapY(spaces()[i - 1]) + '%'"
+                        [attr.x2]="getSpaceMapX(sp) + '%'"
+                        [attr.y2]="getSpaceMapY(sp) + '%'"
+                        stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.3"
+                      />
+                    }
+                  }
+                </svg>
+              </div>
+              <div class="pin-modal__footer">
+                <p class="pin-modal__hint">Drag the dot to position it on the map</p>
+                <div class="pin-modal__actions">
+                  <button type="button" class="btn btn--ghost" (click)="pinningSpace.set(null)">Cancel</button>
+                  <button type="button" class="btn btn--primary" (click)="savePin()">Save position</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="edit-form__actions edit-form__actions--mt">
+          <button type="button" class="btn btn--ghost" (click)="goToStep(2)">Back</button>
+          <a [routerLink]="['/studio/tours']" class="btn btn--ghost">
+            Save as draft
+          </a>
+          @if (tour()?.status !== 'published') {
+            <button type="button" class="btn btn--publish" [disabled]="publishing()" (click)="publish()">
+              {{ publishing() ? 'Publishing…' : 'Publish tour' }}
+            </button>
+          } @else {
+            <span class="publish-badge">Published</span>
+          }
+        </div>
+      </div>
+    }
+  }
+</section>

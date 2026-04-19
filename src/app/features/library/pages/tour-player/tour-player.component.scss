@@ -1,0 +1,719 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.player {
+  display: flex;
+  min-height: calc(100dvh - 64px);
+  background: $bg-base;
+
+  // ── Sidebar ─────────────────────────────────────────────────────────────────
+  &__sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid $border-default;
+    background: $bg-surface;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+
+    @include lg { display: flex; }
+  }
+
+  &__sidebar-header {
+    padding: $space-6;
+    border-bottom: 1px solid $border-default;
+  }
+
+  &__tour-title {
+    font-size: $font-size-lg;
+    color: $text-primary;
+    @include line-clamp(2);
+  }
+
+  &__map-thumb {
+    display: block;
+    margin-top: $space-3;
+    padding: 0;
+    border: 1px solid #eeeeee;
+    border-radius: $radius-md;
+    overflow: hidden;
+    cursor: pointer;
+    background: none;
+    width: 100%;
+    transition: border-color $transition-fast;
+
+    img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      display: block;
+    }
+
+    &:hover { border-color: #999999; }
+  }
+
+  &__stop-list {
+    padding: $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__stop-item {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover { background: rgba($text-primary, 0.05); }
+
+    &--active {
+      background: $accent-muted;
+      border-left: 3px solid $accent-primary;
+    }
+  }
+
+  &__stop-num {
+    width: 24px;
+    height: 24px;
+    border-radius: $radius-full;
+    background: $border-default;
+    @include flex-center;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+    color: $text-primary;
+  }
+
+  &__stop-title {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    @include truncate;
+  }
+
+  // ── Mobile map button ───────────────────────────────────────────────────────
+  &__mobile-map-btn {
+    display: flex;
+    position: fixed;
+    bottom: $space-5;
+    right: $space-5;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    color: #ffffff;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    transition: background $transition-fast;
+
+    .mat-icon { font-size: 24px; }
+    &:hover { background: $accent-primary; }
+
+    @include lg { display: none; }
+  }
+
+  // ── Stage ───────────────────────────────────────────────────────────────────
+  &__stage {
+    flex: 1;
+    padding: $space-8 $space-6;
+    overflow-y: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+
+  &__stop-header { margin-bottom: $space-4; }
+
+  &__space-label {
+    padding: $space-3 $space-4;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: $space-3;
+
+    &:first-child { margin-top: 0; }
+  }
+
+  &__space-group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+
+    &--has-line {
+      position: relative;
+      padding-left: $space-5;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 18px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e5e5e5;
+      }
+    }
+  }
+
+  &__space-direction {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-4;
+    margin: $space-1 0;
+  }
+
+  &__direction-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #999999;
+    flex-shrink: 0;
+  }
+
+  &__direction-text {
+    font-size: $font-size-xs;
+    color: #999999;
+  }
+
+  &__space-watermark {
+    display: block;
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: #999999;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: $space-2;
+  }
+
+  &__stop-name {
+    font-size: $font-size-lg;
+    color: $text-primary;
+    margin-bottom: $space-4;
+
+    @include md { font-size: $font-size-xl; }
+  }
+
+  &__stop-desc {
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+
+  // ── Audio hero player ───────────────────────────────────────────────────────
+  &__audio-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-6;
+    background: linear-gradient(135deg, $bg-dark-alt 0%, $dusty-rose 50%, $wheat 100%);
+    border-radius: $radius-md;
+    margin-bottom: $space-6;
+
+    audio { display: none; }
+
+    @include md {
+      flex-direction: row;
+      gap: $space-5;
+    }
+  }
+
+  &__audio-controls {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    flex-shrink: 0;
+  }
+
+  &__skip-btn {
+    background: rgba(#ffffff, 0.2);
+    color: #1a1a1a;
+    border: none;
+    border-radius: $radius-full;
+    padding: $space-2 $space-4;
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background $transition-fast;
+
+    &:hover { background: rgba(#ffffff, 0.35); }
+  }
+
+  &__play-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: $accent-primary;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background $transition-fast, transform $transition-fast;
+
+    svg { width: 28px; height: 28px; }
+    &:hover { background: $accent-hover; transform: scale(1.05); }
+  }
+
+  &__audio-track {
+    width: 100%;
+    min-width: 0;
+
+    @include md { flex: 1; width: auto; }
+  }
+
+  &__audio-bar {
+    height: 6px;
+    background: rgba(#ffffff, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: $space-2;
+  }
+
+  &__audio-progress {
+    height: 100%;
+    background: $accent-primary;
+    border-radius: 3px;
+  }
+
+  &__audio-times {
+    display: flex;
+    justify-content: center;
+    gap: $space-3;
+    font-family: $font-family-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: #1a1a1a;
+    font-variant-numeric: tabular-nums;
+
+    @include md {
+      justify-content: space-between;
+      gap: 0;
+      font-size: $font-size-lg;
+    }
+    letter-spacing: 0.02em;
+  }
+
+  // ── Attachments ────────────────────────────────────────────────────────────
+  &__attachments {
+    margin-top: $space-6;
+    margin-bottom: $space-6;
+  }
+
+  &__attachments-title {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: #999999;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: $space-3;
+  }
+
+  &__attachments-grid {
+    display: flex;
+    gap: $space-3;
+    flex-wrap: wrap;
+  }
+
+  &__thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-md;
+    overflow: hidden;
+    border: 1px solid #eeeeee;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+    padding: 0;
+    background: none;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    &:hover { border-color: #999999; }
+
+    &--pdf {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: $space-1;
+      background: #fafafa;
+      text-decoration: none;
+      color: #ea4335;
+
+      svg { width: 28px; height: 28px; }
+      span { font-size: $font-size-xs; font-weight: $font-weight-bold; color: #999999; }
+    }
+  }
+
+  // ── Map modal (fullscreen-style) ─────────────────────────────────────────
+  &__map-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  &__map-frame {
+    position: relative;
+    width: 80vw;
+    border: 3px solid rgba(#ffffff, 0.15);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+
+    img {
+      width: 100%;
+      display: block;
+    }
+
+    @media (max-width: $bp-md) {
+      width: 90vw;
+    }
+  }
+
+  &__map-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  &__map-dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(#ffffff, 0.6);
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-family-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: all $transition-fast;
+
+    &--active {
+      background: $accent-primary;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      font-size: $font-size-sm;
+      animation: mapPulse 1.2s ease-in-out infinite;
+      z-index: 1;
+    }
+  }
+
+  &__map-close {
+    position: absolute;
+    top: -36px;
+    right: -4px;
+    background: none;
+    border: none;
+    color: rgba(#ffffff, 0.5);
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color $transition-fast;
+
+    &:hover { color: #ffffff; }
+  }
+
+  // ── Image carousel modal ───────────────────────────────────────────────────
+  &__modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  &__modal {
+    position: relative;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-4;
+  }
+
+  &__modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover { color: $accent-primary; }
+  }
+
+  &__modal-img {
+    max-width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: $radius-md;
+  }
+
+  &__modal-nav {
+    display: flex;
+    align-items: center;
+    gap: $space-5;
+    color: #ffffff;
+    font-size: $font-size-sm;
+
+    button {
+      background: rgba(#ffffff, 0.15);
+      border: none;
+      color: #ffffff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: $font-size-lg;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background $transition-fast;
+
+      &:hover { background: rgba(#ffffff, 0.3); }
+    }
+  }
+
+  // ── Transition (directions between stops) ───────────────────────────────────
+  &__transition {
+    display: flex;
+    gap: $space-4;
+    align-items: flex-start;
+    padding: $space-5;
+    margin-bottom: $space-6;
+    background: $bg-surface-alt;
+    border: 1px solid $border-default;
+    border-radius: $radius-lg;
+  }
+
+  &__transition-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: $accent-primary;
+    flex-shrink: 0;
+  }
+
+  &__transition-info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+
+    strong {
+      font-size: $font-size-sm;
+      color: $text-primary;
+    }
+  }
+
+  &__transition-duration {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $accent-primary;
+  }
+
+  &__transition-desc {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  &__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: $space-4;
+    padding-top: $space-6;
+    border-top: 1px solid $border-default;
+  }
+
+  &__nav-btn {
+    padding: $space-3 $space-6;
+    border: 1px solid $border-strong;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    background: transparent;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) { border-color: $accent-primary; color: $accent-primary; }
+    &:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    &--next {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; color: $white; }
+    }
+  }
+
+  &__nav-btn--finish {
+    background: $color-warning;
+    border-color: $color-warning;
+    color: $white;
+    &:hover:not(:disabled) { background: darken($color-warning, 8%); border-color: darken($color-warning, 8%); color: $white; }
+  }
+
+  // ── Review screen ──────────────────────────────────────────────────────────
+  &__review {
+    @include flex-center;
+    flex-direction: column;
+    flex: 1;
+    padding: $space-8 $space-6;
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+    gap: $space-5;
+    text-align: center;
+
+    h2 { font-size: $font-size-2xl; color: $text-primary; }
+  }
+
+  &__review-stars { margin: $space-4 0; }
+
+  &__review-hint {
+    font-size: $font-size-sm;
+    color: $color-warning;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__review-textarea {
+    width: 100%;
+    padding: $space-4;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    background: $bg-surface;
+    resize: vertical;
+    transition: border-color $transition-fast;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+  }
+
+  &__review-char-count {
+    font-size: $font-size-xs;
+    color: $color-warning;
+    align-self: flex-end;
+  }
+
+  &__review-error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+    width: 100%;
+  }
+
+  &__review-actions {
+    display: flex;
+    gap: $space-4;
+    margin-top: $space-4;
+  }
+
+  &__review-done {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-4;
+  }
+
+  &__review-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+    background: rgba($color-success, 0.15);
+    color: $color-success;
+    @include flex-center;
+    font-size: $font-size-2xl;
+  }
+
+  // ── Loading ─────────────────────────────────────────────────────────────────
+  &__loading {
+    @include flex-center;
+    flex-direction: column;
+    gap: $space-4;
+    flex: 1;
+    font-size: $font-size-3xl;
+    color: $accent-primary;
+
+    p { font-size: $font-size-base; color: $text-secondary; }
+  }
+}
+
+@keyframes mapPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba($accent-primary, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 0 0 12px rgba($accent-primary, 0), 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.btn {
+  display: inline-block;
+  padding: $space-3 $space-6;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all $transition-fast;
+
+  &--primary {
+    background: $accent-primary;
+    color: $white;
+    &:hover { background: $accent-hover; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $text-secondary;
+    border: 1px solid $border-default;
+    &:hover { color: $text-primary; }
+  }
+}

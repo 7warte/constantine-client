@@ -1,0 +1,207 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.account-page {
+  padding-block: $space-12;
+  max-width: 640px;
+
+  &__title {
+    font-size: $font-size-2xl;
+    margin-bottom: $space-8;
+  }
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+
+  &__success {
+    background: rgba($color-success, 0.1);
+    border: 1px solid $color-success;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-success;
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+}
+
+// ── Share card ───────────────────────────────────────────────────────────────
+.share-card {
+  @include card;
+  margin-bottom: $space-8;
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+
+  @include md {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  &__profile {
+    display: flex;
+    gap: $space-4;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+    overflow: hidden;
+    border: 2px solid $border-default;
+    flex-shrink: 0;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: $accent-primary;
+    color: $white;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-xl;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+  }
+
+  &__bio {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    @include line-clamp(2);
+  }
+
+  &__stats {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-top: $space-1;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    flex-shrink: 0;
+  }
+
+  &__btn {
+    padding: $space-2 $space-5;
+    border-radius: $radius-md;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all $transition-fast;
+    white-space: nowrap;
+
+    &--share {
+      background: $accent-primary;
+      color: $white;
+      &:hover { background: $accent-hover; }
+    }
+
+    &--copy {
+      background: transparent;
+      color: $text-secondary;
+      border-color: $border-default;
+      &:hover { color: $text-primary; border-color: $text-primary; }
+    }
+  }
+}
+
+.avatar-field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $space-5;
+  }
+
+  &__preview {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-full;
+    overflow: hidden;
+    border: 2px solid $border-default;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: $accent-primary;
+    color: $white;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-xl;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__upload-btn {
+    display: inline-block;
+    padding: $space-2 $space-5;
+    border-radius: $radius-md;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    border: 1px solid $border-default;
+    color: $text-primary;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover { border-color: $accent-primary; color: $accent-primary; }
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}

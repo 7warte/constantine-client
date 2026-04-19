@@ -1,0 +1,88 @@
+<section class="earnings">
+  <div class="earnings__header">
+    <div>
+      <h1 class="page-title">Earnings</h1>
+      <p class="page-sub">Track revenue from your tours</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading earnings…</div>
+  }
+
+  @if (summary(); as s) {
+    <div class="summary-grid">
+      <div class="summary-card summary-card--highlight">
+        <span class="summary-card__label">Total gross revenue</span>
+        <span class="summary-card__value">€{{ s.total_gross | number:'1.2-2' }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Platform fee</span>
+        <span class="summary-card__value text-muted">−€{{ s.platform_fee | number:'1.2-2' }}</span>
+      </div>
+      <div class="summary-card summary-card--accent">
+        <span class="summary-card__label">Net earnings</span>
+        <span class="summary-card__value">€{{ s.total_net | number:'1.2-2' }}</span>
+        <span class="summary-card__sub">{{ netPct() }}% of gross</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-card__label">Pending payout</span>
+        <span class="summary-card__value">€{{ s.pending_payout | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  }
+
+  <div class="earnings__section">
+    <h2 class="section-title">Transaction history</h2>
+
+    @if (transactions().length === 0 && !loading()) {
+      <div class="empty-state">
+        <p>No transactions yet. Once travellers purchase your tours, earnings will appear here.</p>
+      </div>
+    } @else {
+      <div class="tx-table">
+        <div class="tx-table__head">
+          <span>Date</span>
+          <span>Tour</span>
+          <span>Customer</span>
+          <span>Gross</span>
+          <span>Net</span>
+        </div>
+        @for (tx of transactions(); track tx.id) {
+          <div class="tx-table__row">
+            <span class="tx-table__date">{{ tx.created_at | date:'mediumDate' }}</span>
+            <span class="tx-table__tour">{{ tx.tour_title }}</span>
+            <span class="tx-table__customer">{{ tx.customer_display_name }}</span>
+            <span class="tx-table__amount">€{{ tx.gross | number:'1.2-2' }}</span>
+            <span class="tx-table__amount tx-table__amount--net">€{{ tx.net | number:'1.2-2' }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- IBAN Payout Settings -->
+  <div class="earnings__section">
+    <h2 class="section-title">Payout settings</h2>
+    <p class="page-sub">Enter your IBAN to receive payouts from tour sales.</p>
+    <div class="iban-form">
+      <input
+        type="text"
+        class="iban-form__input"
+        placeholder="e.g. DE89370400440532013000"
+        [ngModel]="iban()"
+        (ngModelChange)="iban.set($event)"
+        maxlength="34"
+      />
+      <button class="btn btn--primary" [disabled]="ibanSaving() || !iban()" (click)="saveIban()">
+        {{ ibanSaving() ? 'Saving…' : 'Save IBAN' }}
+      </button>
+    </div>
+    @if (ibanSaved()) {
+      <p class="iban-form__success">IBAN saved successfully.</p>
+    }
+    @if (ibanError()) {
+      <p class="iban-form__error">{{ ibanError() }}</p>
+    }
+  </div>
+</section>

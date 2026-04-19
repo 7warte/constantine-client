@@ -1,0 +1,121 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTINE — Design Tokens
+// Single source of truth. Never hardcode values in component stylesheets.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Palette ──────────────────────────────────────────────────────────────────
+$alabaster-grey:  #dce0d9;
+$midnight-violet: #31081f;
+$black-cherry:    #6b0f1a;
+$charcoal:        #595959;
+$grey-olive:      #808f85;
+
+// ── Semantic — Backgrounds ───────────────────────────────────────────────────
+$bg-base:        $midnight-violet;
+$bg-surface:     #4a0f32;          // slightly lighter than base — cards, panels
+$bg-surface-alt: #3d0a28;          // deeper surface for nested panels
+$bg-light:       $alabaster-grey;  // forms, checkout, modals on light sections
+$bg-overlay:     rgba($midnight-violet, 0.92);
+
+// ── Semantic — Text ───────────────────────────────────────────────────────────
+$text-primary:   $alabaster-grey;
+$text-secondary: $grey-olive;
+$text-muted:     rgba($alabaster-grey, 0.5);
+$text-dark:      $charcoal;
+$text-inverse:   $midnight-violet;
+
+// ── Semantic — Accent ────────────────────────────────────────────────────────
+$accent-primary:  $black-cherry;
+$accent-hover:    #8f1524;
+$accent-active:   #a0192a;
+$accent-muted:    rgba($black-cherry, 0.35);
+
+// ── Semantic — Borders ───────────────────────────────────────────────────────
+$border-default:  rgba($grey-olive, 0.3);
+$border-strong:   rgba($grey-olive, 0.6);
+$border-light:    rgba($charcoal, 0.2);   // on light surfaces
+
+// ── Status ───────────────────────────────────────────────────────────────────
+$color-success: #4caf78;
+$color-warning: #e6a817;
+$color-error:   #c0392b;
+$color-info:    #5b9bd5;
+
+// ── Gradients ────────────────────────────────────────────────────────────────
+$gradient-brand-v:   linear-gradient(180deg, $midnight-violet 0%, $black-cherry 100%);
+$gradient-brand-h:   linear-gradient(90deg, $midnight-violet 0%, $black-cherry 100%);
+$gradient-overlay:   linear-gradient(180deg, transparent 0%, rgba($midnight-violet, 0.95) 100%);
+$gradient-hero:      linear-gradient(135deg, $midnight-violet 0%, $bg-surface 50%, $black-cherry 100%);
+
+// ── Typography ───────────────────────────────────────────────────────────────
+$font-family-primary:    'Montserrat', serif;
+$font-family-secondary:  'Nunito', sans-serif;
+$font-family-decorative: 'Noto Sans Meroitic', 'Noto Sans Linear A', serif;
+
+$font-size-xs:   0.75rem;    // 12px
+$font-size-sm:   0.875rem;   // 14px
+$font-size-base: 1rem;       // 16px
+$font-size-md:   1.125rem;   // 18px
+$font-size-lg:   1.25rem;    // 20px
+$font-size-xl:   1.5rem;     // 24px
+$font-size-2xl:  2rem;       // 32px
+$font-size-3xl:  2.5rem;     // 40px
+$font-size-4xl:  3rem;       // 48px
+
+$font-weight-light:    300;
+$font-weight-regular:  400;
+$font-weight-semibold: 600;
+$font-weight-bold:     700;
+
+$line-height-tight:  1.2;
+$line-height-normal: 1.5;
+$line-height-loose:  1.75;
+
+// ── Spacing ───────────────────────────────────────────────────────────────────
+$space-1:   0.25rem;   //  4px
+$space-2:   0.5rem;    //  8px
+$space-3:   0.75rem;   // 12px
+$space-4:   1rem;      // 16px
+$space-5:   1.25rem;   // 20px
+$space-6:   1.5rem;    // 24px
+$space-8:   2rem;      // 32px
+$space-10:  2.5rem;    // 40px
+$space-12:  3rem;      // 48px
+$space-16:  4rem;      // 64px
+$space-20:  5rem;      // 80px
+$space-24:  6rem;      // 96px
+
+$container-max-width: 1200px;
+$container-padding:   $space-4;
+
+// ── Breakpoints (mobile-first) ────────────────────────────────────────────────
+$bp-sm:  576px;
+$bp-md:  768px;
+$bp-lg:  992px;
+$bp-xl:  1200px;
+
+// ── Borders & Radius ─────────────────────────────────────────────────────────
+$radius-sm:   4px;
+$radius-md:   8px;
+$radius-lg:   16px;
+$radius-xl:   24px;
+$radius-full: 9999px;
+
+// ── Shadows ───────────────────────────────────────────────────────────────────
+$shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.3);
+$shadow-md:  0 4px 12px rgba(0, 0, 0, 0.4);
+$shadow-lg:  0 8px 24px rgba(0, 0, 0, 0.5);
+$shadow-xl:  0 16px 48px rgba(0, 0, 0, 0.6);
+
+// ── Transitions ───────────────────────────────────────────────────────────────
+$transition-fast:   150ms ease;
+$transition-normal: 250ms ease;
+$transition-slow:   400ms ease;
+
+// ── Z-index scale ─────────────────────────────────────────────────────────────
+$z-base:    0;
+$z-raised:  10;
+$z-overlay: 100;
+$z-modal:   200;
+$z-nav:     300;
+$z-toast:   400;

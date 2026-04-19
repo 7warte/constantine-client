@@ -1,0 +1,38 @@
+<section class="requests-page">
+  <div class="requests-page__header">
+    <div>
+      <h1 class="page-title">Open requests</h1>
+      <p class="page-sub">Translation jobs assigned to you or awaiting your response</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading" role="status">Loading…</div>
+  } @else if (requests().length === 0) {
+    <div class="page-empty">
+      <p>No translation requests yet. Check the <a routerLink="/translation-marketplace">marketplace</a> for open jobs.</p>
+    </div>
+  } @else {
+    <div class="request-cards">
+      @for (r of requests(); track r.id) {
+        <div class="request-card">
+          @if (r.cover_image_url) {
+            <img [src]="r.cover_image_url" [alt]="r.tour_title" class="request-card__cover" />
+          }
+          <div class="request-card__body">
+            <h2 class="request-card__title">{{ r.tour_title }}</h2>
+            <div class="request-card__meta">
+              <span class="request-card__lang">{{ r.target_language_code | uppercase }}</span>
+              <span class="status-badge" [class]="'status-badge--' + r.status">{{ r.status }}</span>
+              <span class="request-card__compensation">{{ getCompensation(r) }}</span>
+            </div>
+            <p class="request-card__from">From <strong>{{ r.requester_name }}</strong></p>
+            @if (r.description) {
+              <p class="request-card__desc">{{ r.description }}</p>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

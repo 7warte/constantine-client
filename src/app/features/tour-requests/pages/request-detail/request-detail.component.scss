@@ -1,0 +1,113 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.detail {
+  padding-block: $space-12;
+  max-width: 700px;
+
+  &__header {
+    @include flex-between;
+    gap: $space-4;
+    margin-bottom: $space-3;
+
+    h1 { font-size: $font-size-2xl; }
+  }
+
+  &__status {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    white-space: nowrap;
+
+    &--open      { background: rgba($color-info, 0.15); color: $color-info; }
+    &--fulfilled { background: rgba($color-success, 0.15); color: $color-success; }
+    &--closed    { background: rgba($text-muted, 0.15); color: $text-muted; }
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-bottom: $space-8;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+    margin-bottom: $space-8;
+  }
+
+  &__section {
+    h3 {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin-bottom: $space-2;
+    }
+
+    p {
+      color: $text-secondary;
+      line-height: $line-height-loose;
+      white-space: pre-wrap;
+    }
+  }
+
+  &__fulfilled-info {
+    @include card;
+    border-left: 3px solid $color-success;
+    margin-bottom: $space-8;
+
+    h3 { font-size: $font-size-base; margin-bottom: $space-2; }
+    p { color: $text-secondary; font-size: $font-size-sm; }
+  }
+
+  &__fulfill {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+
+    h2 { font-size: $font-size-xl; }
+  }
+
+  &__success {
+    background: rgba($color-success, 0.1);
+    border: 1px solid $color-success;
+    border-radius: $radius-md;
+    padding: $space-4 $space-5;
+    color: $color-success;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+
+  &__auth-hint {
+    margin-top: $space-6;
+    color: $text-secondary;
+    a { color: $accent-primary; font-weight: $font-weight-semibold; }
+  }
+}
+
+.field__select {
+  padding: $space-3 $space-4;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  color: $text-primary;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+
+  &:focus { outline: none; border-color: $accent-primary; }
+  option { background: $bg-surface; }
+}

@@ -1,0 +1,84 @@
+@use '../../../../../styles/variables' as *;
+
+.studio {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 64px);
+
+  &__toolbar {
+    background: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+    color: #1a1a1a;
+    font-family: $font-family-primary;
+    height: 52px;
+    min-height: 52px;
+    padding-inline: 12px;
+  }
+
+  &__toolbar-title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    margin-left: 8px;
+  }
+
+  &__container {
+    flex: 1;
+    background: #fafafa;
+  }
+
+  &__sidenav {
+    width: 230px;
+    background: #ffffff;
+    border-right: 1px solid #eeeeee;
+    border-radius: 0 !important;
+
+    .mat-mdc-nav-list {
+      padding-top: 8px;
+    }
+
+    .mat-mdc-list-item {
+      --mdc-list-list-item-label-text-font: #{$font-family-secondary};
+      --mdc-list-list-item-label-text-size: 0.875rem;
+      --mdc-list-list-item-label-text-color: #666666;
+      border-radius: 0;
+      margin: 0;
+
+      .mat-icon {
+        color: #999999;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        --mdc-list-list-item-label-text-color: #1a1a1a;
+        background: #f5f5f5;
+
+        .mat-icon { color: #666666; }
+      }
+    }
+
+    .active-link {
+      --mdc-list-list-item-label-text-color: #{$accent-primary};
+      background: rgba($accent-primary, 0.06);
+      border-left: 3px solid $accent-primary;
+
+      .mat-icon { color: $accent-primary; }
+    }
+  }
+
+  &__content {
+    padding: $space-6;
+    overflow-y: auto;
+    background: #fafafa;
+  }
+}
+
+// Remove all rounded corners from Material sidenav
+::ng-deep .mat-drawer-inner-container {
+  border-radius: 0 !important;
+}
+
+::ng-deep .mat-drawer {
+  border-radius: 0 !important;
+}

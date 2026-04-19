@@ -1,0 +1,22 @@
+<div class="account-page container">
+  <h1 class="account-page__title">Payouts</h1>
+  <p class="text-secondary">Connect a Stripe account to receive earnings from your tours and translation jobs.</p>
+
+  <div class="payouts-list">
+    @if (loading()) {
+      <p class="text-secondary">Loading…</p>
+    } @else if (payouts().length === 0) {
+      <p class="text-secondary">No payouts yet.</p>
+    } @else {
+      @for (payout of payouts(); track payout.id) {
+        <div class="payout-row">
+          <div>
+            <span class="payout-row__amount">{{ payout.amount_cents / 100 | currency:'EUR' }}</span>
+            <span class="payout-row__date">{{ payout.created_at | date:'mediumDate' }}</span>
+          </div>
+          <span class="payout-row__status payout-row__status--{{ payout.status }}">{{ payout.status }}</span>
+        </div>
+      }
+    }
+  </div>
+</div>

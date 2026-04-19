@@ -1,0 +1,115 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.explore {
+  @include container;
+  padding-block: $space-8;
+
+  &__hero {
+    margin-bottom: $space-4;
+    h1 { @include heading($font-size-2xl); margin-bottom: $space-3; }
+  }
+
+  &__filters { margin-bottom: $space-8; }
+
+  &__cta {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    margin-top: $space-12;
+    padding: $space-6;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-lg;
+
+    p {
+      font-family: $font-family-secondary;
+      font-size: $font-size-base;
+      color: $text-secondary;
+    }
+
+    a { margin-left: auto; text-decoration: none; }
+  }
+
+  &__grid {
+    display: grid;
+    gap: $space-4;
+    grid-template-columns: 1fr;
+
+    @include sm { grid-template-columns: repeat(2, 1fr); }
+    @include lg { grid-template-columns: repeat(3, 1fr); }
+    @include xl { grid-template-columns: repeat(4, 1fr); }
+  }
+}
+
+.view-toggle {
+  display: flex;
+  gap: $space-2;
+
+  &__btn {
+    padding: $space-2 $space-5;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      border-color: $accent-primary;
+      color: $text-primary;
+    }
+
+    &--active {
+      background: $accent-primary;
+      color: $text-on-dark;
+      border-color: $accent-primary;
+    }
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-left: auto;
+    align-self: center;
+  }
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  align-items: center;
+
+  &__search,
+  &__input {
+    flex: 1;
+    min-width: 180px;
+    padding: $space-3 $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    color: $text-primary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+
+    &::placeholder { color: $text-muted; }
+    &:focus { outline: none; border-color: $accent-primary; box-shadow: 0 0 0 3px $accent-muted; }
+  }
+
+  &__select {
+    padding: $space-3 $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    color: $text-primary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+    option { background: $bg-surface; }
+  }
+}
