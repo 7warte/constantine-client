@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  
   "dependencies": {
     "@angular/animations": "^18.0.0",
     "@angular/cdk": "^18.2.14",
