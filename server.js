@@ -9,7 +9,7 @@ const distPath = path.join(__dirname, 'dist/constantine-frontend/browser');
 app.use(express.static(distPath));
 
 // All routes fallback to index.html (Angular SPA)
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
