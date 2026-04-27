@@ -1,0 +1,76 @@
+<section class="health">
+  <header>
+    <h1>API health</h1>
+    <p class="endpoint">{{ healthUrl }}</p>
+  </header>
+
+  <div class="status" [attr.data-state]="state()">
+    <span class="dot"></span>
+    <span class="label">
+      @switch (state()) {
+        @case ('loading') { Checking… }
+        @case ('ok')      { Operational }
+        @case ('error')   { Unavailable }
+        @default          { Idle }
+      }
+    </span>
+  </div>
+
+  <dl class="meta">
+    <div>
+      <dt>HTTP status</dt>
+      <dd>{{ httpStatus() ?? '—' }}</dd>
+    </div>
+    <div>
+      <dt>Latency</dt>
+      <dd>{{ latencyMs() != null ? latencyMs() + ' ms' : '—' }}</dd>
+    </div>
+    <div>
+      <dt>Last checked</dt>
+      <dd>{{ lastCheckedAt() ? (lastCheckedAt() | date:'mediumTime') : '—' }}</dd>
+    </div>
+  </dl>
+
+  @if (response()) {
+    <pre class="payload">{{ response() | json }}</pre>
+  }
+  @if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
+  }
+
+  <button
+    type="button"
+    class="recheck"
+    (click)="check()"
+    [disabled]="state() === 'loading'">
+    Check again
+  </button>
+
+  <section class="danger-zone">
+    <header>
+      <h2>Database</h2>
+      <p>Drops all tables and re-runs migrations from scratch.</p>
+    </header>
+
+    <button
+      type="button"
+      class="reset"
+      (click)="resetDatabase()"
+      [disabled]="resetState() === 'loading'">
+      @switch (resetState()) {
+        @case ('loading') { Resetting… }
+        @default          { Reset database }
+      }
+    </button>
+
+    @if (resetState() === 'ok') {
+      <p class="reset-status ok">Reset complete.</p>
+    }
+    @if (resetErrorMessage()) {
+      <p class="reset-status error">{{ resetErrorMessage() }}</p>
+    }
+    @if (resetResponse()) {
+      <pre class="payload">{{ resetResponse() | json }}</pre>
+    }
+  </section>
+</section>
