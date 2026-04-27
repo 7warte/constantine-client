@@ -1,0 +1,48 @@
+<section class="health">
+  <header>
+    <h1>API health</h1>
+    <p class="endpoint">{{ healthUrl }}</p>
+  </header>
+
+  <div class="status" [attr.data-state]="state()">
+    <span class="dot"></span>
+    <span class="label">
+      @switch (state()) {
+        @case ('loading') { Checking… }
+        @case ('ok')      { Operational }
+        @case ('error')   { Unavailable }
+        @default          { Idle }
+      }
+    </span>
+  </div>
+
+  <dl class="meta">
+    <div>
+      <dt>HTTP status</dt>
+      <dd>{{ httpStatus() ?? '—' }}</dd>
+    </div>
+    <div>
+      <dt>Latency</dt>
+      <dd>{{ latencyMs() != null ? latencyMs() + ' ms' : '—' }}</dd>
+    </div>
+    <div>
+      <dt>Last checked</dt>
+      <dd>{{ lastCheckedAt() ? (lastCheckedAt() | date:'mediumTime') : '—' }}</dd>
+    </div>
+  </dl>
+
+  @if (response()) {
+    <pre class="payload">{{ response() | json }}</pre>
+  }
+  @if (errorMessage()) {
+    <p class="error-message">{{ errorMessage() }}</p>
+  }
+
+  <button
+    type="button"
+    class="recheck"
+    (click)="check()"
+    [disabled]="state() === 'loading'">
+    Check again
+  </button>
+</section>

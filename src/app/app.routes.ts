@@ -20,6 +20,10 @@ export const routes: Routes = [
     path: 'creators/:username',
     loadComponent: () => import('./pages/creator-profile/creator-profile.component').then(m => m.CreatorProfileComponent),
   },
+  {
+    path: 'health',
+    loadComponent: () => import('./pages/health/health.component').then(m => m.HealthComponent),
+  },
 
   // ── Accept translation invite (public — user may not be logged in) ─────────
   {
