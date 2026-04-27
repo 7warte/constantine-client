@@ -4,6 +4,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 type HealthState = 'idle' | 'loading' | 'ok' | 'error';
+type ResetState = 'idle' | 'loading' | 'ok' | 'error';
 
 @Component({
   selector: 'app-health',
@@ -18,6 +19,7 @@ export class HealthComponent implements OnInit {
   // /health is mounted at the API root, not under /api
   protected readonly healthUrl =
     environment.apiUrl.replace(/\/api\/?$/, '') + '/health';
+  protected readonly resetUrl = environment.apiUrl.replace(/\/$/, '') + '/admin/reset';
 
   readonly state         = signal<HealthState>('idle');
   readonly response      = signal<unknown>(null);
@@ -25,6 +27,10 @@ export class HealthComponent implements OnInit {
   readonly httpStatus    = signal<number | null>(null);
   readonly latencyMs     = signal<number | null>(null);
   readonly lastCheckedAt = signal<Date | null>(null);
+
+  readonly resetState        = signal<ResetState>('idle');
+  readonly resetResponse     = signal<unknown>(null);
+  readonly resetErrorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.check();
@@ -54,6 +60,24 @@ export class HealthComponent implements OnInit {
         this.errorMessage.set(err.message);
         this.response.set(err.error ?? null);
         this.state.set('error');
+      },
+    });
+  }
+
+  resetDatabase(): void {
+    this.resetState.set('loading');
+    this.resetResponse.set(null);
+    this.resetErrorMessage.set(null);
+
+    this.http.post(this.resetUrl, {}).subscribe({
+      next: (res) => {
+        this.resetResponse.set(res);
+        this.resetState.set('ok');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.resetErrorMessage.set(err.message);
+        this.resetResponse.set(err.error ?? null);
+        this.resetState.set('error');
       },
     });
   }

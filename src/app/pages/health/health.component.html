@@ -45,4 +45,32 @@
     [disabled]="state() === 'loading'">
     Check again
   </button>
+
+  <section class="danger-zone">
+    <header>
+      <h2>Database</h2>
+      <p>Drops all tables and re-runs migrations from scratch.</p>
+    </header>
+
+    <button
+      type="button"
+      class="reset"
+      (click)="resetDatabase()"
+      [disabled]="resetState() === 'loading'">
+      @switch (resetState()) {
+        @case ('loading') { Resetting… }
+        @default          { Reset database }
+      }
+    </button>
+
+    @if (resetState() === 'ok') {
+      <p class="reset-status ok">Reset complete.</p>
+    }
+    @if (resetErrorMessage()) {
+      <p class="reset-status error">{{ resetErrorMessage() }}</p>
+    }
+    @if (resetResponse()) {
+      <pre class="payload">{{ resetResponse() | json }}</pre>
+    }
+  </section>
 </section>

@@ -124,6 +124,58 @@ header {
   }
 }
 
+.danger-zone {
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  header {
+    h2 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #111;
+    }
+    p {
+      margin: 0;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+}
+
+.reset {
+  padding: 8px 14px;
+  border: 1px solid #c0392b;
+  background: #fff;
+  color: #c0392b;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  width: fit-content;
+
+  &:hover:not(:disabled) {
+    background: #c0392b;
+    color: #fff;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.reset-status {
+  margin: 0;
+  font-size: 13px;
+
+  &.ok    { color: #111; }
+  &.error { color: #c0392b; }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.4; }
