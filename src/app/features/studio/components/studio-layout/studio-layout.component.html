@@ -1,10 +1,23 @@
 <div class="studio">
   <mat-toolbar class="studio__toolbar">
-    <button mat-icon-button (click)="toggleSidenav()">
+    <button mat-icon-button class="studio__toolbar-toggle" (click)="toggleSidenav()">
       <mat-icon>menu</mat-icon>
     </button>
     <span class="studio__toolbar-title">Creator Studio</span>
   </mat-toolbar>
+
+  <nav class="studio__tabs" aria-label="Studio sections">
+    @for (item of navItems; track item.route) {
+      <a
+        class="studio__tab"
+        [routerLink]="item.route"
+        routerLinkActive="studio__tab--active"
+      >
+        <mat-icon class="studio__tab-icon">{{ item.icon }}</mat-icon>
+        <span class="studio__tab-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
 
   <mat-sidenav-container class="studio__container">
     <mat-sidenav
@@ -13,22 +26,12 @@
       class="studio__sidenav"
     >
       <mat-nav-list>
-        <a mat-list-item routerLink="/studio/tours" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>map</mat-icon>
-          <span matListItemTitle>Your tours</span>
-        </a>
-        <!-- <a mat-list-item routerLink="/studio/requests" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>inbox</mat-icon>
-          <span matListItemTitle>Open requests</span>
-        </a>
-        <a mat-list-item routerLink="/studio/offer-job" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>work_outline</mat-icon>
-          <span matListItemTitle>Offer a job</span>
-        </a> -->
-        <a mat-list-item routerLink="/studio/earnings" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
-          <span matListItemTitle>Earnings</span>
-        </a>
+        @for (item of navItems; track item.route) {
+          <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
       </mat-nav-list>
     </mat-sidenav>
 

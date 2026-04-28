@@ -19,8 +19,10 @@
   &__brand {
     display: flex;
     align-items: center;
+    align-self: center;
     gap: $space-2;
     text-decoration: none;
+    line-height: 1;
   }
 
   &__brand-icon {
@@ -28,6 +30,11 @@
     height: 22px;
     color: $white;
     flex-shrink: 0;
+
+    @media (max-width: #{$bp-lg - 1px}) {
+      width: 18px;
+      height: 18px;
+    }
   }
 
   &__brand-name {
@@ -35,6 +42,10 @@
     font-size: $font-size-lg;
     color: $text-on-dark;
     letter-spacing: 0.03em;
+
+    @media (max-width: #{$bp-lg - 1px}) {
+      font-size: $font-size-md;
+    }
   }
 
   // ── Desktop nav ─────────────────────────────────────────────────────────────

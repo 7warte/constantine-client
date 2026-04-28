@@ -6,6 +6,10 @@
   @include flex-center;
   background: #fafafa;
   padding: $space-6;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
 }
 
 .auth-layout {
@@ -15,6 +19,10 @@
   background: #ffffff;
   border: 1px solid #eeeeee;
   overflow: hidden;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    max-width: 480px;
+  }
 
   &__image {
     display: none;
@@ -50,6 +58,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    max-width: none;
+    padding: $space-5 $space-4;
+  }
 
   &__brand {
     margin-bottom: $space-4;
