@@ -77,6 +77,28 @@
   border: 1px solid #f0f0f0;
   border-radius: 0;
 
+  // Hide secondary columns when there's no room
+  @media (max-width: #{$bp-md - 1px}) {
+    .mat-column-downloads,
+    .mat-column-price {
+      display: none;
+    }
+
+    .mat-mdc-cell,
+    .mat-mdc-header-cell {
+      padding-inline: $space-3;
+    }
+
+    .mat-column-cover {
+      width: 64px;
+    }
+
+    &__thumb {
+      width: 64px;
+      height: 48px;
+    }
+  }
+
   .mat-mdc-header-row {
     background: #fafafa;
     border-bottom: 1px solid #f0f0f0;

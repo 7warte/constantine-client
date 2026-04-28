@@ -138,6 +138,10 @@
     padding: $space-6;
     overflow-y: auto;
     background: #fafafa;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      padding: $space-4 $space-3;
+    }
   }
 }
 

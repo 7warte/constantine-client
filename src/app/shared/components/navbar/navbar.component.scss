@@ -10,6 +10,13 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba($white, 0.2);
 
+  // On mobile, drop the translucency so page content can't show through
+  // when scrolling underneath the sticky bar.
+  @media (max-width: #{$bp-lg - 1px}) {
+    background: $dusty-rose;
+    backdrop-filter: none;
+  }
+
   &__inner {
     @include flex-between;
     height: 100%;
@@ -17,12 +24,13 @@
 
   // ── Brand ───────────────────────────────────────────────────────────────────
   &__brand {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    align-self: center;
+    align-self: stretch;
     gap: $space-2;
     text-decoration: none;
     line-height: 1;
+    padding-block: 0;
   }
 
   &__brand-icon {
