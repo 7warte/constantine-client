@@ -67,11 +67,11 @@ export const routes: Routes = [
   },
 
   // ── Contributor Jobs ───────────────────────────────────────────────────────
-  {
-    path: 'jobs',
-    canActivate: [authGuard],
-    loadChildren: () => import('./features/jobs/jobs.routes').then(m => m.JOBS_ROUTES),
-  },
+  // {
+  //   path: 'jobs',
+  //   canActivate: [authGuard],
+  //   loadChildren: () => import('./features/jobs/jobs.routes').then(m => m.JOBS_ROUTES),
+  // },
 
   // ── Checkout ───────────────────────────────────────────────────────────────
   {

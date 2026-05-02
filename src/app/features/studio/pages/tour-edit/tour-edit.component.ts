@@ -17,6 +17,16 @@ import { AudioRecorderComponent } from '../../../../shared/components/audio-reco
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../../../../environments/environment';
 
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 @Component({
   selector: 'app-tour-edit',
   standalone: true,
@@ -184,11 +194,38 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly stopForm = this.fb.nonNullable.group({
     title:       ['', Validators.required],
     description: [''],
+    latitude:    [null as number | null],
+    longitude:   [null as number | null],
   });
   readonly activeSpaceId     = signal<string | null>(null); // which space to add stop into
   readonly editingStopId     = signal<string | null>(null);
   readonly addingDirectionFor      = signal<string | null>(null); // stop id
   readonly addingSpaceDirectionFor = signal<string | null>(null); // space id
+
+  // ── Stop GPS location picker ───────────────────────────────────────────
+  readonly locationPickerOpen = signal(false);
+  readonly pickerLat          = signal<number | null>(null);
+  readonly pickerLng          = signal<number | null>(null);
+  readonly pickerLocating     = signal(false);
+  readonly pickerError        = signal<string | null>(null);
+  private pickerMap: L.Map | null = null;
+  private pickerMarker: L.Marker | null = null;
+  private pickerMapRendered = false;
+
+  // True when the picker pin is far enough from the tour's start that it
+  // probably represents a mistake (e.g. GPS resolved to the wrong region).
+  // Soft warning only — saving is still allowed.
+  readonly outsideTourArea = computed(() => {
+    const lat = this.pickerLat();
+    const lng = this.pickerLng();
+    const start = this.startCoords();
+    if (lat == null || lng == null || !start) return false;
+
+    const end = this.endCoords();
+    const tourSpanKm = end ? haversineKm(start[0], start[1], end[0], end[1]) : 0;
+    const radiusKm = Math.max(5, tourSpanKm * 2);
+    return haversineKm(start[0], start[1], lat, lng) > radiusKm;
+  });
 
 
   // ── Init ───────────────────────────────────────────────────────────────
@@ -264,6 +301,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngOnDestroy(): void {
     this.geoSub?.unsubscribe();
     this.map?.remove();
+    this.pickerMap?.remove();
   }
 
   ngAfterViewChecked(): void {
@@ -274,6 +312,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.map?.remove();
       this.map = null;
       this.mapRendered = false;
+    }
+    if (this.locationPickerOpen() && !this.pickerMapRendered) {
+      setTimeout(() => this.renderPickerMap());
     }
   }
 
@@ -639,14 +680,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     const body = { ...this.stopForm.getRawValue(), space_id: currentSpaceId };
     this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops`, body).subscribe(stop => {
       this.loadStops(); // reload to get proper ordering and space data
-      this.stopForm.reset({ title: '', description: '' });
+      this.stopForm.reset({ title: '', description: '', latitude: null, longitude: null });
       // Keep the form open in the same space for sequential adding
     });
   }
 
   editStop(stop: any): void {
     this.editingStopId.set(stop.id);
-    this.stopForm.patchValue({ title: stop.title, description: stop.description || '' });
+    this.stopForm.patchValue({
+      title: stop.title,
+      description: stop.description || '',
+      latitude:  stop.latitude  != null ? Number(stop.latitude)  : null,
+      longitude: stop.longitude != null ? Number(stop.longitude) : null,
+    });
   }
 
   saveStop(): void {
@@ -659,13 +705,175 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops/${stopId}`, body).subscribe(updated => {
       this.stops.update(s => s.map(x => x.id === stopId ? { ...x, ...updated } : x));
       this.editingStopId.set(null);
-      this.stopForm.reset({ title: '', description: '' });
+      this.stopForm.reset({ title: '', description: '', latitude: null, longitude: null });
     });
   }
 
   cancelEdit(): void {
     this.editingStopId.set(null);
-    this.stopForm.reset({ title: '', description: '' });
+    this.stopForm.reset({ title: '', description: '', latitude: null, longitude: null });
+  }
+
+  // ── Location picker ────────────────────────────────────────────────────
+  openLocationPicker(): void {
+    const formLat = this.stopForm.value.latitude  ?? null;
+    const formLng = this.stopForm.value.longitude ?? null;
+    const tourStart = this.startCoords();
+
+    // Pin starts at the stop's saved coords if it has any, otherwise at the
+    // tour's starting point so the user has a draggable anchor on the tour map.
+    if (formLat != null && formLng != null) {
+      this.pickerLat.set(formLat);
+      this.pickerLng.set(formLng);
+    } else if (tourStart) {
+      this.pickerLat.set(tourStart[0]);
+      this.pickerLng.set(tourStart[1]);
+    } else {
+      this.pickerLat.set(null);
+      this.pickerLng.set(null);
+    }
+
+    this.pickerError.set(null);
+    this.pickerLocating.set(false);
+    this.locationPickerOpen.set(true);
+    this.pickerMapRendered = false;
+  }
+
+  closeLocationPicker(): void {
+    this.locationPickerOpen.set(false);
+    this.pickerMap?.remove();
+    this.pickerMap = null;
+    this.pickerMarker = null;
+    this.pickerMapRendered = false;
+  }
+
+  saveStopLocation(): void {
+    const lat = this.pickerLat();
+    const lng = this.pickerLng();
+    if (lat == null || lng == null) {
+      this.pickerError.set('Place a pin on the map first.');
+      return;
+    }
+    this.stopForm.patchValue({
+      latitude:  Number(lat.toFixed(6)),
+      longitude: Number(lng.toFixed(6)),
+    });
+    this.closeLocationPicker();
+  }
+
+  clearStopLocation(): void {
+    this.stopForm.patchValue({ latitude: null, longitude: null });
+  }
+
+  useCurrentLocation(): void {
+    if (!('geolocation' in navigator)) {
+      this.pickerError.set('Geolocation is not supported by this browser.');
+      return;
+    }
+    this.pickerError.set(null);
+    this.pickerLocating.set(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        this.pickerLat.set(latitude);
+        this.pickerLng.set(longitude);
+        this.pickerLocating.set(false);
+        if (this.pickerMap) {
+          this.updatePickerMarker(latitude, longitude);
+          this.pickerMap.panTo([latitude, longitude]);
+        }
+      },
+      (err) => {
+        this.pickerLocating.set(false);
+        const msg = err.code === err.PERMISSION_DENIED
+          ? 'Location permission denied. Allow location access or place the pin manually.'
+          : err.code === err.POSITION_UNAVAILABLE
+            ? 'Location unavailable. Try again or place the pin manually.'
+            : err.code === err.TIMEOUT
+              ? 'Location request timed out. Try again.'
+              : 'Could not determine your location.';
+        this.pickerError.set(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
+    );
+  }
+
+  private renderPickerMap(): void {
+    const el = document.getElementById('stop-location-map');
+    if (!el || this.pickerMapRendered) return;
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+    });
+
+    this.pickerMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 20,
+      subdomains: 'abcd',
+    } as any).addTo(this.pickerMap);
+
+    // Show the tour endpoints as small static dots for context.
+    const start = this.startCoords();
+    const end   = this.endCoords();
+    if (start) {
+      L.circleMarker(start, {
+        radius: 7, color: '#1a1a1a', fillColor: '#1a1a1a', fillOpacity: 0.7, weight: 2,
+      }).addTo(this.pickerMap).bindTooltip('Tour start');
+    }
+    if (end) {
+      L.circleMarker(end, {
+        radius: 7, color: '#666666', fillColor: '#666666', fillOpacity: 0.7, weight: 2,
+      }).addTo(this.pickerMap).bindTooltip('Tour end');
+    }
+
+    // Initial view: fit the tour endpoints + the pin into a tour-context frame.
+    const stopLat = this.pickerLat();
+    const stopLng = this.pickerLng();
+    const points: L.LatLngExpression[] = [];
+    if (start) points.push(start);
+    if (end)   points.push(end);
+    if (stopLat != null && stopLng != null && (!start || stopLat !== start[0] || stopLng !== start[1])) {
+      points.push([stopLat, stopLng]);
+    }
+
+    if (points.length === 0) {
+      this.pickerMap.setView([20, 0], 2);
+    } else if (points.length === 1) {
+      this.pickerMap.setView(points[0] as any, 16);
+    } else {
+      this.pickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
+    }
+
+    if (stopLat != null && stopLng != null) {
+      this.updatePickerMarker(stopLat, stopLng);
+    }
+
+    this.pickerMap.on('click', (e: L.LeafletMouseEvent) => {
+      this.pickerLat.set(e.latlng.lat);
+      this.pickerLng.set(e.latlng.lng);
+      this.updatePickerMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    this.pickerMapRendered = true;
+  }
+
+  private updatePickerMarker(lat: number, lng: number): void {
+    if (!this.pickerMap) return;
+    if (!this.pickerMarker) {
+      this.pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.pickerMap);
+      this.pickerMarker.on('drag', (e: L.LeafletEvent) => {
+        const ll = (e.target as L.Marker).getLatLng();
+        this.pickerLat.set(ll.lat);
+        this.pickerLng.set(ll.lng);
+      });
+    } else {
+      this.pickerMarker.setLatLng([lat, lng]);
+    }
   }
 
   deleteStop(stopId: string): void {

@@ -62,7 +62,7 @@
         @if (requestSuccess()) {
           <div class="request-success">
             <span class="request-success__icon">&#10003;</span>
-            <p>Translation request posted! You can track it in <a routerLink="/jobs">Jobs</a>.</p>
+            <p>Translation request posted! You can track it in <a routerLink="/studio/requests">your requests</a>.</p>
           </div>
         } @else {
           <form [formGroup]="requestForm" (ngSubmit)="submitTranslationRequest()" class="edit-form" novalidate>

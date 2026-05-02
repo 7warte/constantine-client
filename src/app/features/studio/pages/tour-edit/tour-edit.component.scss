@@ -6,6 +6,11 @@
   padding-block: $space-8;
   max-width: none;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-inline: 0;
+    padding-block: $space-5;
+  }
+
   &__header { margin-bottom: $space-4; }
 }
 
@@ -73,6 +78,12 @@
 .edit-card {
   @include card;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+    border-radius: 0;
+    border-inline: none;
+  }
+
   &__title { @include heading($font-size-lg); margin-bottom: $space-4; }
   &__desc { font-size: $font-size-sm; color: $text-secondary; margin-bottom: $space-6; }
   &--mt { margin-top: $space-6; }
@@ -97,8 +108,13 @@
   &__actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: $space-3;
     margin-top: $space-3;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      .btn { flex: 1 1 auto; text-align: center; }
+    }
 
     &--mt { margin-top: $space-6; }
   }
@@ -820,12 +836,16 @@
     margin-top: $space-3;
     max-width: 320px;
 
+    @media (max-width: #{$bp-md - 1px}) {
+      max-width: none;
+      gap: $space-2;
+    }
+
     .btn--ghost.btn--sm {
       font-size: $font-size-sm;
       padding: $space-3 $space-4;
       text-align: center;
       width: 100%;
-      display: block;
     }
   }
 
@@ -1009,8 +1029,8 @@
 
 .pin-modal {
   background: #ffffff;
-  width: 90vw;
-  max-width: 750px;
+  width: 95vw;
+  max-width: 1400px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -1097,6 +1117,104 @@
     display: flex;
     gap: $space-3;
   }
+
+  &--location {
+    width: 95vw;
+    max-width: 1400px;
+    height: 90vh;
+    max-height: 90vh;
+  }
+}
+
+// ── Stop GPS location row (in stop form) ────────────────────────────────────
+.stop-location {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  flex-wrap: wrap;
+
+  &__icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $text-secondary;
+  }
+
+  &__coords {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+  }
+
+  &__set-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+  }
+}
+
+.stop-card__geo {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: $text-secondary;
+  vertical-align: middle;
+  margin-left: $space-1;
+}
+
+// ── Stop GPS location picker ────────────────────────────────────────────────
+.loc-picker {
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 $space-5;
+    border-bottom: 1px solid #eeeeee;
+    flex-wrap: wrap;
+  }
+
+  &__icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: $space-1;
+    vertical-align: middle;
+  }
+
+  &__coords {
+    font-size: $font-size-sm;
+    color: $text-primary;
+
+    &--muted { color: #999999; }
+  }
+
+  &__error {
+    padding: $space-2 $space-5;
+    background: rgba($color-error, 0.08);
+    color: $color-error;
+    font-size: $font-size-xs;
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  &__warning {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-5;
+    background: rgba($color-warning, 0.12);
+    color: #8a5a00;
+    font-size: $font-size-xs;
+    border-bottom: 1px solid #eeeeee;
+
+    .mat-icon { color: $color-warning; }
+  }
+
+  &__map {
+    flex: 1;
+    width: 100%;
+    min-height: 320px;
+    background: #f4f4f4;
+  }
 }
 
 // ── Buttons ─────────────────────────────────────────────────────────────────
@@ -1115,6 +1233,20 @@
   &--ghost   { background: transparent; color: $text-secondary; border-color: $border-default; &:hover { color: $text-primary; } }
   &--sm      { padding: $space-1 $space-3; font-size: $font-size-xs; }
   &--publish { background: $color-success; color: $white; border-color: $color-success; &:hover { opacity: 0.9; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+
+  &--icon-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+
+    .mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      line-height: 1;
+    }
+  }
 }
 
 .publish-badge {
@@ -1126,4 +1258,21 @@
   border-radius: $radius-md;
   font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
+}
+
+// ── Mobile overrides ─────────────────────────────────────────────────────────
+@media (max-width: #{$bp-md - 1px}) {
+  .spaces-timeline::before { display: none; }
+
+  .space-block {
+    &::before { display: none; }
+    &__header { padding: $space-3 $space-4; }
+    &__inline-form { padding: $space-3 $space-4; }
+    &__footer { padding: $space-3 $space-4; flex-wrap: wrap; }
+  }
+
+  .stop-card { padding: $space-3 $space-4; }
+  .space-empty { padding: $space-5 $space-3; }
+
+  .transition-form-block__fields { flex-wrap: wrap; }
 }

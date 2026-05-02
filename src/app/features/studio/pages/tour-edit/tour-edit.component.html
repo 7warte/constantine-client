@@ -336,7 +336,12 @@
                     <div class="stop-card__header">
                       <span class="stop-card__num">{{ i + 1 }}</span>
                       <div class="stop-card__info">
-                        <strong>{{ stop.title }}</strong>
+                        <strong>
+                          {{ stop.title }}
+                          @if (stop.latitude != null && stop.longitude != null) {
+                            <mat-icon class="stop-card__geo" title="Has GPS location">place</mat-icon>
+                          }
+                        </strong>
                         @if (stop.description) {
                           <p class="stop-card__desc">{{ stop.description }}</p>
                         }
@@ -366,15 +371,24 @@
                         <div class="stop-card__upload-actions">
                           <label class="audio-upload">
                             <input type="file" accept="audio/*" (change)="onMediaSelect(stop.id, 'audio', $event)" hidden />
-                            <span class="btn btn--ghost btn--sm">+ Audio file</span>
+                            <span class="btn btn--ghost btn--sm btn--icon-text">
+                              <mat-icon>mic</mat-icon>
+                              <span>Audio</span>
+                            </span>
                           </label>
                           <label class="audio-upload">
                             <input type="file" accept="image/*" (change)="onMediaSelect(stop.id, 'image', $event)" hidden />
-                            <span class="btn btn--ghost btn--sm">+ Image</span>
+                            <span class="btn btn--ghost btn--sm btn--icon-text">
+                              <mat-icon>image</mat-icon>
+                              <span>Image</span>
+                            </span>
                           </label>
                           <label class="audio-upload">
                             <input type="file" accept=".pdf" (change)="onMediaSelect(stop.id, 'pdf', $event)" hidden />
-                            <span class="btn btn--ghost btn--sm">+ PDF</span>
+                            <span class="btn btn--ghost btn--sm btn--icon-text">
+                              <mat-icon>picture_as_pdf</mat-icon>
+                              <span>PDF</span>
+                            </span>
                           </label>
                         </div>
                         <app-audio-recorder (recorded)="uploadRecordedAudio(stop.id, $event)" />
@@ -435,6 +449,22 @@
                     <div class="form-field">
                       <label class="form-field__label">Description</label>
                       <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What visitors will see or hear about…"></textarea>
+                    </div>
+                    <div class="form-field">
+                      <label class="form-field__label">Location</label>
+                      @if (stopForm.value.latitude != null && stopForm.value.longitude != null) {
+                        <div class="stop-location">
+                          <mat-icon class="stop-location__icon">place</mat-icon>
+                          <span class="stop-location__coords">{{ stopForm.value.latitude | number:'1.5-5' }}, {{ stopForm.value.longitude | number:'1.5-5' }}</span>
+                          <button type="button" class="btn btn--ghost btn--sm" (click)="openLocationPicker()">Edit</button>
+                          <button type="button" class="btn btn--ghost btn--sm" (click)="clearStopLocation()">Clear</button>
+                        </div>
+                      } @else {
+                        <button type="button" class="btn btn--ghost btn--sm stop-location__set-btn" (click)="openLocationPicker()">
+                          <mat-icon class="stop-location__icon">place</mat-icon>
+                          Set location
+                        </button>
+                      }
                     </div>
                     <div class="edit-form__actions">
                       <button type="button" class="btn btn--ghost btn--sm" (click)="activeSpaceId.set(null)">Done</button>
@@ -527,6 +557,22 @@
                   <label class="form-field__label">Description</label>
                   <textarea formControlName="description" class="form-field__textarea" rows="3"></textarea>
                 </div>
+                <div class="form-field">
+                  <label class="form-field__label">Location</label>
+                  @if (stopForm.value.latitude != null && stopForm.value.longitude != null) {
+                    <div class="stop-location">
+                      <mat-icon class="stop-location__icon">place</mat-icon>
+                      <span class="stop-location__coords">{{ stopForm.value.latitude | number:'1.5-5' }}, {{ stopForm.value.longitude | number:'1.5-5' }}</span>
+                      <button type="button" class="btn btn--ghost btn--sm" (click)="openLocationPicker()">Edit</button>
+                      <button type="button" class="btn btn--ghost btn--sm" (click)="clearStopLocation()">Clear</button>
+                    </div>
+                  } @else {
+                    <button type="button" class="btn btn--ghost btn--sm stop-location__set-btn" (click)="openLocationPicker()">
+                      <mat-icon class="stop-location__icon">place</mat-icon>
+                      Set location
+                    </button>
+                  }
+                </div>
                 <div class="edit-form__actions">
                   <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancel</button>
                   <button type="submit" class="btn btn--primary">Update stop</button>
@@ -615,6 +661,57 @@
                 <div class="pin-modal__actions">
                   <button type="button" class="btn btn--ghost" (click)="pinningSpace.set(null)">Cancel</button>
                   <button type="button" class="btn btn--primary" (click)="savePin()">Save position</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Stop GPS location picker modal -->
+        @if (locationPickerOpen()) {
+          <div class="pin-modal-backdrop" (click)="closeLocationPicker()">
+            <div class="pin-modal pin-modal--location" (click)="$event.stopPropagation()">
+              <div class="pin-modal__header">
+                <h3>Pick the stop's location</h3>
+                <button type="button" class="btn-icon" (click)="closeLocationPicker()">&times;</button>
+              </div>
+
+              <div class="loc-picker__toolbar">
+                <button type="button" class="btn btn--ghost btn--sm" [disabled]="pickerLocating()" (click)="useCurrentLocation()">
+                  <mat-icon class="loc-picker__icon">my_location</mat-icon>
+                  {{ pickerLocating() ? 'Locating…' : 'Use my current location' }}
+                </button>
+                @if (pickerLat() != null && pickerLng() != null) {
+                  <span class="loc-picker__coords">{{ pickerLat() | number:'1.5-5' }}, {{ pickerLng() | number:'1.5-5' }}</span>
+                } @else {
+                  <span class="loc-picker__coords loc-picker__coords--muted">Click on the map to drop a pin</span>
+                }
+              </div>
+
+              @if (pickerError()) {
+                <div class="loc-picker__error">{{ pickerError() }}</div>
+              }
+
+              @if (outsideTourArea()) {
+                <div class="loc-picker__warning">
+                  <mat-icon class="loc-picker__icon">warning_amber</mat-icon>
+                  You're currently outside the tour area.
+                </div>
+              }
+
+              <div id="stop-location-map" class="loc-picker__map"></div>
+
+              <div class="pin-modal__footer">
+                <p class="pin-modal__hint">
+                  @if (pickerLat() == null) {
+                    Click anywhere on the map to drop a pin.
+                  } @else {
+                    Drag the pin or click elsewhere on the map to move it.
+                  }
+                </p>
+                <div class="pin-modal__actions">
+                  <button type="button" class="btn btn--ghost" (click)="closeLocationPicker()">Cancel</button>
+                  <button type="button" class="btn btn--primary" [disabled]="pickerLat() == null || pickerLng() == null" (click)="saveStopLocation()">Save location</button>
                 </div>
               </div>
             </div>

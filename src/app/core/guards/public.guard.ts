@@ -9,5 +9,5 @@ export const publicGuard: CanActivateFn = () => {
 
   if (!auth.isLoggedIn()) return true;
 
-  return router.createUrlTree(['/studio']);
+  return router.createUrlTree(['/explore']);
 };

@@ -16,7 +16,8 @@
       @if (auth.isLoggedIn()) {
         <a routerLink="/library"  routerLinkActive="active" class="navbar__link">My Library</a>
         <a routerLink="/studio"   routerLinkActive="active" class="navbar__link">Studio</a>
-        <a routerLink="/jobs"     routerLinkActive="active" class="navbar__link">Jobs</a>
+        <!-- <a routerLink="/jobs"     routerLinkActive="active" class="navbar__link">Jobs</a> -->
+
       }
     </nav>
 
@@ -53,7 +54,8 @@
     @if (auth.isLoggedIn()) {
       <a routerLink="/library" class="navbar__mobile-link">My Library</a>
       <a routerLink="/studio"  class="navbar__mobile-link">Studio</a>
-      <a routerLink="/jobs"    class="navbar__mobile-link">Jobs</a>
+      <!-- <a routerLink="/jobs"    class="navbar__mobile-link">Jobs</a> -->
+
       <a routerLink="/account/profile" class="navbar__mobile-link">Account</a>
       <button class="navbar__mobile-link" (click)="auth.logout()">Sign out</button>
     } @else {
