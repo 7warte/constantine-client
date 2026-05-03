@@ -4,3 +4,8 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Docker (local-only; let Railway/Nixpacks handle deploys)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
