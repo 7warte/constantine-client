@@ -211,6 +211,9 @@
 
         @if (compassError()) {
           <div class="player__compass-error">{{ compassError() }}</div>
+          <button type="button" class="player__compass-perm-btn" (click)="retryLocation()">
+            Try again
+          </button>
         } @else if (!userPosition()) {
           <div class="player__compass-status">Waiting for your location…</div>
         } @else {

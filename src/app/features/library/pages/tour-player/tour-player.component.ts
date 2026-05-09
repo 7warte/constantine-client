@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ApiService } from '../../../../core/services/api.service';
@@ -10,7 +9,7 @@ import { ApiService } from '../../../../core/services/api.service';
   selector: 'app-tour-player',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, FormsModule, MatIconModule, MatExpansionModule],
+  imports: [CommonModule, MatIconModule, MatExpansionModule],
   templateUrl: './tour-player.component.html',
   styleUrl: './tour-player.component.scss',
 })
@@ -255,6 +254,27 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.compassError.set(null);
     this.needsOrientationPermission.set(false);
 
+    this.startGeoWatch();
+
+    const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
+    if (typeof reqPermFn === 'function') {
+      this.needsOrientationPermission.set(true);
+    } else {
+      this.attachOrientationListener();
+    }
+  }
+
+  retryLocation(): void {
+    this.compassError.set(null);
+    this.userPosition.set(null);
+    this.startGeoWatch();
+  }
+
+  private startGeoWatch(): void {
+    if (this.geoWatchId != null) {
+      navigator.geolocation.clearWatch(this.geoWatchId);
+      this.geoWatchId = null;
+    }
     if (!('geolocation' in navigator)) {
       this.compassError.set('Geolocation is not supported on this device.');
       return;
@@ -263,7 +283,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       (pos) => this.userPosition.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       (err) => {
         const msg = err.code === err.PERMISSION_DENIED
-          ? 'Location permission denied.'
+          ? 'Location permission denied. If you previously denied, enable it in Settings → Safari → Location, then try again.'
           : err.code === err.POSITION_UNAVAILABLE
             ? 'Location unavailable.'
             : err.code === err.TIMEOUT
@@ -273,13 +293,6 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       },
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 20_000 },
     );
-
-    const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
-    if (typeof reqPermFn === 'function') {
-      this.needsOrientationPermission.set(true);
-    } else {
-      this.attachOrientationListener();
-    }
   }
 
   requestOrientationPermission(): void {
