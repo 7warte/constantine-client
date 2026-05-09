@@ -256,14 +256,14 @@
     margin: 0;
   }
 
-  // ── Mobile map FAB ──────────────────────────────────────────────────────────
+  // ── Map FAB ─────────────────────────────────────────────────────────────────
   &__mobile-map-btn {
     display: flex;
     position: fixed;
     bottom: $space-5;
     right: $space-5;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: $text-primary;
     color: $white;
@@ -271,12 +271,17 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 100;
-    transition: background $transition-fast;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+    z-index: 110;
+    transition: background $transition-fast, transform $transition-fast, bottom $transition-normal;
 
-    .mat-icon { font-size: 24px; }
-    &:hover { background: $accent-primary; }
+    .mat-icon { font-size: 28px; width: 28px; height: 28px; }
+    &:hover { background: $accent-primary; transform: scale(1.05); }
+
+    /* Bump above the "Start from..." sticky CTA so it isn't hidden pre-tour. */
+    &--lifted {
+      bottom: calc(96px + #{$space-5} + env(safe-area-inset-bottom));
+    }
   }
 
   // ── Audio hero player ───────────────────────────────────────────────────────
@@ -473,29 +478,33 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: $space-4;
+
+    @media (max-width: $bp-md) {
+      padding: $space-3;
+    }
   }
 
   &__map-frame {
     position: relative;
-    width: 80vw;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 92vh;
     border: 3px solid rgba(#ffffff, 0.15);
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+    overflow: auto;
 
     img {
       width: 100%;
       display: block;
-    }
-
-    @media (max-width: $bp-md) {
-      width: 90vw;
     }
   }
 
   &__map-dot {
     position: absolute;
     transform: translate(-50%, -50%);
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: rgba(#ffffff, 0.6);
     color: #1a1a1a;
@@ -511,9 +520,10 @@
     &--active {
       background: $accent-primary;
       color: #ffffff;
-      width: 32px;
-      height: 32px;
+      width: 38px;
+      height: 38px;
       font-size: $font-size-sm;
+      border: 2px solid #ffffff;
       animation: mapPulse 1.2s ease-in-out infinite;
       z-index: 1;
     }
@@ -521,17 +531,24 @@
 
   &__map-close {
     position: absolute;
-    top: -36px;
-    right: -4px;
-    background: none;
+    top: $space-2;
+    right: $space-2;
+    background: rgba(0, 0, 0, 0.55);
     border: none;
-    color: rgba(#ffffff, 0.5);
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     font-size: 28px;
     cursor: pointer;
     line-height: 1;
-    transition: color $transition-fast;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background $transition-fast;
 
-    &:hover { color: #ffffff; }
+    &:hover { background: rgba(0, 0, 0, 0.8); }
   }
 
   // ── Image carousel modal ───────────────────────────────────────────────────

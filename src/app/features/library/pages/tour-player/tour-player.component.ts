@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -141,8 +141,25 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   readonly showMapModal = signal(false);
   readonly mapSpaces    = signal<any[]>([]);
 
+  @ViewChild('mapFrame') mapFrameRef?: ElementRef<HTMLElement>;
+
   openMap(): void {
     this.showMapModal.set(true);
+    // After the modal renders, scroll the active dot into the centre of the frame.
+    setTimeout(() => {
+      const frame = this.mapFrameRef?.nativeElement;
+      const activeId = this.currentSpaceId();
+      if (!frame || !activeId) return;
+      const space = this.mapSpaces().find(s => s.id === activeId);
+      if (space?.map_x == null || space?.map_y == null) return;
+      const targetX = (space.map_x / 100) * frame.scrollWidth - frame.clientWidth / 2;
+      const targetY = (space.map_y / 100) * frame.scrollHeight - frame.clientHeight / 2;
+      frame.scrollTo({
+        left: Math.max(0, targetX),
+        top: Math.max(0, targetY),
+        behavior: 'smooth',
+      });
+    }, 80);
   }
 
   getRomanNumeral(idx: number): string {

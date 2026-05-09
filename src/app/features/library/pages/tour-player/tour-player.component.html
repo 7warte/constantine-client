@@ -161,14 +161,18 @@
     </section>
 
     @if (variant()?.map_image_url) {
-      <button type="button" class="player__mobile-map-btn" (click)="openMap()">
+      <button type="button"
+        class="player__mobile-map-btn"
+        [class.player__mobile-map-btn--lifted]="!started()"
+        (click)="openMap()"
+        aria-label="Open tour map">
         <mat-icon>map</mat-icon>
       </button>
     }
 
     @if (showMapModal()) {
       <div class="player__map-backdrop" (click)="showMapModal.set(false)">
-        <div class="player__map-frame" (click)="$event.stopPropagation()">
+        <div class="player__map-frame" #mapFrame (click)="$event.stopPropagation()">
           <button type="button" class="player__map-close" (click)="showMapModal.set(false)">&times;</button>
           <img [src]="variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />
 
