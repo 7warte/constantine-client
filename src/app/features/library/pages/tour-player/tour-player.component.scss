@@ -731,6 +731,13 @@
   cursor: pointer;
 }
 
+.player__compass-route {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  align-items: center;
+}
+
 .player__compass-target {
   font-size: $font-size-sm;
   color: $text-secondary;
@@ -802,13 +809,33 @@
   line-height: $line-height-normal;
 }
 
-.player__compass-perm-btn {
-  padding: $space-3 $space-5;
-  background: $text-primary;
-  color: $bg-light;
-  border: none;
+.player__compass-instructions {
+  max-width: min(420px, 90vw);
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
   border-radius: $radius-md;
-  font-family: $font-family-secondary;
-  font-weight: $font-weight-semibold;
-  cursor: pointer;
+  padding: $space-4 $space-5;
+  text-align: left;
+
+  ol {
+    margin: 0;
+    padding-left: $space-5;
+  }
+
+  li {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+
+  strong { color: $text-primary; }
+}
+
+.player__compass-instructions-title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 $space-3;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -203,14 +203,31 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   }
 
   // ── Compass to next stop ─────────────────────────────────────────
-  readonly compassOpen                = signal(false);
-  readonly userPosition               = signal<{ lat: number; lng: number } | null>(null);
-  readonly userHeading                = signal<number | null>(null);
-  readonly compassError               = signal<string | null>(null);
-  readonly needsOrientationPermission = signal(false);
+  readonly compassOpen             = signal(false);
+  readonly userPosition            = signal<{ lat: number; lng: number } | null>(null);
+  readonly userHeading             = signal<number | null>(null);
+  readonly compassError            = signal<string | null>(null);
+  readonly compassPermissionDenied = signal(false);
 
   private geoWatchId: number | null = null;
   private orientationListener: ((e: any) => void) | null = null;
+
+  get isIOS(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  get isAndroid(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    return /android/i.test(navigator.userAgent);
+  }
+
+  readonly currentStop = computed(() => {
+    const id = this.expandedStopId();
+    if (!id) return null;
+    return this.stops().find(s => s.id === id) ?? null;
+  });
 
   readonly nextStop = computed(() => {
     const id = this.expandedStopId();
@@ -239,35 +256,48 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     return bearingDeg(pos.lat, pos.lng, +next.latitude, +next.longitude);
   });
 
-  readonly arrowAngle = computed<number>(() => {
+  /** Cumulative arrow rotation. Continuous (no modulo) so CSS rotates the short way at the 0/360 wrap. */
+  readonly arrowDisplayAngle = signal(0);
+
+  /** Low-pass-filtered heading used by the EMA in the orientation listener. */
+  private smoothedHeading: number | null = null;
+
+  /** Last absolute arrow rotation we wrote, used to compute shortest-path delta. */
+  private lastArrowAngle = 0;
+
+  private readonly _arrowEffect = effect(() => {
     const b = this.bearingDegrees();
     const h = this.userHeading();
-    if (b == null) return 0;
-    if (h == null) return b;
-    return ((b - h) + 360) % 360;
-  });
+    if (b == null) return;
+    const target = h == null ? b : ((b - h) + 360) % 360;
+    const currentMod = ((this.lastArrowAngle % 360) + 360) % 360;
+    let diff = target - currentMod;
+    if (diff > 180) diff -= 360;
+    else if (diff < -180) diff += 360;
+    this.lastArrowAngle += diff;
+    this.arrowDisplayAngle.set(this.lastArrowAngle);
+  }, { allowSignalWrites: true });
 
   openCompass(): void {
     this.compassOpen.set(true);
     this.userPosition.set(null);
     this.userHeading.set(null);
     this.compassError.set(null);
-    this.needsOrientationPermission.set(false);
+    this.compassPermissionDenied.set(false);
+    this.smoothedHeading = null;
+    this.lastArrowAngle = 0;
+    this.arrowDisplayAngle.set(0);
 
     this.startGeoWatch();
 
     const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
     if (typeof reqPermFn === 'function') {
-      this.needsOrientationPermission.set(true);
+      reqPermFn().then((res: string) => {
+        if (res === 'granted') this.attachOrientationListener();
+      }).catch(() => {});
     } else {
       this.attachOrientationListener();
     }
-  }
-
-  retryLocation(): void {
-    this.compassError.set(null);
-    this.userPosition.set(null);
-    this.startGeoWatch();
   }
 
   private startGeoWatch(): void {
@@ -282,43 +312,42 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.geoWatchId = navigator.geolocation.watchPosition(
       (pos) => this.userPosition.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       (err) => {
-        const msg = err.code === err.PERMISSION_DENIED
-          ? 'Location permission denied. If you previously denied, enable it in Settings → Safari → Location, then try again.'
-          : err.code === err.POSITION_UNAVAILABLE
-            ? 'Location unavailable.'
-            : err.code === err.TIMEOUT
-              ? 'Location request timed out.'
-              : 'Could not determine your location.';
-        this.compassError.set(msg);
+        if (err.code === err.PERMISSION_DENIED) {
+          this.compassError.set('Location permission denied.');
+          this.compassPermissionDenied.set(true);
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          this.compassError.set('Location unavailable.');
+        } else if (err.code === err.TIMEOUT) {
+          this.compassError.set('Location request timed out.');
+        } else {
+          this.compassError.set('Could not determine your location.');
+        }
       },
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 20_000 },
     );
   }
 
-  requestOrientationPermission(): void {
-    const reqPermFn = (DeviceOrientationEvent as any).requestPermission;
-    reqPermFn().then((res: string) => {
-      if (res === 'granted') {
-        this.needsOrientationPermission.set(false);
-        this.attachOrientationListener();
-      } else {
-        this.compassError.set('Compass permission denied. The arrow will point at absolute bearing instead.');
-        this.needsOrientationPermission.set(false);
-      }
-    }).catch(() => {
-      this.needsOrientationPermission.set(false);
-    });
-  }
-
   private attachOrientationListener(): void {
+    const ALPHA = 0.15;
     this.orientationListener = (e: any) => {
-      let heading: number | null = null;
+      let raw: number | null = null;
       if (typeof e.webkitCompassHeading === 'number') {
-        heading = e.webkitCompassHeading;
+        raw = e.webkitCompassHeading;
       } else if (typeof e.alpha === 'number') {
-        heading = (360 - e.alpha) % 360;
+        raw = (360 - e.alpha) % 360;
       }
-      this.userHeading.set(heading);
+      if (raw == null) return;
+
+      if (this.smoothedHeading == null) {
+        this.smoothedHeading = raw;
+      } else {
+        let delta = raw - this.smoothedHeading;
+        if (delta > 180) delta -= 360;
+        else if (delta < -180) delta += 360;
+        this.smoothedHeading = ((this.smoothedHeading + delta * ALPHA) + 360) % 360;
+      }
+
+      this.userHeading.set(this.smoothedHeading);
     };
     window.addEventListener('deviceorientationabsolute', this.orientationListener as any, true);
     window.addEventListener('deviceorientation', this.orientationListener as any, true);
