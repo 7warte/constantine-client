@@ -191,29 +191,34 @@
         }
 
         <!-- Map preview -->
-        @if (startCoords()) {
-          <div class="map-wrapper">
-            <div class="map-theme-picker">
-              <mat-icon class="map-theme-picker__icon">map</mat-icon>
-              @for (theme of mapThemes; track theme.id) {
-                <button type="button"
-                  class="map-theme-btn"
-                  [class.map-theme-btn--active]="activeTheme() === theme.id"
-                  (click)="changeMapTheme(theme.id)">
-                  {{ theme.label }}
-                </button>
-              }
-            </div>
-            <div class="map-container" id="tour-map"></div>
+        <div class="map-wrapper">
+          <div class="map-hint-row">
+            <p class="map-hint">{{ mapHint() }}</p>
+            <button type="button" class="btn btn--ghost btn--sm" (click)="useCurrentLocationForTour()">
+              <mat-icon class="loc-picker__icon">my_location</mat-icon>
+              Use my current location
+            </button>
           </div>
-        }
+          <div class="map-theme-picker">
+            <mat-icon class="map-theme-picker__icon">map</mat-icon>
+            @for (theme of mapThemes; track theme.id) {
+              <button type="button"
+                class="map-theme-btn"
+                [class.map-theme-btn--active]="activeTheme() === theme.id"
+                (click)="changeMapTheme(theme.id)">
+                {{ theme.label }}
+              </button>
+            }
+          </div>
+          <div class="map-container" id="tour-map"></div>
+        </div>
 
         @if (showMapResetWarning()) {
           <div class="map-reset-warning">
             <mat-icon class="map-reset-warning__icon">warning</mat-icon>
             <div class="map-reset-warning__text">
               <strong>Map pins will be reset</strong>
-              <p>Saving a new map will remove all existing space pins. You'll need to re-pin them on the new map.</p>
+              <p>Saving a new map will remove all existing venue pins. You'll need to re-pin them on the new map.</p>
             </div>
             <div class="map-reset-warning__actions">
               <button type="button" class="btn btn--ghost btn--sm" (click)="showMapResetWarning.set(false)">Cancel</button>
@@ -231,32 +236,32 @@
       </div>
     }
 
-    <!-- ═══════════════ STEP 3: SPACES & STOPS ═════════════════════ -->
+    <!-- ═══════════════ STEP 3: VENUES & STOPS ═════════════════════ -->
     @if (step() === 3) {
       <div class="edit-card">
-        <h2 class="edit-card__title">Spaces & stops</h2>
-        <p class="edit-card__desc">Start by creating spaces (rooms, squares, areas), then add stops within each space.</p>
+        <h2 class="edit-card__title">Venues & stops</h2>
+        <p class="edit-card__desc">Start by creating venues (rooms, squares, areas), then add stops within each venue.</p>
 
         @if (spaces().length === 0 && stops().length === 0) {
-          <!-- No spaces yet — prompt to create the first one -->
+          <!-- No venues yet — prompt to create the first one -->
           <div class="space-empty">
             <h3 class="space-empty__title">Where does your tour begin?</h3>
             <p class="space-empty__desc">
-              A <strong>space</strong> is a place your visitors will stop at — a museum hall, a city square, a park entrance.
-              Each space can contain multiple stops (individual things to see or hear about).
+              A <strong>venue</strong> is a place your visitors will stop at — a museum hall, a city square, a park entrance.
+              Each venue can contain multiple stops (individual things to see or hear about).
             </p>
             <button type="button" class="space-empty__example-btn" (click)="showExample.set(true)">See an example</button>
 
             <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
               <div class="form-field">
-                <label class="form-field__label">Space name <span class="required">*</span></label>
+                <label class="form-field__label">Venue name <span class="required">*</span></label>
                 <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Main Entrance Hall" />
               </div>
               <div class="form-field">
                 <label class="form-field__label">Description</label>
-                <textarea formControlName="description" class="form-field__textarea" rows="3" placeholder="Describe this space…"></textarea>
+                <textarea formControlName="description" class="form-field__textarea" rows="3" placeholder="Describe this venue…"></textarea>
               </div>
-              <button type="submit" class="btn btn--primary">Create first space</button>
+              <button type="submit" class="btn btn--primary">Create first venue</button>
             </form>
           </div>
 
@@ -265,23 +270,23 @@
             <div class="example-backdrop" (click)="showExample.set(false)">
               <div class="example-modal" (click)="$event.stopPropagation()">
                 <div class="example-modal__header">
-                  <h3>How spaces and stops work</h3>
+                  <h3>How venues and stops work</h3>
                   <button type="button" class="btn-icon" (click)="showExample.set(false)">&times;</button>
                 </div>
                 <div class="example-modal__body">
                   <p class="example-modal__intro">
-                    A <strong>space</strong> is a physical area your visitors will be in — like a room, a square, or an outdoor area.
-                    Inside each space you add <strong>stops</strong> — the individual things visitors will look at, listen to, or learn about.
+                    A <strong>venue</strong> is a physical area your visitors will be in — like a room, a square, or an outdoor area.
+                    Inside each venue you add <strong>stops</strong> — the individual things visitors will look at, listen to, or learn about.
                   </p>
 
-                  <p class="example-modal__label">SPACE</p>
+                  <p class="example-modal__label">VENUE</p>
                   <div class="example-space">
                     <div class="example-space__header">
                       <strong>Hall of Sculptures</strong>
                       <span>The main gallery on the ground floor featuring Roman and Greek works</span>
                     </div>
 
-                    <p class="example-modal__label example-modal__label--stop">STOPS INSIDE THIS SPACE</p>
+                    <p class="example-modal__label example-modal__label--stop">STOPS INSIDE THIS VENUE</p>
 
                     <div class="example-stop">
                       <span class="example-stop__num">1</span>
@@ -300,14 +305,14 @@
                   </div>
 
                   <p class="example-modal__note">
-                    You'll create your first space now. After that, you'll be able to add stops to it — each with a title, description, audio, and images.
+                    You'll create your first venue now. After that, you'll be able to add stops to it — each with a title, description, audio, and images.
                   </p>
                 </div>
               </div>
             </div>
           }
         } @else {
-          <!-- Spaces with their stops -->
+          <!-- Venues with their stops -->
           <div class="spaces-timeline">
           @for (space of spaces(); track space.id; let si = $index; let lastSpace = $last) {
             <div class="space-block" [@slideIn]>
@@ -319,12 +324,10 @@
                   }
                 </div>
                 <div class="space-block__actions">
-                  @if (tour()?.map_image_url) {
-                    <button type="button" class="space-block__pin-btn" [class.space-block__pin-btn--placed]="space.map_x != null" (click)="openPinModal(space)">
-                      <mat-icon>place</mat-icon>
-                      {{ space.map_x != null ? 'Pinned' : 'Pin on map' }}
-                    </button>
-                  }
+                  <button type="button" class="space-block__pin-btn" [class.space-block__pin-btn--placed]="space.latitude != null" (click)="openVenuePicker(space)">
+                    <mat-icon>place</mat-icon>
+                    {{ space.latitude != null ? 'Pinned' : 'Pin on map' }}
+                  </button>
                   <button type="button" class="btn-icon btn-icon--danger" (click)="deleteSpace(space.id)">&times;</button>
                 </div>
               </div>
@@ -500,7 +503,7 @@
                 } @else if (addingSpaceDirectionFor() === space.id) {
                   <div class="transition-form-block" [@slideIn]>
                     <div class="transition-form-block__header">
-                      <span class="transition-form-block__title">Directions to next space</span>
+                      <span class="transition-form-block__title">Directions to next venue</span>
                       <button type="button" class="btn-icon" (click)="addingSpaceDirectionFor.set(null)">&times;</button>
                     </div>
                     <div class="transition-form-block__fields">
@@ -514,7 +517,7 @@
                   </div>
                 } @else {
                   <button type="button" class="transition-add-btn" (click)="addingSpaceDirectionFor.set(space.id)">
-                    <mat-icon class="transition-add-btn__icon">directions_walk</mat-icon> + Directions to next space
+                    <mat-icon class="transition-add-btn__icon">directions_walk</mat-icon> + Directions to next venue
                   </button>
                 }
               </div>
@@ -526,7 +529,7 @@
           @if (getStopsForSpace(null).length > 0) {
             <div class="space-block space-block--unassigned">
               <div class="space-block__header">
-                <h3 class="space-block__name">Stops without a space</h3>
+                <h3 class="space-block__name">Stops without a venue</h3>
               </div>
               <div class="stops-list">
                 @for (stop of getStopsForSpace(null); track stop.id; let i = $index) {
@@ -581,86 +584,79 @@
             </div>
           }
 
-          <!-- Add space -->
+          <!-- Add venue -->
           @if (!addingSpace()) {
-            <button type="button" class="btn btn--ghost edit-card--mt" (click)="addingSpace.set(true)">+ Add another space</button>
+            <button type="button" class="btn btn--ghost edit-card--mt" (click)="addingSpace.set(true)">+ Add another venue</button>
           } @else {
             <div class="stop-form edit-card edit-card--mt">
-              <h3>New space</h3>
+              <h3>New venue</h3>
               <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
                 <div class="form-field">
-                  <label class="form-field__label">Space name <span class="required">*</span></label>
+                  <label class="form-field__label">Venue name <span class="required">*</span></label>
                   <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Hall of Statues" />
                 </div>
                 <div class="form-field">
                   <label class="form-field__label">Description</label>
-                  <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What is this space about…"></textarea>
+                  <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What is this venue about…"></textarea>
                 </div>
                 <div class="edit-form__actions">
                   <button type="button" class="btn btn--ghost" (click)="addingSpace.set(false)">Cancel</button>
-                  <button type="submit" class="btn btn--primary">Add space</button>
+                  <button type="submit" class="btn btn--primary">Add venue</button>
                 </div>
               </form>
             </div>
           }
         }
 
-        <!-- Pin placement modal -->
-        @if (pinningSpace()) {
-          <div class="pin-modal-backdrop" (click)="pinningSpace.set(null)">
-            <div class="pin-modal" (click)="$event.stopPropagation()">
+        <!-- Venue GPS picker modal -->
+        @if (venuePickerOpen()) {
+          <div class="pin-modal-backdrop" (click)="closeVenuePicker()">
+            <div class="pin-modal pin-modal--location" (click)="$event.stopPropagation()">
               <div class="pin-modal__header">
-                <h3>Place "{{ pinningSpace()!.name }}" on the map</h3>
-                <button type="button" class="btn-icon" (click)="pinningSpace.set(null)">&times;</button>
+                <h3>Place "{{ venuePickerSpace()!.name }}" on the map</h3>
+                <button type="button" class="btn-icon" (click)="closeVenuePicker()">&times;</button>
               </div>
-              <div class="pin-modal__map"
-                (mousemove)="onPinDragMove($event)"
-                (touchmove)="onPinDragMove($event)"
-                (mouseup)="onPinDragEnd()"
-                (touchend)="onPinDragEnd()"
-                (mouseleave)="onPinDragEnd()">
-                <img [src]="tour()!.map_image_url" alt="Tour map" />
 
-                <!-- All existing pins (dimmed) -->
-                @for (sp of spaces(); track sp.id) {
-                  @if (sp.map_x != null && sp.id !== pinningSpace()!.id) {
-                    <div class="pin-modal__dot pin-modal__dot--dimmed"
-                      [style.left.%]="sp.map_x"
-                      [style.top.%]="sp.map_y">
-                      {{ getSpaceRomanNumeral(sp) }}
-                    </div>
+              <div class="loc-picker__toolbar">
+                <div class="loc-picker__address address-field">
+                  <input type="text" class="form-field__input" placeholder="Search an address…"
+                    [value]="venuePickerAddress()" (input)="onVenueAddressInput($event)" />
+                  @if (venuePickerSuggestions().length > 0) {
+                    <ul class="address-suggestions">
+                      @for (s of venuePickerSuggestions(); track s.display_name) {
+                        <li (mousedown)="selectVenueSuggestion(s)">{{ s.display_name }}</li>
+                      }
+                    </ul>
                   }
-                }
-
-                <!-- Active draggable pin -->
-                <div class="pin-modal__dot pin-modal__dot--active"
-                  [style.left.%]="pinX()"
-                  [style.top.%]="pinY()"
-                  (mousedown)="onPinDragStart($event)"
-                  (touchstart)="onPinDragStart($event)">
-                  {{ getSpaceRomanNumeral(pinningSpace()!) }}
                 </div>
-
-                <!-- Dotted lines between pins -->
-                <svg class="pin-modal__lines">
-                  @for (sp of spaces(); track sp.id; let i = $index) {
-                    @if (i > 0 && getSpaceMapX(spaces()[i - 1]) != null && getSpaceMapX(sp) != null) {
-                      <line
-                        [attr.x1]="getSpaceMapX(spaces()[i - 1]) + '%'"
-                        [attr.y1]="getSpaceMapY(spaces()[i - 1]) + '%'"
-                        [attr.x2]="getSpaceMapX(sp) + '%'"
-                        [attr.y2]="getSpaceMapY(sp) + '%'"
-                        stroke="#1a1a1a" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.3"
-                      />
-                    }
-                  }
-                </svg>
+                <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePickerLocating()" (click)="useVenueCurrentLocation()">
+                  <mat-icon class="loc-picker__icon">my_location</mat-icon>
+                  {{ venuePickerLocating() ? 'Locating…' : 'Use my current location' }}
+                </button>
+                @if (venuePickerLat() != null && venuePickerLng() != null) {
+                  <span class="loc-picker__coords">{{ venuePickerLat() | number:'1.5-5' }}, {{ venuePickerLng() | number:'1.5-5' }}</span>
+                } @else {
+                  <span class="loc-picker__coords loc-picker__coords--muted">Drag the pin, search an address, or use your location</span>
+                }
               </div>
+
+              @if (venuePickerError()) {
+                <div class="loc-picker__error">{{ venuePickerError() }}</div>
+              }
+
+              <div id="venue-picker-map" class="loc-picker__map"></div>
+
               <div class="pin-modal__footer">
-                <p class="pin-modal__hint">Drag the dot to position it on the map</p>
+                <p class="pin-modal__hint">
+                  @if (venuePickerLat() == null) {
+                    Click anywhere on the map to drop a pin.
+                  } @else {
+                    Drag the pin or click elsewhere on the map to move it.
+                  }
+                </p>
                 <div class="pin-modal__actions">
-                  <button type="button" class="btn btn--ghost" (click)="pinningSpace.set(null)">Cancel</button>
-                  <button type="button" class="btn btn--primary" (click)="savePin()">Save position</button>
+                  <button type="button" class="btn btn--ghost" (click)="closeVenuePicker()">Cancel</button>
+                  <button type="button" class="btn btn--primary" [disabled]="venuePickerLat() == null || venuePickerLng() == null" (click)="saveVenueLocation()">Save location</button>
                 </div>
               </div>
             </div>
@@ -677,6 +673,17 @@
               </div>
 
               <div class="loc-picker__toolbar">
+                <div class="loc-picker__address address-field">
+                  <input type="text" class="form-field__input" placeholder="Search an address…"
+                    [value]="pickerAddress()" (input)="onPickerAddressInput($event)" />
+                  @if (pickerSuggestions().length > 0) {
+                    <ul class="address-suggestions">
+                      @for (s of pickerSuggestions(); track s.display_name) {
+                        <li (mousedown)="selectPickerSuggestion(s)">{{ s.display_name }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
                 <button type="button" class="btn btn--ghost btn--sm" [disabled]="pickerLocating()" (click)="useCurrentLocation()">
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
                   {{ pickerLocating() ? 'Locating…' : 'Use my current location' }}
@@ -684,7 +691,7 @@
                 @if (pickerLat() != null && pickerLng() != null) {
                   <span class="loc-picker__coords">{{ pickerLat() | number:'1.5-5' }}, {{ pickerLng() | number:'1.5-5' }}</span>
                 } @else {
-                  <span class="loc-picker__coords loc-picker__coords--muted">Click on the map to drop a pin</span>
+                  <span class="loc-picker__coords loc-picker__coords--muted">Drag the pin, search an address, or use your location</span>
                 }
               </div>
 

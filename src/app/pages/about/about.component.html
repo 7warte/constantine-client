@@ -1,0 +1,130 @@
+<section class="about">
+  <!-- ── Intro / Choice cards ────────────────────────────────────────── -->
+  <header class="about-hero">
+    <div class="container about-hero__inner">
+      <h1 class="about-hero__title">Welcome to Constantine</h1>
+      <p class="about-hero__sub">
+        Audio tours, made by people who actually know the place.
+        What brings you here?
+      </p>
+
+      <div class="about-choices">
+        <button type="button" class="about-choice" (click)="scrollTo('enjoy')">
+          <img src="assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg" alt="" class="about-choice__img" />
+          <div class="about-choice__overlay">
+            <h2 class="about-choice__title">Enjoy Tours</h2>
+            <p class="about-choice__blurb">Discover, buy, and listen to audio tours from creators around the world.</p>
+            <span class="about-choice__cta">See how →</span>
+          </div>
+        </button>
+
+        <button type="button" class="about-choice" (click)="scrollTo('create')">
+          <img src="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" class="about-choice__img" />
+          <div class="about-choice__overlay">
+            <h2 class="about-choice__title">Be a Tour Creator</h2>
+            <p class="about-choice__blurb">Share what you know, build a tour, and earn from every listener.</p>
+            <span class="about-choice__cta">See how →</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Enjoy Tours ─────────────────────────────────────────────────── -->
+  <section id="enjoy" class="about-section">
+    <div class="container">
+      <h2 class="about-section__heading">Enjoy Tours</h2>
+      <p class="about-section__lede">
+        Constantine is a marketplace of audio tours — built around real places by people who know them.
+        Here's what to expect as a listener.
+      </p>
+
+      <div class="about-block">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Browse stories curated by locals and experts</h3>
+          <p>
+            Find tours by city, topic, language, or favourite creator. Every tour is built around a real place —
+            a museum hall, a neighbourhood, a hike, a cathedral — and comes with audio, photos, and the kind of context
+            only an insider can give.
+          </p>
+        </div>
+        <img src="assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-block about-block--reverse">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Buy once, listen anytime</h3>
+          <p>
+            A tour is yours after a single purchase — no subscription, no expiry. Open it from your library whenever you
+            visit the place, pause when something catches your eye, and pick up where you left off.
+          </p>
+        </div>
+        <img src="assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-block">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Navigate with confidence</h3>
+          <p>
+            Each stop has a precise location. A built-in compass points you toward the next stop, a map shows how the
+            venues connect, and walking directions tell you what to expect on the way. Walk, listen, and explore at your
+            own pace.
+          </p>
+        </div>
+        <img src="assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-section__cta">
+        <app-button routerLink="/explore" variant="primary" size="lg">Browse the marketplace</app-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Be a Tour Creator ───────────────────────────────────────────── -->
+  <section id="create" class="about-section about-section--alt">
+    <div class="container">
+      <h2 class="about-section__heading">Be a Tour Creator</h2>
+      <p class="about-section__lede">
+        If you know a place better than anyone, Constantine gives you the tools to turn that into a polished audio tour
+        — and to earn from it.
+      </p>
+
+      <div class="about-block">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Tell the stories you know best</h3>
+          <p>
+            Whether it's the alleys of your hometown, the collection of a small museum, or a hike only you've walked,
+            you start with what you already know. The studio walks you through structuring it into a tour, step by step.
+          </p>
+        </div>
+        <img src="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-block about-block--reverse">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Build it your way</h3>
+          <p>
+            Group stops into venues — rooms, squares, viewpoints — upload audio clips, attach photos, write transitions,
+            and pin every stop on a real map. Preview each step as you go, and edit any time after publishing.
+          </p>
+        </div>
+        <img src="assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-block">
+        <div class="about-block__copy">
+          <h3 class="about-block__title">Reach a global audience</h3>
+          <p>
+            Translators on the platform can offer localised versions of your tour, expanding your reach without extra
+            work. You set the price; payments are handled via Stripe and paid out to your account directly.
+          </p>
+        </div>
+        <img src="assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg" alt="" class="about-block__img" />
+      </div>
+
+      <div class="about-section__cta">
+        <app-button routerLink="/studio" variant="primary" size="lg">Open my studio</app-button>
+      </div>
+    </div>
+  </section>
+</section>

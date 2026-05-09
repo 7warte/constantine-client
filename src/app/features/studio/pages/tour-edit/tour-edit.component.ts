@@ -92,6 +92,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.endCoords.set(null);
       this.endSuggestions.set([]);
     }
+    if (this.endMarker) {
+      this.endMarker.remove();
+      this.endMarker = null;
+    }
   }
 
   readonly startAddress = signal('');
@@ -101,10 +105,22 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly startSuggestions = signal<any[]>([]);
   readonly endSuggestions   = signal<any[]>([]);
 
-  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' }>();
+  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' | 'picker' | 'venue' }>();
   private geoSub!: Subscription;
   private map: L.Map | null = null;
   private mapRendered = false;
+  private startMarker: L.Marker | null = null;
+  private endMarker: L.Marker | null = null;
+
+  readonly mapHint = computed(() => {
+    const sc = this.startCoords();
+    const ec = this.endCoords();
+    const same = this.sameAddress();
+    if (!sc) return 'Place the starting point on the map, or enter an address above to navigate there.';
+    if (same) return 'Drag the start pin to fine-tune its position.';
+    if (!ec) return 'Now place the finishing point on the map, or enter the end address above.';
+    return 'Drag a pin to fine-tune its position.';
+  });
 
   readonly mapThemes: { id: string; label: string; url: string; ext: string }[] = [
     { id: 'voyager',     label: 'Voyager',     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', ext: 'png' },
@@ -115,15 +131,205 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     { id: 'dark',        label: 'Dark',        url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', ext: 'png' },
     { id: 'osm',         label: 'Classic',     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', ext: 'png' },
   ];
-  readonly activeTheme = signal('watercolor');
+  readonly activeTheme = signal('toner');
 
   readonly showMapResetWarning = signal(false);
 
-  // ── Map pin placement ──────────────────────────────────────────────────
+  // ── Map pin placement (legacy image-based — kept for back-compat) ──────
   readonly pinningSpace = signal<any | null>(null);
   readonly pinX = signal(50);
   readonly pinY = signal(50);
   private isDragging = false;
+
+  // ── Venue GPS picker (Leaflet, 3-mode) ─────────────────────────────────
+  readonly venuePickerOpen        = signal(false);
+  readonly venuePickerSpace       = signal<any | null>(null);
+  readonly venuePickerLat         = signal<number | null>(null);
+  readonly venuePickerLng         = signal<number | null>(null);
+  readonly venuePickerAddress     = signal('');
+  readonly venuePickerSuggestions = signal<any[]>([]);
+  readonly venuePickerLocating    = signal(false);
+  readonly venuePickerError       = signal<string | null>(null);
+  private venuePickerMap: L.Map | null = null;
+  private venuePickerMarker: L.Marker | null = null;
+  private venuePickerMapRendered = false;
+
+  openVenuePicker(space: any): void {
+    this.venuePickerSpace.set(space);
+    this.venuePickerError.set(null);
+    this.venuePickerLocating.set(false);
+    this.venuePickerAddress.set('');
+    this.venuePickerSuggestions.set([]);
+
+    // Pre-fill from existing coords, else from tour start
+    if (space.latitude != null && space.longitude != null) {
+      this.venuePickerLat.set(+space.latitude);
+      this.venuePickerLng.set(+space.longitude);
+    } else {
+      const tourStart = this.startCoords();
+      if (tourStart) {
+        this.venuePickerLat.set(tourStart[0]);
+        this.venuePickerLng.set(tourStart[1]);
+      } else {
+        this.venuePickerLat.set(null);
+        this.venuePickerLng.set(null);
+      }
+    }
+
+    this.venuePickerOpen.set(true);
+    this.venuePickerMapRendered = false;
+  }
+
+  closeVenuePicker(): void {
+    this.venuePickerOpen.set(false);
+    this.venuePickerMap?.remove();
+    this.venuePickerMap = null;
+    this.venuePickerMarker = null;
+    this.venuePickerMapRendered = false;
+    this.venuePickerSpace.set(null);
+    this.venuePickerAddress.set('');
+    this.venuePickerSuggestions.set([]);
+  }
+
+  useVenueCurrentLocation(): void {
+    if (!('geolocation' in navigator)) {
+      this.venuePickerError.set('Geolocation is not supported by this browser.');
+      return;
+    }
+    this.venuePickerError.set(null);
+    this.venuePickerLocating.set(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        this.venuePickerLat.set(latitude);
+        this.venuePickerLng.set(longitude);
+        this.venuePickerLocating.set(false);
+        if (this.venuePickerMap) {
+          this.updateVenuePickerMarker(latitude, longitude);
+          this.venuePickerMap.panTo([latitude, longitude]);
+        }
+      },
+      (err) => {
+        this.venuePickerLocating.set(false);
+        const msg = err.code === err.PERMISSION_DENIED
+          ? 'Location permission denied. Allow location access or place the pin manually.'
+          : err.code === err.POSITION_UNAVAILABLE
+            ? 'Location unavailable. Try again or place the pin manually.'
+            : err.code === err.TIMEOUT
+              ? 'Location request timed out. Try again.'
+              : 'Could not determine your location.';
+        this.venuePickerError.set(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
+    );
+  }
+
+  onVenueAddressInput(event: Event): void {
+    const query = (event.target as HTMLInputElement).value;
+    this.venuePickerAddress.set(query);
+    this.geocode$.next({ query, target: 'venue' });
+  }
+
+  selectVenueSuggestion(suggestion: any): void {
+    this.venuePickerLat.set(suggestion.lat);
+    this.venuePickerLng.set(suggestion.lon);
+    this.venuePickerAddress.set(suggestion.display_name);
+    this.venuePickerSuggestions.set([]);
+    this.venuePickerError.set(null);
+    if (this.venuePickerMap) {
+      this.updateVenuePickerMarker(suggestion.lat, suggestion.lon);
+      this.venuePickerMap.panTo([suggestion.lat, suggestion.lon]);
+    }
+  }
+
+  saveVenueLocation(): void {
+    const space = this.venuePickerSpace();
+    const lat = this.venuePickerLat();
+    const lng = this.venuePickerLng();
+    if (!space || lat == null || lng == null) {
+      this.venuePickerError.set('Place a pin on the map first.');
+      return;
+    }
+    const vid = this.variantId();
+    if (!vid) return;
+
+    this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces/${space.id}`, {
+      latitude:  Number(lat.toFixed(6)),
+      longitude: Number(lng.toFixed(6)),
+    }).subscribe(updated => {
+      this.spaces.update(s => s.map(sp => sp.id === space.id ? updated : sp));
+      this.closeVenuePicker();
+    });
+  }
+
+  private renderVenuePickerMap(): void {
+    const el = document.getElementById('venue-picker-map');
+    if (!el || this.venuePickerMapRendered) return;
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+    });
+
+    this.venuePickerMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
+
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 20,
+    } as any).addTo(this.venuePickerMap);
+
+    // Show other venues with coords as small static dots for context.
+    const activeId = this.venuePickerSpace()?.id;
+    for (const sp of this.spaces()) {
+      if (sp.id === activeId) continue;
+      if (sp.latitude == null || sp.longitude == null) continue;
+      L.circleMarker([+sp.latitude, +sp.longitude], {
+        radius: 6, color: '#666', fillColor: '#999', fillOpacity: 0.7, weight: 2,
+      }).addTo(this.venuePickerMap).bindTooltip(sp.name);
+    }
+
+    // Initial view: fit active pin + tour start for context.
+    const lat = this.venuePickerLat();
+    const lng = this.venuePickerLng();
+    const start = this.startCoords();
+    const points: L.LatLngExpression[] = [];
+    if (start) points.push(start);
+    if (lat != null && lng != null) points.push([lat, lng]);
+
+    if (points.length === 0) {
+      this.venuePickerMap.setView([41.9028, 12.4964], 5);
+    } else if (points.length === 1) {
+      this.venuePickerMap.setView(points[0] as any, 16);
+    } else {
+      this.venuePickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
+    }
+
+    if (lat != null && lng != null) this.updateVenuePickerMarker(lat, lng);
+
+    this.venuePickerMap.on('click', (e: L.LeafletMouseEvent) => {
+      this.venuePickerLat.set(e.latlng.lat);
+      this.venuePickerLng.set(e.latlng.lng);
+      this.updateVenuePickerMarker(e.latlng.lat, e.latlng.lng);
+    });
+
+    this.venuePickerMapRendered = true;
+  }
+
+  private updateVenuePickerMarker(lat: number, lng: number): void {
+    if (!this.venuePickerMap) return;
+    if (!this.venuePickerMarker) {
+      this.venuePickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.venuePickerMap);
+      this.venuePickerMarker.on('drag', (e: L.LeafletEvent) => {
+        const ll = (e.target as L.Marker).getLatLng();
+        this.venuePickerLat.set(ll.lat);
+        this.venuePickerLng.set(ll.lng);
+      });
+    } else {
+      this.venuePickerMarker.setLatLng([lat, lng]);
+    }
+  }
 
   openPinModal(space: any): void {
     this.pinningSpace.set(space);
@@ -208,6 +414,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly pickerLng          = signal<number | null>(null);
   readonly pickerLocating     = signal(false);
   readonly pickerError        = signal<string | null>(null);
+  readonly pickerAddress      = signal('');
+  readonly pickerSuggestions  = signal<any[]>([]);
   private pickerMap: L.Map | null = null;
   private pickerMarker: L.Marker | null = null;
   private pickerMapRendered = false;
@@ -236,8 +444,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       debounceTime(400),
       switchMap(({ query, target }) => {
         if (query.length < 3) {
-          if (target === 'start') this.startSuggestions.set([]);
-          else this.endSuggestions.set([]);
+          if (target === 'start')       this.startSuggestions.set([]);
+          else if (target === 'end')    this.endSuggestions.set([]);
+          else if (target === 'picker') this.pickerSuggestions.set([]);
+          else                          this.venuePickerSuggestions.set([]);
           return of(null);
         }
         return this.http.get<any[]>(
@@ -251,8 +461,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
         lat: +r.lat,
         lon: +r.lon,
       }));
-      if (data.target === 'start') this.startSuggestions.set(suggestions);
-      else this.endSuggestions.set(suggestions);
+      if (data.target === 'start')       this.startSuggestions.set(suggestions);
+      else if (data.target === 'end')    this.endSuggestions.set(suggestions);
+      else if (data.target === 'picker') this.pickerSuggestions.set(suggestions);
+      else                               this.venuePickerSuggestions.set(suggestions);
     });
 
     const id = this.routeTourId;
@@ -302,19 +514,25 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.geoSub?.unsubscribe();
     this.map?.remove();
     this.pickerMap?.remove();
+    this.venuePickerMap?.remove();
   }
 
   ngAfterViewChecked(): void {
-    if (this.step() === 2 && this.startCoords() && !this.mapRendered) {
+    if (this.step() === 2 && !this.mapRendered) {
       setTimeout(() => this.renderMap());
     }
     if (this.step() !== 2 && this.mapRendered) {
       this.map?.remove();
       this.map = null;
+      this.startMarker = null;
+      this.endMarker = null;
       this.mapRendered = false;
     }
     if (this.locationPickerOpen() && !this.pickerMapRendered) {
       setTimeout(() => this.renderPickerMap());
+    }
+    if (this.venuePickerOpen() && !this.venuePickerMapRendered) {
+      setTimeout(() => this.renderVenuePickerMap());
     }
   }
 
@@ -322,10 +540,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     const el = document.getElementById('tour-map');
     if (!el || this.mapRendered) return;
 
-    const sc = this.startCoords()!;
-    const ec = this.sameAddress() ? sc : (this.endCoords() ?? sc);
-
-    // Fix Leaflet default icon paths
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
@@ -334,8 +548,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
 
     this.map = L.map(el, {
-      scrollWheelZoom: false,
-      zoomControl: false,
+      scrollWheelZoom: true,
+      zoomControl: true,
       preferCanvas: true,
     });
 
@@ -347,28 +561,98 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       crossOrigin: 'anonymous',
     } as any).addTo(this.map);
 
-    const startMarker = L.marker([sc[0], sc[1]]).addTo(this.map).bindPopup('Start');
+    const sc = this.startCoords();
+    const ec = this.sameAddress() ? sc : this.endCoords();
 
-    if (ec[0] !== sc[0] || ec[1] !== sc[1]) {
-      const endMarker = L.marker([ec[0], ec[1]]).addTo(this.map).bindPopup('End');
-      const bounds = L.latLngBounds([sc[0], sc[1]], [ec[0], ec[1]]);
-      this.map.fitBounds(bounds, { padding: [60, 60] }); // more padding = more zoomed out
+    if (sc && ec && (ec[0] !== sc[0] || ec[1] !== sc[1])) {
+      this.map.fitBounds(L.latLngBounds(sc, ec), { padding: [60, 60] });
+    } else if (sc) {
+      this.map.setView(sc, 13);
     } else {
-      this.map.setView([sc[0], sc[1]], 13); // was 15, now more zoomed out
+      this.map.setView([41.9028, 12.4964], 5);
     }
 
+    if (sc) this.placeStartMarker(sc[0], sc[1]);
+    if (!this.sameAddress() && ec) this.placeEndMarker(ec[0], ec[1]);
+
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      if (!this.startCoords()) {
+        this.startCoords.set([lat, lng]);
+        this.placeStartMarker(lat, lng);
+      } else if (!this.sameAddress() && !this.endCoords()) {
+        this.endCoords.set([lat, lng]);
+        this.placeEndMarker(lat, lng);
+      }
+    });
+
     this.mapRendered = true;
+  }
+
+  private placeStartMarker(lat: number, lng: number): void {
+    if (!this.map) return;
+    if (this.startMarker) {
+      this.startMarker.setLatLng([lat, lng]);
+    } else {
+      this.startMarker = L.marker([lat, lng], { draggable: true })
+        .addTo(this.map)
+        .bindPopup('Start');
+      this.startMarker.on('dragend', (e: L.LeafletEvent) => {
+        const ll = (e.target as L.Marker).getLatLng();
+        this.startCoords.set([ll.lat, ll.lng]);
+      });
+    }
+  }
+
+  private placeEndMarker(lat: number, lng: number): void {
+    if (!this.map) return;
+    if (this.endMarker) {
+      this.endMarker.setLatLng([lat, lng]);
+    } else {
+      this.endMarker = L.marker([lat, lng], { draggable: true })
+        .addTo(this.map)
+        .bindPopup('End');
+      this.endMarker.on('dragend', (e: L.LeafletEvent) => {
+        const ll = (e.target as L.Marker).getLatLng();
+        this.endCoords.set([ll.lat, ll.lng]);
+      });
+    }
   }
 
   updateMap(): void {
     this.map?.remove();
     this.map = null;
+    this.startMarker = null;
+    this.endMarker = null;
     this.mapRendered = false;
   }
 
   changeMapTheme(themeId: string): void {
     this.activeTheme.set(themeId);
     this.updateMap();
+  }
+
+  useCurrentLocationForTour(): void {
+    if (!('geolocation' in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        if (!this.startCoords()) {
+          this.startCoords.set([lat, lng]);
+          this.placeStartMarker(lat, lng);
+          this.map?.setView([lat, lng], 15);
+        } else if (!this.sameAddress() && !this.endCoords()) {
+          this.endCoords.set([lat, lng]);
+          this.placeEndMarker(lat, lng);
+          const sc = this.startCoords()!;
+          this.map?.fitBounds(L.latLngBounds(sc, [lat, lng]), { padding: [60, 60] });
+        }
+      },
+      () => { /* ignore — user can still drag or type address */ },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 },
+    );
   }
 
   // ── Step navigation ────────────────────────────────────────────────────
@@ -435,12 +719,22 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.startCoords.set([suggestion.lat, suggestion.lon]);
       this.startAddress.set(suggestion.display_name);
       this.startSuggestions.set([]);
+      this.placeStartMarker(suggestion.lat, suggestion.lon);
     } else {
       this.endCoords.set([suggestion.lat, suggestion.lon]);
       this.endAddress.set(suggestion.display_name);
       this.endSuggestions.set([]);
+      this.placeEndMarker(suggestion.lat, suggestion.lon);
     }
-    this.updateMap();
+    if (this.map) {
+      const sc = this.startCoords();
+      const ec = this.sameAddress() ? null : this.endCoords();
+      if (sc && ec && (ec[0] !== sc[0] || ec[1] !== sc[1])) {
+        this.map.fitBounds(L.latLngBounds(sc, ec), { padding: [60, 60] });
+      } else {
+        this.map.setView([suggestion.lat, suggestion.lon], 13);
+      }
+    }
   }
 
   async saveLocation(skipWarning = false): Promise<void> {
@@ -745,6 +1039,26 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.pickerMap = null;
     this.pickerMarker = null;
     this.pickerMapRendered = false;
+    this.pickerAddress.set('');
+    this.pickerSuggestions.set([]);
+  }
+
+  onPickerAddressInput(event: Event): void {
+    const query = (event.target as HTMLInputElement).value;
+    this.pickerAddress.set(query);
+    this.geocode$.next({ query, target: 'picker' });
+  }
+
+  selectPickerSuggestion(suggestion: any): void {
+    this.pickerLat.set(suggestion.lat);
+    this.pickerLng.set(suggestion.lon);
+    this.pickerAddress.set(suggestion.display_name);
+    this.pickerSuggestions.set([]);
+    this.pickerError.set(null);
+    if (this.pickerMap) {
+      this.updatePickerMarker(suggestion.lat, suggestion.lon);
+      this.pickerMap.panTo([suggestion.lat, suggestion.lon]);
+    }
   }
 
   saveStopLocation(): void {
@@ -811,10 +1125,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     this.pickerMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 20,
-      subdomains: 'abcd',
     } as any).addTo(this.pickerMap);
 
     // Show the tour endpoints as small static dots for context.

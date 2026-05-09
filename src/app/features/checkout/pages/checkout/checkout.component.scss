@@ -4,45 +4,79 @@
 .checkout-page {
   min-height: calc(100dvh - 64px);
   @include flex-center;
-  padding: $space-6;
+  padding: $space-3;
   background: $bg-base;
+
+  @include sm {
+    padding: $space-6;
+  }
 }
 
 .checkout-card {
   @include card-light;
   width: 100%;
   max-width: 500px;
+  padding: $space-4;
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-5;
+
+  @include sm {
+    padding: $space-6;
+    gap: $space-6;
+  }
 
   &__header h1 {
-    font-size: $font-size-2xl;
+    font-size: $font-size-xl;
     color: $text-primary;
     margin-bottom: $space-2;
+
+    @include sm {
+      font-size: $font-size-2xl;
+    }
   }
 
   &__summary {
     display: flex;
-    gap: $space-4;
+    gap: $space-3;
     align-items: center;
-    padding: $space-4;
+    padding: $space-3;
     background: $bg-surface-alt;
     border-radius: $radius-md;
+
+    @include sm {
+      gap: $space-4;
+      padding: $space-4;
+    }
+  }
+
+  &__summary-text {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   &__cover {
-    width: 80px;
-    height: 60px;
+    width: 64px;
+    height: 48px;
     object-fit: cover;
     border-radius: $radius-sm;
     flex-shrink: 0;
+
+    @include sm {
+      width: 80px;
+      height: 60px;
+    }
   }
 
   &__title {
-    font-size: $font-size-lg;
+    font-size: $font-size-base;
     color: $text-primary;
+    overflow-wrap: break-word;
     @include line-clamp(2);
+
+    @include sm {
+      font-size: $font-size-lg;
+    }
   }
 
   &__meta {

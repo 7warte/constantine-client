@@ -256,6 +256,28 @@
   margin-bottom: $space-4;
 }
 
+.map-hint {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin: 0;
+  padding: $space-2 $space-3;
+  background: $bg-surface-alt;
+  border-left: 3px solid $accent-primary;
+  border-radius: $radius-sm;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.map-hint-row {
+  display: flex;
+  align-items: stretch;
+  gap: $space-3;
+  margin-bottom: $space-3;
+  flex-wrap: wrap;
+
+  > .btn { flex-shrink: 0; }
+}
+
 .map-theme-picker {
   display: flex;
   align-items: center;
@@ -1171,6 +1193,16 @@
     padding: $space-3 $space-5;
     border-bottom: 1px solid #eeeeee;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 1000;  // stack address-suggestions above the Leaflet map below
+  }
+
+  &__address {
+    flex: 1 1 100%;
+    min-width: 0;
+    position: relative;
+
+    .form-field__input { width: 100%; }
   }
 
   &__icon {

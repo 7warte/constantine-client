@@ -6,6 +6,259 @@
   min-height: calc(100dvh - 64px);
   background: $bg-base;
 
+  // ── Mobile welcome — hide stage + FAB; sidebar stays hidden until lg ──
+  &--welcome {
+    .player__stage          { display: none; @include lg { display: block; } }
+    .player__mobile-map-btn { display: none; }
+  }
+
+  // ── Welcome screen (mobile only) ────────────────────────────────────────
+  &__welcome {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    background: $bg-base;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  &--welcome &__welcome {
+    display: flex;
+    @include lg { display: none; }
+  }
+
+  &__welcome-map {
+    position: relative;
+    width: 100%;
+    background: $bg-surface-alt;
+    border-bottom: 1px solid $border-default;
+
+    img {
+      width: 100%;
+      display: block;
+    }
+  }
+
+  &__welcome-map-dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: $bg-surface;
+    color: $text-primary;
+    border: 1.5px solid $text-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-family-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+
+  &__welcome-content {
+    padding: $space-5 $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+  }
+
+  &__welcome-title {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    text-align: center;
+    margin: 0;
+    line-height: $line-height-tight;
+    overflow-wrap: break-word;
+  }
+
+  &__welcome-address {
+    display: flex;
+    gap: $space-3;
+    align-items: flex-start;
+    padding: $space-3 $space-4;
+    background: $bg-surface-alt;
+    border-radius: $radius-md;
+    border: 1px solid $border-light;
+  }
+
+  &__welcome-address-icon {
+    color: $accent-primary;
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+  }
+
+  &__welcome-address-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__welcome-address-label {
+    font-size: $font-size-xs;
+    color: $text-dark;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: $font-weight-bold;
+  }
+
+  &__welcome-address-value {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    overflow-wrap: break-word;
+    line-height: $line-height-normal;
+  }
+
+  &__welcome-section-title {
+    font-size: $font-size-xs;
+    color: $text-dark;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: $font-weight-bold;
+    margin: 0;
+  }
+
+  &__welcome-spaces {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+
+  &__welcome-space {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__welcome-space-header {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__welcome-space-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $text-primary;
+    color: $bg-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-family-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+
+  &__welcome-space-name {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  &__welcome-stops {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0 calc(28px + #{$space-3});
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -22px;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: $border-default;
+    }
+
+    &--bare { margin-left: 0; &::before { display: none; } }
+  }
+
+  &__welcome-stop {
+    display: flex;
+    align-items: baseline;
+    gap: $space-3;
+    padding: $space-2 0;
+  }
+
+  &__welcome-stop-num {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    color: $text-muted;
+    font-variant-numeric: tabular-nums;
+    min-width: 18px;
+    flex-shrink: 0;
+  }
+
+  &__welcome-stop-title {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-normal;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  &__welcome-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: $space-3 $space-4;
+    padding-bottom: calc($space-3 + env(safe-area-inset-bottom));
+    background: $bg-surface;
+    border-top: 1px solid $border-default;
+    z-index: $z-overlay;
+
+    @include lg { display: none; }
+  }
+
+  &__welcome-start-btn {
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: $text-primary;
+    color: $bg-light;
+    border: none;
+    border-radius: $radius-md;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    transition: background $transition-fast, transform $transition-fast;
+
+    &:hover { background: $accent-hover; }
+    &:active { transform: scale(0.99); }
+  }
+
+  &__welcome-start-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: $font-weight-semibold;
+    opacity: 0.7;
+  }
+
+  &__welcome-start-name {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    @include line-clamp(1);
+    max-width: 100%;
+  }
+
   // ── Sidebar ─────────────────────────────────────────────────────────────────
   &__sidebar {
     width: 280px;
@@ -716,4 +969,135 @@
     border: 1px solid $border-default;
     &:hover { color: $text-primary; }
   }
+}
+
+// ── Compass to next stop ──────────────────────────────────────────────────────
+.player__compass-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  width: 100%;
+  padding: $space-3 $space-4;
+  margin-bottom: $space-4;
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  &:hover { background: $bg-surface; border-color: $border-strong; }
+
+  &-icon { font-size: 20px; width: 20px; height: 20px; color: $accent-primary; }
+}
+
+.player__compass {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: $bg-base;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-5;
+  padding: $space-6 $space-4;
+}
+
+.player__compass-close {
+  position: absolute;
+  top: $space-4;
+  right: $space-4;
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  color: $text-primary;
+  cursor: pointer;
+}
+
+.player__compass-target {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  text-align: center;
+  margin: 0;
+  max-width: 80vw;
+  overflow-wrap: break-word;
+
+  strong { color: $text-primary; }
+}
+
+.player__compass-arrow-wrap {
+  width: min(60vw, 280px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid $border-default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::after {
+    content: 'N';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $text-muted;
+  }
+}
+
+.player__compass-arrow {
+  width: 70%;
+  height: 70%;
+  color: $accent-primary;
+  transition: transform 0.2s ease-out;
+  transform-origin: 50% 50%;
+}
+
+.player__compass-distance {
+  font-family: $font-family-primary;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  font-variant-numeric: tabular-nums;
+}
+
+.player__compass-status,
+.player__compass-error {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  text-align: center;
+  max-width: 80vw;
+}
+
+.player__compass-error {
+  color: $color-error;
+}
+
+.player__compass-hint {
+  font-size: $font-size-sm;
+  color: $text-muted;
+  text-align: center;
+  max-width: 80vw;
+  margin: 0;
+  line-height: $line-height-normal;
+}
+
+.player__compass-perm-btn {
+  padding: $space-3 $space-5;
+  background: $text-primary;
+  color: $bg-light;
+  border: none;
+  border-radius: $radius-md;
+  font-family: $font-family-secondary;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
 }

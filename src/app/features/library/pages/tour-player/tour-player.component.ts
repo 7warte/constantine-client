@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,7 @@ import { StarRatingComponent } from '../../../../shared/components/star-rating/s
   templateUrl: './tour-player.component.html',
   styleUrl: './tour-player.component.scss',
 })
-export class TourPlayerComponent implements OnInit {
+export class TourPlayerComponent implements OnInit, OnDestroy {
   private readonly api   = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
 
@@ -22,10 +22,17 @@ export class TourPlayerComponent implements OnInit {
   readonly variant          = signal<any | null>(null);
   readonly stops            = signal<any[]>([]);
   readonly currentStopIndex = signal(0);
+  readonly started          = signal(typeof window !== 'undefined' && window.innerWidth >= 992);
 
   readonly purchaseId  = this.route.snapshot.paramMap.get('purchaseId') ?? '';
   readonly currentStop = computed(() => this.stops()[this.currentStopIndex()] ?? null);
   readonly isLastStop  = computed(() => this.currentStopIndex() === this.stops().length - 1);
+
+  readonly firstSpaceName = computed(() => {
+    const groups = this.groupedStops();
+    if (!groups.length) return '';
+    return groups[0].spaceName ?? groups[0].stops[0]?.title ?? '';
+  });
 
   /** Stops grouped by space for sidebar display */
   readonly groupedStops = computed(() => {
@@ -193,8 +200,9 @@ export class TourPlayerComponent implements OnInit {
           error: ()      => this.loading.set(false),
         });
 
-        // Load spaces for map overlay
+        // Load full variant detail (start_address, tour_title, spaces, etc.)
         this.api.get<any>(`/tours/${tour_id}/variants/${tour_variant_id}`).subscribe(detail => {
+          this.variant.update(v => ({ ...v, ...detail }));
           if (detail.spaces) this.mapSpaces.set(detail.spaces);
         });
 
@@ -212,6 +220,137 @@ export class TourPlayerComponent implements OnInit {
     if (idx < 0 || idx >= this.stops().length) return;
     this.currentStopIndex.set(idx);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  startTour(): void {
+    this.started.set(true);
+    window.scrollTo({ top: 0 });
+  }
+
+  // ── Compass to next stop ───────────────────────────────────────────────
+  readonly compassOpen                = signal(false);
+  readonly userPosition               = signal<{ lat: number; lng: number } | null>(null);
+  readonly userHeading                = signal<number | null>(null);
+  readonly compassError               = signal<string | null>(null);
+  readonly needsOrientationPermission = signal(false);
+
+  private geoWatchId: number | null = null;
+  private orientationListener: ((e: any) => void) | null = null;
+
+  readonly nextStop = computed(() => this.stops()[this.currentStopIndex() + 1] ?? null);
+
+  readonly canShowCompass = computed(() => {
+    const next = this.nextStop();
+    return !!(next && next.latitude != null && next.longitude != null);
+  });
+
+  readonly distanceMeters = computed<number | null>(() => {
+    const pos = this.userPosition();
+    const next = this.nextStop();
+    if (!pos || !next?.latitude) return null;
+    return haversineKm(pos.lat, pos.lng, +next.latitude, +next.longitude) * 1000;
+  });
+
+  readonly bearingDegrees = computed<number | null>(() => {
+    const pos = this.userPosition();
+    const next = this.nextStop();
+    if (!pos || !next?.latitude) return null;
+    return bearingDeg(pos.lat, pos.lng, +next.latitude, +next.longitude);
+  });
+
+  readonly arrowAngle = computed<number>(() => {
+    const b = this.bearingDegrees();
+    const h = this.userHeading();
+    if (b == null) return 0;
+    if (h == null) return b;
+    return ((b - h) + 360) % 360;
+  });
+
+  openCompass(): void {
+    this.compassOpen.set(true);
+    this.userPosition.set(null);
+    this.userHeading.set(null);
+    this.compassError.set(null);
+    this.needsOrientationPermission.set(false);
+
+    if (!('geolocation' in navigator)) {
+      this.compassError.set('Geolocation is not supported on this device.');
+      return;
+    }
+    this.geoWatchId = navigator.geolocation.watchPosition(
+      (pos) => this.userPosition.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (err) => {
+        const msg = err.code === err.PERMISSION_DENIED
+          ? 'Location permission denied.'
+          : err.code === err.POSITION_UNAVAILABLE
+            ? 'Location unavailable.'
+            : err.code === err.TIMEOUT
+              ? 'Location request timed out.'
+              : 'Could not determine your location.';
+        this.compassError.set(msg);
+      },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 20_000 },
+    );
+
+    const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
+    if (typeof reqPermFn === 'function') {
+      // iOS 13+ — needs a user-gesture-driven permission button
+      this.needsOrientationPermission.set(true);
+    } else {
+      this.attachOrientationListener();
+    }
+  }
+
+  requestOrientationPermission(): void {
+    const reqPermFn = (DeviceOrientationEvent as any).requestPermission;
+    reqPermFn().then((res: string) => {
+      if (res === 'granted') {
+        this.needsOrientationPermission.set(false);
+        this.attachOrientationListener();
+      } else {
+        this.compassError.set('Compass permission denied. The arrow will point at absolute bearing instead.');
+        this.needsOrientationPermission.set(false);
+      }
+    }).catch(() => {
+      this.needsOrientationPermission.set(false);
+    });
+  }
+
+  private attachOrientationListener(): void {
+    this.orientationListener = (e: any) => {
+      let heading: number | null = null;
+      if (typeof e.webkitCompassHeading === 'number') {
+        heading = e.webkitCompassHeading;
+      } else if (typeof e.alpha === 'number') {
+        heading = (360 - e.alpha) % 360;
+      }
+      this.userHeading.set(heading);
+    };
+    window.addEventListener('deviceorientationabsolute', this.orientationListener as any, true);
+    window.addEventListener('deviceorientation', this.orientationListener as any, true);
+  }
+
+  closeCompass(): void {
+    this.compassOpen.set(false);
+    if (this.geoWatchId != null) {
+      navigator.geolocation.clearWatch(this.geoWatchId);
+      this.geoWatchId = null;
+    }
+    if (this.orientationListener) {
+      window.removeEventListener('deviceorientationabsolute', this.orientationListener as any, true);
+      window.removeEventListener('deviceorientation', this.orientationListener as any, true);
+      this.orientationListener = null;
+    }
+  }
+
+  formatDistance(meters: number | null): string {
+    if (meters == null) return '—';
+    if (meters >= 1000) return `${(meters / 1000).toFixed(1)} km`;
+    return `${Math.round(meters)} m`;
+  }
+
+  ngOnDestroy(): void {
+    this.closeCompass();
   }
 
   next(): void { this.goToStop(this.currentStopIndex() + 1); }
@@ -263,4 +402,24 @@ export class TourPlayerComponent implements OnInit {
   skipReview(): void {
     this.reviewSubmitted.set(true);
   }
+}
+
+// ── Geo helpers ───────────────────────────────────────────────────────────────
+function bearingDeg(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const dLambda = (lng2 - lng1) * Math.PI / 180;
+  const y = Math.sin(dLambda) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+          + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
+          * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

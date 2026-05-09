@@ -12,7 +12,7 @@
         @if (variant()!.tour_cover_image_url) {
           <img [src]="variant()!.tour_cover_image_url" [alt]="variant()!.tour_title" class="checkout-card__cover" />
         }
-        <div>
+        <div class="checkout-card__summary-text">
           <h2 class="checkout-card__title">{{ variant()!.tour_title }}</h2>
           <p class="checkout-card__meta">Language: {{ variant()!.language_code | uppercase }}</p>
         </div>

@@ -7,10 +7,10 @@
       <h1>Tour unlocked!</h1>
       <p class="text-secondary">Your purchase is confirmed. Head to your library to start the tour.</p>
       <div class="confirmation-card__actions">
-        <app-button routerLink="/library" variant="primary" size="lg">
+        <app-button routerLink="/library" variant="primary" size="lg" [block]="true">
           Go to library
         </app-button>
-        <app-button routerLink="/explore" variant="outline" size="lg">
+        <app-button routerLink="/explore" variant="outline" size="lg" [block]="true">
           Explore more tours
         </app-button>
       </div>
@@ -19,7 +19,7 @@
       <h1>Payment failed</h1>
       <p class="text-secondary">Something went wrong with your payment. Please try again.</p>
       <div class="confirmation-card__actions">
-        <app-button routerLink="/explore" variant="primary" size="lg">
+        <app-button routerLink="/explore" variant="primary" size="lg" [block]="true">
           Back to tours
         </app-button>
       </div>

@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/creator-profile/creator-profile.component').then(m => m.CreatorProfileComponent),
   },
   {
+    path: 'about',
+    loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent),
+  },
+  {
     path: 'health',
     loadComponent: () => import('./pages/health/health.component').then(m => m.HealthComponent),
   },
