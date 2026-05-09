@@ -360,6 +360,14 @@
                               <div class="stop-card__image">
                                 <img [src]="m.url" [alt]="stop.title" />
                                 <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
+                                <input
+                                  type="text"
+                                  class="stop-card__caption-input"
+                                  [value]="m.caption || ''"
+                                  (blur)="updateMediaCaption(stop.id, m.id, $event)"
+                                  placeholder="Caption (optional, max 80 chars)"
+                                  maxlength="80"
+                                />
                               </div>
                             }
                             @if (m.media_type === 'pdf') {

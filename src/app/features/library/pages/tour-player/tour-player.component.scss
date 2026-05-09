@@ -362,17 +362,11 @@
   &__audio-times {
     display: flex;
     justify-content: center;
-    gap: $space-3;
     font-family: $font-family-primary;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     color: #1a1a1a;
     font-variant-numeric: tabular-nums;
-
-    @include md {
-      justify-content: space-between;
-      gap: 0;
-    }
     letter-spacing: 0.02em;
   }
 
@@ -544,67 +538,125 @@
   &__modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.92);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: $space-4;
   }
 
   &__modal {
     position: relative;
-    max-width: 90vw;
-    max-height: 85vh;
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    max-height: 92vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: $space-4;
+    justify-content: center;
   }
 
   &__modal-close {
     position: absolute;
-    top: -40px;
-    right: 0;
-    background: none;
+    top: $space-2;
+    right: $space-2;
+    background: rgba(0, 0, 0, 0.55);
     border: none;
     color: #ffffff;
-    font-size: 32px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 28px;
     cursor: pointer;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background $transition-fast;
 
-    &:hover { color: $accent-primary; }
+    &:hover { background: rgba(0, 0, 0, 0.8); }
+  }
+
+  &__modal-frame {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-3;
   }
 
   &__modal-img {
-    max-width: 100%;
-    max-height: 75vh;
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
     object-fit: contain;
-    border-radius: $radius-md;
+    border-radius: $radius-sm;
   }
 
-  &__modal-nav {
+  &__modal-frame--with-caption &__modal-img {
+    max-height: calc(100% - 4rem);
+  }
+
+  &__modal-caption {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 720px;
+    margin: 0;
+    padding: $space-2 $space-4;
+    text-align: center;
+    font-size: $font-size-sm;
+    line-height: $line-height-normal;
+    color: $white;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: $radius-sm;
+    overflow-wrap: break-word;
+
+    @media (max-width: $bp-md) {
+      font-size: $font-size-xs;
+      padding: $space-2 $space-3;
+    }
+  }
+
+  &__modal-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+    color: #ffffff;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: $font-size-lg;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: $space-5;
+    justify-content: center;
+    z-index: 2;
+    transition: background $transition-fast;
+
+    &:hover { background: rgba(0, 0, 0, 0.8); }
+    &--prev { left: $space-2; }
+    &--next { right: $space-2; }
+  }
+
+  &__modal-counter {
+    position: absolute;
+    bottom: $space-3;
+    left: 50%;
+    transform: translateX(-50%);
     color: #ffffff;
-    font-size: $font-size-sm;
-
-    button {
-      background: rgba(#ffffff, 0.15);
-      border: none;
-      color: #ffffff;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: $font-size-lg;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background $transition-fast;
-
-      &:hover { background: rgba(#ffffff, 0.3); }
-    }
+    font-size: $font-size-xs;
+    background: rgba(0, 0, 0, 0.55);
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    z-index: 2;
   }
 
   // ── Loading ─────────────────────────────────────────────────────────────────

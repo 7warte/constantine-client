@@ -1291,6 +1291,15 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
   }
 
+  updateMediaCaption(stopId: string, mediaId: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const caption = input.value.trim().slice(0, 80);
+    this.api.patch<any>(`/studio/stops/${stopId}/media/${mediaId}`, { caption }).subscribe({
+      next: () => this.loadStops(),
+      error: () => this.error.set('Failed to save caption.'),
+    });
+  }
+
   uploadRecordedPresentation(file: File): void {
     if (!this.tourId()) return;
     const formData = new FormData();

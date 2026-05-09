@@ -807,8 +807,10 @@
 
   &__image {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
     margin-bottom: $space-3;
+    max-width: 100%;
 
     img {
       max-width: 100%;
@@ -824,6 +826,21 @@
       color: #ffffff;
       border-radius: $radius-full;
     }
+  }
+
+  &__caption-input {
+    margin-top: $space-2;
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid #e5e5e5;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    color: #1a1a1a;
+    background: #ffffff;
+    transition: border-color $transition-fast;
+
+    &::placeholder { color: #999999; }
+    &:focus { outline: none; border-color: $accent-primary; }
   }
 
   &__pdf {
