@@ -20,7 +20,10 @@
   }
 }
 
-.page-title  { @include heading($font-size-2xl); }
+.page-title  {
+  @include heading($font-size-2xl);
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+}
 .page-sub    { color: $text-secondary; margin-top: $space-1; }
 .page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
 .page-empty  { @include card; text-align: center; padding: $space-12; color: $text-secondary; }
@@ -36,6 +39,12 @@
   cursor: pointer;
   transition: all $transition-fast;
   margin-bottom: -1px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-3 $space-4;
+    flex: 1;
+    text-align: center;
+  }
 
   &:hover { color: $text-primary; }
 
@@ -57,6 +66,11 @@
   justify-content: space-between;
   gap: $space-6;
   flex-wrap: wrap;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4;
+    gap: $space-4;
+  }
 
   &__left { flex: 1; min-width: 0; }
 
@@ -98,10 +112,21 @@
     justify-content: space-between;
     gap: $space-4;
     flex-shrink: 0;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
   }
 
   &__reward {
     text-align: right;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      text-align: left;
+    }
 
     &-label { display: block; font-size: $font-size-xs; color: $text-secondary; }
     &-value { font-size: $font-size-xl; font-weight: $font-weight-bold; color: $color-success; font-family: $font-family-primary; }

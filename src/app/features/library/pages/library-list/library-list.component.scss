@@ -21,6 +21,10 @@
     padding: $space-16;
     gap: $space-4;
 
+    @media (max-width: #{$bp-md - 1px}) {
+      padding: $space-8 $space-4;
+    }
+
     h2 { @include heading($font-size-xl); }
     p  { color: $text-secondary; }
   }
@@ -28,7 +32,10 @@
   &__empty-icon { font-size: $font-size-3xl; }
 }
 
-.page-title  { @include heading($font-size-2xl); }
+.page-title  {
+  @include heading($font-size-2xl);
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+}
 .page-sub    { color: $text-secondary; margin-top: $space-1; }
 .page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
 

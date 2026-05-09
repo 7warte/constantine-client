@@ -4,7 +4,19 @@
 .account-page {
   padding-block: $space-12;
   max-width: 700px;
-  &__title { font-size: $font-size-2xl; margin-bottom: $space-4; }
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    margin-bottom: $space-4;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xl;
+    }
+  }
 }
 
 .payouts-list {

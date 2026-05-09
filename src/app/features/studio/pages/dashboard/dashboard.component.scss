@@ -5,13 +5,24 @@
   @include container;
   padding-block: $space-8;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-5;
+  }
+
   &__header {
     @include flex-between;
     margin-bottom: $space-8;
+    flex-wrap: wrap;
+    gap: $space-3;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      margin-bottom: $space-5;
+    }
   }
 
   &__title {
     @include heading($font-size-2xl);
+    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
   }
 
   &__loading {

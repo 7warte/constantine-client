@@ -5,7 +5,10 @@
   &__header { margin-bottom: $space-5; }
 }
 
-.page-title { @include heading($font-size-2xl); }
+.page-title {
+  @include heading($font-size-2xl);
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+}
 .page-sub { color: #666666; margin-top: $space-1; }
 
 .page-loading,

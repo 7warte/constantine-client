@@ -5,12 +5,20 @@
   padding-block: $space-12;
   max-width: 700px;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
   &__header {
     @include flex-between;
     gap: $space-4;
     margin-bottom: $space-3;
+    flex-wrap: wrap;
 
-    h1 { font-size: $font-size-2xl; }
+    h1 {
+      font-size: $font-size-2xl;
+      @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+    }
   }
 
   &__status {

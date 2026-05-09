@@ -12,7 +12,10 @@
   &__section { margin-top: $space-8; }
 }
 
-.page-title  { @include heading($font-size-2xl); }
+.page-title  {
+  @include heading($font-size-2xl);
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+}
 .page-sub    { color: #666666; margin-top: $space-1; }
 .page-loading { text-align: center; padding: $space-8; color: #999999; }
 .section-title { @include heading($font-size-lg); margin-bottom: $space-4; }

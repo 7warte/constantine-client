@@ -4,13 +4,28 @@
 .request-page {
   padding-block: $space-12;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
   &__header {
     @include flex-between;
     flex-wrap: wrap;
     gap: $space-4;
     margin-bottom: $space-10;
 
-    h1 { font-size: $font-size-3xl; margin-bottom: $space-3; }
+    @media (max-width: #{$bp-md - 1px}) {
+      margin-bottom: $space-6;
+    }
+
+    h1 {
+      font-size: $font-size-3xl;
+      margin-bottom: $space-3;
+
+      @media (max-width: #{$bp-md - 1px}) {
+        font-size: $font-size-xl;
+      }
+    }
   }
 }
 

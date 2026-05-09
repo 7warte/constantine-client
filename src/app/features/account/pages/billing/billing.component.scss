@@ -1,3 +1,26 @@
 @use '../../../../../styles/variables' as *;
-.account-page { padding-block: $space-12; max-width: 640px; &__title { font-size: $font-size-2xl; margin-bottom: $space-8; } }
-.billing-card { display: flex; flex-direction: column; gap: $space-6; }
+
+.account-page {
+  padding-block: $space-12;
+  max-width: 640px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    margin-bottom: $space-8;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xl;
+      margin-bottom: $space-5;
+    }
+  }
+}
+
+.billing-card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+}

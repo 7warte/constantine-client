@@ -14,7 +14,11 @@
   &__header { margin-bottom: $space-4; }
 }
 
-.page-title  { @include heading($font-size-2xl); margin-top: $space-2; }
+.page-title  {
+  @include heading($font-size-2xl);
+  margin-top: $space-2;
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
+}
 .page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
 .back-link { font-size: $font-size-sm; color: $text-secondary; &:hover { color: $text-primary; } }
 
@@ -24,6 +28,10 @@
   align-items: center;
   gap: $space-2;
   margin-bottom: $space-8;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    margin-bottom: $space-5;
+  }
 
   &__step {
     display: flex;
@@ -39,6 +47,13 @@
     padding: $space-2 $space-3;
     border-radius: $radius-md;
     transition: all $transition-fast;
+    min-height: 44px;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xs;
+      gap: $space-1;
+      padding: $space-2;
+    }
 
     &:hover:not(:disabled) { color: $text-primary; }
     &:disabled { cursor: not-allowed; opacity: 0.5; }

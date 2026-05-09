@@ -34,6 +34,10 @@
     display: flex;
     flex-direction: column;
     gap: $space-4;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      padding-block: $space-6;
+    }
   }
 
   &__lang {
@@ -45,9 +49,11 @@
   }
 
   &__title {
-    font-size: $font-size-3xl;
+    font-size: $font-size-2xl;
     color: $white;
+    line-height: $line-height-tight;
 
+    @include sm { font-size: $font-size-3xl; }
     @include md { font-size: $font-size-4xl; }
   }
 
@@ -488,5 +494,21 @@
   &__date {
     font-size: $font-size-xs;
     color: $text-muted;
+  }
+}
+
+@media (max-width: #{$bp-md - 1px}) {
+  .detail {
+    &__info,
+    &__map { padding-block: $space-6; }
+    &__reviews,
+    &__author { padding-block: $space-8; }
+    &__audio-preview { padding-block: $space-6; }
+
+    &__info h2,
+    &__reviews h2,
+    &__audio-preview h2,
+    &__map h2,
+    &__author h2 { font-size: $font-size-xl; }
   }
 }
