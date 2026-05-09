@@ -259,11 +259,22 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   /** Cumulative arrow rotation. Continuous (no modulo) so CSS rotates the short way at the 0/360 wrap. */
   readonly arrowDisplayAngle = signal(0);
 
-  /** Low-pass-filtered heading used by the EMA in the orientation listener. */
-  private smoothedHeading: number | null = null;
-
   /** Last absolute arrow rotation we wrote, used to compute shortest-path delta. */
   private lastArrowAngle = 0;
+
+  // ── Compass heading smoothing ─────────────────────────────────────
+  /** Latest raw heading from the sensor (0–360). Updated only when delta exceeds the deadband. */
+  private rawTargetHeading: number | null = null;
+  /** Currently-displayed heading; chases rawTargetHeading via a rAF loop. */
+  private currentDisplayHeading: number | null = null;
+  private headingRafId: number | null = null;
+
+  /** Sensor noise floor — raw deltas below this are dropped as jitter. */
+  private readonly HEADING_DEADBAND_DEG = 0.6;
+  /** Per-frame interpolation factor toward the target (lower = smoother, slower). */
+  private readonly HEADING_INTERP_RATE  = 0.08;
+  /** Snap-to-target threshold — stops the animation when within this many degrees. */
+  private readonly HEADING_SETTLE_DEG   = 0.1;
 
   private readonly _arrowEffect = effect(() => {
     const b = this.bearingDegrees();
@@ -284,7 +295,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.userHeading.set(null);
     this.compassError.set(null);
     this.compassPermissionDenied.set(false);
-    this.smoothedHeading = null;
+    this.rawTargetHeading = null;
+    this.currentDisplayHeading = null;
     this.lastArrowAngle = 0;
     this.arrowDisplayAngle.set(0);
 
@@ -328,7 +340,6 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   }
 
   private attachOrientationListener(): void {
-    const ALPHA = 0.15;
     this.orientationListener = (e: any) => {
       let raw: number | null = null;
       if (typeof e.webkitCompassHeading === 'number') {
@@ -338,20 +349,51 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       }
       if (raw == null) return;
 
-      if (this.smoothedHeading == null) {
-        this.smoothedHeading = raw;
-      } else {
-        let delta = raw - this.smoothedHeading;
-        if (delta > 180) delta -= 360;
-        else if (delta < -180) delta += 360;
-        this.smoothedHeading = ((this.smoothedHeading + delta * ALPHA) + 360) % 360;
+      // Deadband: drop sub-degree jitter before it ever updates the target.
+      if (this.rawTargetHeading != null) {
+        let d = raw - this.rawTargetHeading;
+        if (d > 180) d -= 360;
+        else if (d < -180) d += 360;
+        if (Math.abs(d) < this.HEADING_DEADBAND_DEG) return;
       }
 
-      this.userHeading.set(this.smoothedHeading);
+      this.rawTargetHeading = raw;
+
+      // First reading — snap so the arrow doesn't sweep from 0.
+      if (this.currentDisplayHeading == null) {
+        this.currentDisplayHeading = raw;
+        this.userHeading.set(raw);
+      }
+
+      // Kick the rAF loop if it's idle. Bursts of events between frames coalesce naturally.
+      if (this.headingRafId == null) {
+        this.headingRafId = requestAnimationFrame(this.tickHeading);
+      }
     };
     window.addEventListener('deviceorientationabsolute', this.orientationListener as any, true);
     window.addEventListener('deviceorientation', this.orientationListener as any, true);
   }
+
+  private tickHeading = (): void => {
+    this.headingRafId = null;
+    const target = this.rawTargetHeading;
+    const current = this.currentDisplayHeading;
+    if (target == null || current == null) return;
+
+    let delta = target - current;
+    if (delta > 180) delta -= 360;
+    else if (delta < -180) delta += 360;
+
+    if (Math.abs(delta) < this.HEADING_SETTLE_DEG) {
+      this.currentDisplayHeading = target;
+      this.userHeading.set(target);
+      return;
+    }
+
+    this.currentDisplayHeading = ((current + delta * this.HEADING_INTERP_RATE) + 360) % 360;
+    this.userHeading.set(this.currentDisplayHeading);
+    this.headingRafId = requestAnimationFrame(this.tickHeading);
+  };
 
   closeCompass(): void {
     this.compassOpen.set(false);
@@ -364,6 +406,12 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       window.removeEventListener('deviceorientation', this.orientationListener as any, true);
       this.orientationListener = null;
     }
+    if (this.headingRafId != null) {
+      cancelAnimationFrame(this.headingRafId);
+      this.headingRafId = null;
+    }
+    this.rawTargetHeading = null;
+    this.currentDisplayHeading = null;
   }
 
   formatDistance(meters: number | null): string {
