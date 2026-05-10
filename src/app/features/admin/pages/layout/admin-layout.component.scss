@@ -1,0 +1,206 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+$nav-w:           240px;
+$nav-w-collapsed: 56px;
+$nav-bg:          #fafafa;
+$nav-divider:     #ececec;
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: $nav-w 1fr;
+  min-height: 100dvh;
+  background: $bg-base;
+  transition: grid-template-columns $transition-normal;
+
+  &--collapsed {
+    grid-template-columns: $nav-w-collapsed 1fr;
+
+    .admin-shell__brand-text,
+    .admin-shell__brand-tag,
+    .admin-shell__section-label,
+    .admin-shell__item-label { display: none; }
+
+    .admin-shell__item    { justify-content: center; padding: $space-2; }
+    .admin-shell__logout  { justify-content: center; padding: $space-2 0; }
+  }
+
+  &__nav {
+    background: $nav-bg;
+    border-right: 1px solid $nav-divider;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__nav-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $space-4 $space-3;
+    border-bottom: 1px solid $nav-divider;
+    gap: $space-2;
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    min-width: 0;
+  }
+
+  &__brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-sm;
+    background: $text-primary;
+    color: $bg-light;
+    font-family: $font-family-primary;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+  }
+
+  &__brand-text {
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    @include truncate;
+  }
+
+  &__brand-tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    background: $accent-muted;
+    color: $accent-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &__collapse {
+    background: none;
+    border: none;
+    color: $text-secondary;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-sm;
+
+    &:hover { background: rgba(0, 0, 0, 0.05); color: $text-primary; }
+    .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  }
+
+  &__nav-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: $space-3 0;
+  }
+
+  &__section {
+    padding: $space-2 0;
+
+    & + & { border-top: 1px solid $nav-divider; margin-top: $space-2; padding-top: $space-3; }
+  }
+
+  &__section-label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: $text-muted;
+    padding: 0 $space-4 $space-2;
+    font-weight: $font-weight-bold;
+  }
+
+  &__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-2 $space-4;
+    color: $text-secondary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
+
+    &:hover { background: rgba(0, 0, 0, 0.04); color: $text-primary; }
+
+    &--active {
+      background: $accent-muted;
+      color: $accent-primary;
+      border-left-color: $accent-primary;
+      font-weight: $font-weight-semibold;
+
+      .admin-shell__item-icon { color: $accent-primary; }
+    }
+  }
+
+  &__item-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+
+  &__item-label { @include truncate; }
+
+  &__nav-foot {
+    border-top: 1px solid $nav-divider;
+    padding: $space-3;
+  }
+
+  &__logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-2 $space-3;
+    background: none;
+    border: none;
+    color: $text-secondary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    border-radius: $radius-sm;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover { background: rgba(0, 0, 0, 0.04); color: $text-primary; }
+
+    .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+
+  &__main {
+    overflow: auto;
+    background: $bg-base;
+  }
+
+  // Mobile: collapse to icon-only by default
+  @media (max-width: #{$bp-md - 1px}) {
+    grid-template-columns: $nav-w-collapsed 1fr;
+
+    .admin-shell__brand-text,
+    .admin-shell__brand-tag,
+    .admin-shell__section-label,
+    .admin-shell__item-label { display: none; }
+
+    .admin-shell__item   { justify-content: center; padding: $space-2; }
+    .admin-shell__logout { justify-content: center; padding: $space-2 0; }
+    .admin-shell__collapse { display: none; }
+  }
+}

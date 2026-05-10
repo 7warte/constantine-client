@@ -765,41 +765,54 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.startAddress()) body['start_address'] = this.startAddress();
     if (this.endAddress()) body['end_address'] = this.endAddress();
 
-    // Capture map screenshot using Leaflet's canvas renderer
+    // Capture two map screenshots: the visible square one for the in-tour
+    // player modal, and a rectangular one (briefly resizing the same map) for
+    // previews/listings around the rest of the site.
     if (this.map && this.startCoords()) {
       try {
-        const sc = this.startCoords()!;
-        const zoom = this.map.getZoom();
-        // Use a static tile image as the map screenshot (OpenStreetMap static)
-        const staticUrl = `https://staticmap.stalker2021.workers.dev/?center=${sc[0]},${sc[1]}&zoom=${zoom}&size=800x400&markers=${sc[0]},${sc[1]}`;
-
-        // Alternatively, use html2canvas with proxy workaround
         const mapEl = document.getElementById('tour-map');
         if (mapEl) {
           const controls = mapEl.querySelector('.leaflet-control-container') as HTMLElement;
-          if (controls) controls.style.display = 'none';
+          const html2canvasModule = (await import('html2canvas')).default;
 
-          const html2canvasModule = await import('html2canvas');
-          const canvas = await html2canvasModule.default(mapEl, {
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-          });
+          const snapshot = async (): Promise<Blob | null> => {
+            if (controls) controls.style.display = 'none';
+            const canvas = await html2canvasModule(mapEl, {
+              useCORS: true, allowTaint: true, logging: false,
+            });
+            if (controls) controls.style.display = '';
+            return await new Promise<Blob | null>(resolve => canvas.toBlob(b => resolve(b), 'image/png'));
+          };
 
-          if (controls) controls.style.display = '';
+          // 1. Square (current, visible)
+          const squareBlob = await snapshot();
 
-          canvas.toBlob(blob => {
-            if (!blob || blob.size < 5000) return; // skip if blank/tiny
-            const formData = new FormData();
-            formData.append('file', blob, 'map-screenshot.png');
+          // 2. Resize element to 16:9, let Leaflet redraw + new tiles load,
+          //    capture, then restore.
+          mapEl.classList.add('map-container--rect-snap');
+          this.map.invalidateSize({ animate: false });
+          await new Promise(r => setTimeout(r, 700));
+          const rectBlob = await snapshot();
+          mapEl.classList.remove('map-container--rect-snap');
+          this.map.invalidateSize({ animate: false });
+
+          const formData = new FormData();
+          if (rectBlob   && rectBlob.size   > 5000) formData.append('file',        rectBlob,   'map-rect.png');
+          if (squareBlob && squareBlob.size > 5000) formData.append('file_square', squareBlob, 'map-square.png');
+
+          if (formData.has('file') || formData.has('file_square')) {
             this.http.post<any>(
               `${environment.apiUrl}/studio/tours/${this.tour()!.id}/map-screenshot`,
               formData,
               { headers: { Authorization: `Bearer ${this.auth.token()}` } }
             ).subscribe({
-              next: (res) => this.tour.update(t => t ? { ...t, map_image_url: res.map_image_url } : t),
+              next: (res) => this.tour.update(t => t ? {
+                ...t,
+                map_image_url: res.map_image_url,
+                map_image_square_url: res.map_image_square_url,
+              } : t),
             });
-          }, 'image/png');
+          }
         }
       } catch (e) { console.error('Map screenshot failed:', e); }
     }

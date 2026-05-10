@@ -174,7 +174,7 @@
       <div class="player__map-backdrop" (click)="showMapModal.set(false)">
         <div class="player__map-frame" #mapFrame (click)="$event.stopPropagation()">
           <button type="button" class="player__map-close" (click)="showMapModal.set(false)">&times;</button>
-          <img [src]="variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />
+          <img [src]="variant()!.map_image_square_url || variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />
 
           @for (sp of mapSpaces(); track sp.id; let i = $index) {
             @if (sp.map_x != null) {

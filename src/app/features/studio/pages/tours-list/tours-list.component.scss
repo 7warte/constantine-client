@@ -7,6 +7,12 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: $space-5;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $space-3;
+    }
   }
 
   &__title {
@@ -14,11 +20,19 @@
     font-size: $font-size-2xl;
     font-weight: $font-weight-bold;
     color: #1a1a1a;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-lg;
+    }
   }
 
   &__new-btn {
     background: $accent-primary !important;
     color: #ffffff !important;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      width: 100%;
+    }
   }
 
   &__toolbar {
@@ -77,10 +91,12 @@
   border: 1px solid #f0f0f0;
   border-radius: 0;
 
-  // Hide secondary columns when there's no room
+  // Hide secondary columns on mobile — language and status move to badges on the cover
   @media (max-width: #{$bp-md - 1px}) {
     .mat-column-downloads,
-    .mat-column-price {
+    .mat-column-price,
+    .mat-column-language,
+    .mat-column-status {
       display: none;
     }
 
@@ -90,12 +106,12 @@
     }
 
     .mat-column-cover {
-      width: 64px;
+      width: 88px;
     }
 
     &__thumb {
-      width: 64px;
-      height: 48px;
+      width: 88px;
+      height: 66px;
     }
   }
 
@@ -151,6 +167,47 @@
 
       .mat-icon { font-size: 24px; color: #cccccc; }
     }
+  }
+
+  &__cover-cell {
+    position: relative;
+    display: inline-block;
+  }
+
+  // Badges live on top of the cover thumb on mobile only — they replace the
+  // language and status columns we hide at <md.
+  &__cover-badges {
+    display: none;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      display: flex;
+      position: absolute;
+      inset: 0;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 3px;
+      pointer-events: none;
+    }
+  }
+
+  &__cover-badge {
+    font-family: $font-family-secondary;
+    font-size: 9px;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 5px;
+    border-radius: $radius-sm;
+    line-height: 1.1;
+    color: #ffffff;
+
+    &--lang {
+      background: rgba(0, 0, 0, 0.65);
+    }
+
+    &--status-published { background: $color-success; }
+    &--status-draft     { background: $color-warning; }
+    &--status-archived  { background: $text-muted; }
   }
 
   &__number {

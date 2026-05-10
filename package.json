@@ -9,7 +9,6 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  
   "dependencies": {
     "@angular/animations": "^18.0.0",
     "@angular/cdk": "^18.2.14",
@@ -22,6 +21,7 @@
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
     "@stripe/stripe-js": "^9.1.0",
+    "altcha": "^3.0.8",
     "express": "^5.2.1",
     "html2canvas": "^1.4.1",
     "leaflet": "^1.9.4",

@@ -91,6 +91,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/account/account.routes').then(m => m.ACCOUNT_ROUTES),
   },
 
+  // ── Admin (auth handled inside the feature) ────────────────────────────────
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+  },
+
   // ── Fallback ───────────────────────────────────────────────────────────────
   {
     path: '**',

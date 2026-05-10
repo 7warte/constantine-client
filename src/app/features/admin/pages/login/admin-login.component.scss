@@ -1,0 +1,106 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.admin-login {
+  min-height: 100dvh;
+  @include flex-center;
+  background: $bg-base;
+  padding: $space-4;
+
+  &__card {
+    width: 100%;
+    max-width: 380px;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-lg;
+    padding: $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    box-shadow: $shadow-md;
+  }
+
+  &__head {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    margin-bottom: $space-2;
+  }
+
+  &__brand {
+    font-family: $font-family-primary;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: $text-muted;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  &__sub {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $space-3 $space-4;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-light;
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    color: $text-primary;
+    transition: border-color $transition-fast;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+  }
+
+  /* Invisible captcha — keep in DOM so the widget runs, just don't show it. */
+  &__altcha {
+    display: none;
+  }
+
+  &__error {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    border-radius: $radius-md;
+    padding: $space-2 $space-3;
+    color: $color-error;
+    font-size: $font-size-sm;
+  }
+
+  &__btn {
+    margin-top: $space-2;
+    padding: $space-3 $space-4;
+    background: $text-primary;
+    color: $bg-light;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover:not(:disabled) { background: $accent-primary; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

@@ -1,0 +1,47 @@
+<div class="admin-shell" [class.admin-shell--collapsed]="collapsed()">
+  <aside class="admin-shell__nav">
+    <div class="admin-shell__nav-head">
+      <span class="admin-shell__brand">
+        <span class="admin-shell__brand-mark">C</span>
+        <span class="admin-shell__brand-text">Constantine</span>
+        <span class="admin-shell__brand-tag">admin</span>
+      </span>
+      <button type="button" class="admin-shell__collapse" (click)="toggleCollapse()" aria-label="Toggle sidebar">
+        <mat-icon>{{ collapsed() ? 'menu' : 'chevron_left' }}</mat-icon>
+      </button>
+    </div>
+
+    <nav class="admin-shell__nav-body">
+      @for (section of sections; track section.label) {
+        <div class="admin-shell__section">
+          <span class="admin-shell__section-label">{{ section.label }}</span>
+          <ul class="admin-shell__items">
+            @for (item of section.items; track item.path) {
+              <li>
+                <a
+                  [routerLink]="item.path"
+                  routerLinkActive="admin-shell__item--active"
+                  class="admin-shell__item"
+                  [title]="item.label">
+                  <mat-icon class="admin-shell__item-icon">{{ item.icon }}</mat-icon>
+                  <span class="admin-shell__item-label">{{ item.label }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+
+    <div class="admin-shell__nav-foot">
+      <button type="button" class="admin-shell__logout" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span class="admin-shell__item-label">Sign out</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="admin-shell__main">
+    <router-outlet />
+  </main>
+</div>

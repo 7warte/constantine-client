@@ -1,0 +1,33 @@
+<section class="admin-overview">
+  <header class="admin-overview__head">
+    <h1>Dashboard</h1>
+    <p>High-level snapshot of the platform.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="admin-overview__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="admin-overview__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+      <div class="admin-overview__cards">
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Users</span>
+          <span class="admin-overview__card-value">{{ d.user_count }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Tours</span>
+          <span class="admin-overview__card-value">{{ d.tour_count }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Purchases</span>
+          <span class="admin-overview__card-value">{{ d.purchase_count }}</span>
+        </div>
+      </div>
+
+      <p class="admin-overview__note">
+        Phase 2 will add revenue, Cloudinary usage, and per-section breakdowns.
+      </p>
+    }
+  }
+</section>

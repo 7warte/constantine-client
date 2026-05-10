@@ -1,0 +1,43 @@
+<div class="admin-login">
+  <form class="admin-login__card" (ngSubmit)="submit()" novalidate>
+    <header class="admin-login__head">
+      <span class="admin-login__brand">Constantine</span>
+      <h1 class="admin-login__title">Admin</h1>
+      <p class="admin-login__sub">Restricted area. Authorised personnel only.</p>
+    </header>
+
+    <label class="admin-login__field">
+      <span class="admin-login__label">Password</span>
+      <input
+        type="password"
+        autocomplete="current-password"
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        name="password"
+        class="admin-login__input"
+        [disabled]="submitting()"
+      />
+    </label>
+
+    <!-- Invisible: the proof-of-work runs in the background while you type the password. -->
+    <altcha-widget
+      class="admin-login__altcha"
+      [attr.challengeurl]="challengeUrl"
+      auto="onload"
+      hidefooter
+      hidelogo
+      (statechange)="onAltchaStateChange($event)">
+    </altcha-widget>
+
+    @if (error(); as e) {
+      <div class="admin-login__error" role="alert">{{ e }}</div>
+    }
+
+    <button
+      type="submit"
+      class="admin-login__btn"
+      [disabled]="submitting()">
+      {{ submitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+</div>
