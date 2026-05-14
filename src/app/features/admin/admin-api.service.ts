@@ -20,6 +20,10 @@ export class AdminApiService {
     return this.http.post<T>(`${this.base}${path}`, body, { withCredentials: true });
   }
 
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.http.put<T>(`${this.base}${path}`, body, { withCredentials: true });
+  }
+
   patch<T>(path: string, body: unknown): Observable<T> {
     return this.http.patch<T>(`${this.base}${path}`, body, { withCredentials: true });
   }

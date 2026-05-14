@@ -25,10 +25,9 @@ export class AdminLayoutComponent {
     {
       label: 'Overview',
       items: [
-        { label: 'Dashboard',      icon: 'dashboard',   path: '/admin/overview' },
-        { label: 'Users',          icon: 'people',      path: '/admin/users' },
-        { label: 'Tours',          icon: 'map',         path: '/admin/tours' },
-        { label: 'Featured tours', icon: 'star',        path: '/admin/featured' },
+        { label: 'Dashboard', icon: 'dashboard', path: '/admin/overview' },
+        { label: 'Users',     icon: 'people',    path: '/admin/users' },
+        { label: 'Tours',     icon: 'map',       path: '/admin/tours' },
       ],
     },
     {

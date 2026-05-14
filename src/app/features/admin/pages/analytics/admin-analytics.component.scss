@@ -1,0 +1,166 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.analytics {
+  padding: $space-6;
+  max-width: 1280px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $space-4;
+    flex-wrap: wrap;
+    margin-bottom: $space-5;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; margin: 0; }
+  }
+
+  &__range {
+    display: inline-flex;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    overflow: hidden;
+    background: $bg-surface;
+  }
+
+  &__range-btn {
+    padding: $space-2 $space-3;
+    background: none;
+    border: none;
+    color: $text-secondary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+    border-right: 1px solid $border-default;
+
+    &:last-child { border-right: none; }
+
+    &:hover { background: $bg-surface-alt; color: $text-primary; }
+
+    &--active {
+      background: $accent-primary;
+      color: $white;
+      &:hover { background: $accent-hover; color: $white; }
+    }
+  }
+
+  &__loading,
+  &__error { font-size: $font-size-sm; }
+  &__error { color: $color-error; }
+  &__loading { color: $text-secondary; }
+
+  // ── Top cards ──────────────────────────────────────────────────────────────
+  &__cards {
+    display: grid;
+    gap: $space-3;
+    grid-template-columns: 1fr;
+    margin-bottom: $space-6;
+
+    @include sm { grid-template-columns: repeat(2, 1fr); }
+    @include md { grid-template-columns: repeat(3, 1fr); }
+    @include lg { grid-template-columns: repeat(5, 1fr); }
+  }
+
+  &__card {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-4 $space-5;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__card-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+  }
+
+  &__card-value {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: 1.1;
+  }
+
+  &__delta {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    margin-top: 2px;
+
+    &--up   { color: $color-success; }
+    &--down { color: $color-error; }
+  }
+
+  // ── Lists ──────────────────────────────────────────────────────────────────
+  &__lists {
+    display: grid;
+    gap: $space-4;
+    grid-template-columns: 1fr;
+
+    @include md { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  &__list {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-4;
+
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: $space-3;
+      padding: $space-2 0;
+      border-bottom: 1px solid $border-light;
+      font-size: $font-size-sm;
+
+      &:last-child { border-bottom: none; }
+    }
+  }
+
+  &__list-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    margin: 0 0 $space-2;
+  }
+
+  &__list-empty {
+    font-size: $font-size-sm;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  &__list-key {
+    color: $text-primary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__list-val {
+    color: $text-secondary;
+    font-variant-numeric: tabular-nums;
+    font-weight: $font-weight-semibold;
+    flex-shrink: 0;
+  }
+}

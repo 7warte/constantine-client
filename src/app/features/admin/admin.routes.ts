@@ -38,12 +38,6 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
       },
       {
-        path: 'featured',
-        data: { title: 'Featured tours' },
-        loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
-      },
-      {
         path: 'money-flow',
         loadComponent: () =>
           import('./pages/money-flow/admin-money-flow.component').then(m => m.AdminMoneyFlowComponent),
@@ -78,9 +72,8 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'todos',
-        data: { title: 'To-do list' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/todos/admin-todos.component').then(m => m.AdminTodosComponent),
       },
       {
         path: 'error-logs',
@@ -90,21 +83,18 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'email-logs',
-        data: { title: 'Email log' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/email-logs/admin-email-logs.component').then(m => m.AdminEmailLogsComponent),
       },
       {
         path: 'legal/:slug',
-        data: { title: 'Legal documents' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/legal/admin-legal.component').then(m => m.AdminLegalComponent),
       },
       {
         path: 'analytics',
-        data: { title: 'Analytics' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent),
       },
     ],
   },

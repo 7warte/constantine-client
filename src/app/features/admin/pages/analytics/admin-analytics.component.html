@@ -1,0 +1,119 @@
+<section class="analytics">
+  <header class="analytics__head">
+    <div>
+      <h1>Visitors</h1>
+      <p>Live numbers from Umami — {{ rangeLabel() }}.</p>
+    </div>
+    <div class="analytics__range">
+      <button type="button" class="analytics__range-btn"
+        [class.analytics__range-btn--active]="range() === '24h'"
+        (click)="setRange('24h')">24h</button>
+      <button type="button" class="analytics__range-btn"
+        [class.analytics__range-btn--active]="range() === '7d'"
+        (click)="setRange('7d')">7d</button>
+      <button type="button" class="analytics__range-btn"
+        [class.analytics__range-btn--active]="range() === '30d'"
+        (click)="setRange('30d')">30d</button>
+      <button type="button" class="analytics__range-btn"
+        [class.analytics__range-btn--active]="range() === '90d'"
+        (click)="setRange('90d')">90d</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="analytics__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="analytics__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (stats(); as s) {
+
+    <div class="analytics__cards">
+      <div class="analytics__card">
+        <span class="analytics__card-label">Pageviews</span>
+        <span class="analytics__card-value">{{ s.pageviews.value | number }}</span>
+        @if (delta(s.pageviews); as d) {
+          @if (d.sign !== 0) {
+            <span class="analytics__delta"
+              [class.analytics__delta--up]="d.sign === 1"
+              [class.analytics__delta--down]="d.sign === -1">
+              {{ d.sign === 1 ? '▲' : '▼' }} {{ d.pct }}%
+            </span>
+          }
+        }
+      </div>
+      <div class="analytics__card">
+        <span class="analytics__card-label">Visitors</span>
+        <span class="analytics__card-value">{{ s.visitors.value | number }}</span>
+        @if (delta(s.visitors); as d) {
+          @if (d.sign !== 0) {
+            <span class="analytics__delta"
+              [class.analytics__delta--up]="d.sign === 1"
+              [class.analytics__delta--down]="d.sign === -1">
+              {{ d.sign === 1 ? '▲' : '▼' }} {{ d.pct }}%
+            </span>
+          }
+        }
+      </div>
+      <div class="analytics__card">
+        <span class="analytics__card-label">Visits</span>
+        <span class="analytics__card-value">{{ s.visits.value | number }}</span>
+      </div>
+      <div class="analytics__card">
+        <span class="analytics__card-label">Bounce rate</span>
+        <span class="analytics__card-value">{{ bounceRate(s) }}</span>
+      </div>
+      <div class="analytics__card">
+        <span class="analytics__card-label">Avg visit time</span>
+        <span class="analytics__card-value">{{ fmtAvgTime(s) }}</span>
+      </div>
+    </div>
+
+    <div class="analytics__lists">
+      <div class="analytics__list">
+        <h2 class="analytics__list-title">Top pages</h2>
+        @if (topUrls().length === 0) { <p class="analytics__list-empty">No data</p> }
+        @else {
+          <ul>
+            @for (row of topUrls(); track row.x) {
+              <li>
+                <span class="analytics__list-key">{{ row.x }}</span>
+                <span class="analytics__list-val">{{ row.y | number }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="analytics__list">
+        <h2 class="analytics__list-title">Top referrers</h2>
+        @if (topRef().length === 0) { <p class="analytics__list-empty">No data — mostly direct traffic so far.</p> }
+        @else {
+          <ul>
+            @for (row of topRef(); track row.x) {
+              <li>
+                <span class="analytics__list-key">{{ row.x || '(direct)' }}</span>
+                <span class="analytics__list-val">{{ row.y | number }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="analytics__list">
+        <h2 class="analytics__list-title">Countries</h2>
+        @if (topCty().length === 0) { <p class="analytics__list-empty">No data</p> }
+        @else {
+          <ul>
+            @for (row of topCty(); track row.x) {
+              <li>
+                <span class="analytics__list-key">{{ row.x }}</span>
+                <span class="analytics__list-val">{{ row.y | number }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+    }
+  }
+</section>

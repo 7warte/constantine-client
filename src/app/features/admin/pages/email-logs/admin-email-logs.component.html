@@ -1,0 +1,109 @@
+<section class="email-logs">
+  <header class="email-logs__head">
+    <h1>Email log</h1>
+    <p>All emails sent by the platform via Resend. Filterable.</p>
+  </header>
+
+  <div class="email-logs__filters">
+    <label>
+      <span>From</span>
+      <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+    </label>
+    <label>
+      <span>To</span>
+      <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+    </label>
+    <label>
+      <span>Status</span>
+      <select [ngModel]="status()" (ngModelChange)="status.set($event)">
+        <option value="">All</option>
+        @for (s of facets().statuses; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Template</span>
+      <select [ngModel]="template()" (ngModelChange)="template.set($event)">
+        <option value="">All</option>
+        @for (t of facets().templates; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </label>
+    <label class="email-logs__filter--wide">
+      <span>Search (recipient / subject)</span>
+      <input type="text" placeholder="email or subject…"
+             [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    </label>
+    <div class="email-logs__filter-actions">
+      <button type="button" class="email-logs__btn email-logs__btn--primary" (click)="reload()">Apply</button>
+      <button type="button" class="email-logs__btn" (click)="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="email-logs__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="email-logs__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+    <p class="email-logs__count">
+      Showing {{ d.rows.length }} of {{ d.total }} email{{ d.total === 1 ? '' : 's' }}.
+    </p>
+
+    @if (d.rows.length === 0) {
+      <p class="email-logs__empty">No emails match these filters.</p>
+    } @else {
+      <div class="email-logs__table-wrap">
+        <table class="email-logs__table">
+          <thead>
+            <tr>
+              <th>Sent</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Template</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of d.rows; track r.id) {
+              <tr class="email-logs__row"
+                  [class.email-logs__row--failed]="r.status === 'failed'"
+                  (click)="toggleExpand(r.id)">
+                <td>{{ fmtDate(r.created_at) }}</td>
+                <td>{{ r.recipient }}</td>
+                <td>{{ r.subject }}</td>
+                <td><code>{{ r.template }}</code></td>
+                <td>
+                  <span class="email-logs__chip"
+                    [class.email-logs__chip--ok]="r.status === 'sent'"
+                    [class.email-logs__chip--fail]="r.status === 'failed'">
+                    {{ r.status }}
+                  </span>
+                </td>
+              </tr>
+              @if (expanded() === r.id) {
+                <tr class="email-logs__detail-row">
+                  <td colspan="5">
+                    <dl class="email-logs__detail">
+                      <dt>Resend ID</dt>
+                      <dd>{{ r.resend_id || '—' }}</dd>
+                      <dt>User ID</dt>
+                      <dd>{{ r.user_id || '—' }}</dd>
+                      @if (r.error_message) {
+                        <dt>Error</dt>
+                        <dd class="email-logs__detail-error">{{ r.error_message }}</dd>
+                      }
+                    </dl>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    }
+  }
+</section>

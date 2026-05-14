@@ -1,0 +1,74 @@
+<section class="todos">
+  <header class="todos__head">
+    <h1>To-do list</h1>
+    <p>Personal scratchpad. Nothing here is exposed to users.</p>
+  </header>
+
+  <form class="todos__add" (ngSubmit)="add()">
+    <input
+      type="text"
+      class="todos__add-input"
+      placeholder="Add a task…"
+      maxlength="2000"
+      [ngModel]="newBody()"
+      (ngModelChange)="newBody.set($event)"
+      name="newBody" />
+    <label class="todos__priority-toggle" title="Mark as high priority">
+      <input type="checkbox" [ngModel]="newHigh()" (ngModelChange)="newHigh.set($event)" name="newHigh" />
+      <span>High priority</span>
+    </label>
+    <button type="submit" class="todos__btn todos__btn--primary" [disabled]="adding() || !newBody().trim()">
+      {{ adding() ? 'Adding…' : 'Add' }}
+    </button>
+  </form>
+
+  @if (loading()) {
+    <p class="todos__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="todos__error" role="alert">{{ error() }}</div>
+  } @else {
+
+    <h2 class="todos__section-title">Open ({{ open().length }})</h2>
+    @if (open().length === 0) {
+      <p class="todos__empty">Nothing to do. 🎉</p>
+    } @else {
+      <ul class="todos__list">
+        @for (t of open(); track t.id) {
+          <li class="todos__item" [class.todos__item--high]="t.priority === 1">
+            <input
+              type="checkbox"
+              class="todos__check"
+              [checked]="t.done"
+              (change)="toggleDone(t)" />
+            <span class="todos__body">{{ t.body }}</span>
+            <button type="button"
+              class="todos__icon-btn"
+              [class.todos__icon-btn--active]="t.priority === 1"
+              [title]="t.priority === 1 ? 'Unmark high priority' : 'Mark high priority'"
+              (click)="togglePriority(t)">★</button>
+            <button type="button" class="todos__icon-btn todos__icon-btn--danger"
+              title="Delete" (click)="remove(t)">×</button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (closed().length > 0) {
+      <h2 class="todos__section-title">Done ({{ closed().length }})</h2>
+      <ul class="todos__list todos__list--closed">
+        @for (t of closed(); track t.id) {
+          <li class="todos__item todos__item--done">
+            <input
+              type="checkbox"
+              class="todos__check"
+              [checked]="t.done"
+              (change)="toggleDone(t)" />
+            <span class="todos__body">{{ t.body }}</span>
+            <button type="button" class="todos__icon-btn todos__icon-btn--danger"
+              title="Delete" (click)="remove(t)">×</button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

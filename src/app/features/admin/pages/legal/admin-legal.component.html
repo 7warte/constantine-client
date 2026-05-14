@@ -1,0 +1,51 @@
+<section class="legal">
+  <header class="legal__head">
+    <h1>{{ pageTitle() }}</h1>
+    @if (version() != null) {
+      <span class="legal__meta">
+        v{{ version() }} · updated {{ updatedAt() | date:'short' }}
+      </span>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="legal__loading">Loading…</p>
+  } @else {
+    <label class="legal__field">
+      <span class="legal__field-label">Title</span>
+      <input
+        type="text"
+        class="legal__input"
+        [ngModel]="title()"
+        (ngModelChange)="title.set($event)"
+        maxlength="200" />
+    </label>
+
+    <label class="legal__field">
+      <span class="legal__field-label">Body (markdown)</span>
+      <textarea
+        class="legal__textarea"
+        [ngModel]="bodyMd()"
+        (ngModelChange)="bodyMd.set($event)"
+        rows="22"
+        spellcheck="false"
+        placeholder="# Section title&#10;Lorem ipsum…"></textarea>
+    </label>
+
+    @if (error(); as e) {
+      <div class="legal__error" role="alert">{{ e }}</div>
+    }
+
+    <div class="legal__actions">
+      <button type="button"
+        class="legal__btn legal__btn--primary"
+        [disabled]="saving() || !dirty()"
+        (click)="save()">
+        {{ saving() ? 'Saving…' : dirty() ? 'Save changes' : 'Up to date' }}
+      </button>
+      @if (dirty()) {
+        <span class="legal__dirty">Unsaved changes</span>
+      }
+    </div>
+  }
+</section>

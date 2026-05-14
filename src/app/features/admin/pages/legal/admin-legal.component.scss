@@ -1,0 +1,115 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.legal {
+  padding: $space-6;
+  max-width: 900px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: $space-4;
+    margin-bottom: $space-5;
+    flex-wrap: wrap;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0; }
+  }
+
+  &__meta {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    letter-spacing: 0.04em;
+  }
+
+  &__loading { color: $text-secondary; font-size: $font-size-sm; }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    margin-bottom: $space-4;
+  }
+
+  &__field-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+  }
+
+  &__input {
+    padding: $space-2 $space-3;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    background: $bg-light;
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    color: $text-primary;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+  }
+
+  &__textarea {
+    padding: $space-3 $space-4;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-light;
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: $text-primary;
+    line-height: 1.55;
+    resize: vertical;
+    min-height: 320px;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+  }
+
+  &__error {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    border-radius: $radius-sm;
+    padding: $space-2 $space-3;
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-bottom: $space-3;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__btn {
+    padding: $space-3 $space-5;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  &__dirty {
+    font-size: $font-size-xs;
+    color: $color-warning;
+    font-style: italic;
+  }
+}
