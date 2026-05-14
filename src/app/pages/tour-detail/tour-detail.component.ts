@@ -6,12 +6,13 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { StarRatingComponent } from '../../shared/components/star-rating/star-rating.component';
+import { ReportButtonComponent } from '../../shared/components/report-button/report-button.component';
 
 @Component({
   selector: 'app-tour-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, FormsModule, ButtonComponent, StarRatingComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ButtonComponent, StarRatingComponent, ReportButtonComponent],
   templateUrl: './tour-detail.component.html',
   styleUrl: './tour-detail.component.scss',
 })

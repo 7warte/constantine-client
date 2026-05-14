@@ -238,6 +238,10 @@
           </div>
         }
       </section>
+
+      <div class="detail__footer container">
+        <app-report-button targetType="tour" [targetId]="v.tour_id" label="Report this tour" />
+      </div>
     } @else {
       <p class="container" style="padding-block: 4rem; color: var(--color-text-secondary)">Tour not found.</p>
     }

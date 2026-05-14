@@ -512,3 +512,9 @@
     &__author h2 { font-size: $font-size-xl; }
   }
 }
+
+.detail__footer {
+  padding-block: $space-5;
+  border-top: 1px solid $border-light;
+  text-align: right;
+}

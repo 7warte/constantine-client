@@ -1,0 +1,112 @@
+<section class="reports">
+  <header class="reports__head">
+    <h1>Reports</h1>
+    <p>Abuse and content reports submitted by users (or anonymously).</p>
+  </header>
+
+  <div class="reports__filters">
+    <label>
+      <span>Status</span>
+      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); reload()">
+        <option value="">All</option>
+        <option value="open">Open</option>
+        <option value="reviewing">Reviewing</option>
+        <option value="actioned">Actioned</option>
+        <option value="dismissed">Dismissed</option>
+      </select>
+    </label>
+  </div>
+
+  @if (loading()) {
+    <p class="reports__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="reports__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="reports__empty">No reports match this filter.</p>
+  } @else {
+    <div class="reports__table-wrap">
+      <table class="reports__table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Target</th>
+            <th>Reason</th>
+            <th>Reporter</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td>
+                <span class="reports__chip" [class]="'reports__chip--' + r.status">{{ r.status }}</span>
+              </td>
+              <td>{{ fmtDate(r.created_at) }}</td>
+              <td>
+                <strong>{{ r.target_type }}</strong>
+                <small><code>{{ r.target_id.slice(0, 8) }}…</code></small>
+              </td>
+              <td>{{ r.reason }}</td>
+              <td>{{ reporterLabel(r) }}</td>
+              <td>
+                <button type="button" class="reports__btn reports__btn--primary" (click)="openEdit(r)">Triage</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (editing(); as r) {
+    <div class="reports__backdrop" (click)="closeEdit()">
+      <div class="reports__modal" (click)="$event.stopPropagation()">
+        <h2 class="reports__modal-title">Triage report</h2>
+
+        <dl class="reports__detail">
+          <dt>Target</dt>
+          <dd><strong>{{ r.target_type }}</strong> <code>{{ r.target_id }}</code></dd>
+          <dt>Reason</dt>
+          <dd>{{ r.reason }}</dd>
+          @if (r.details) {
+            <dt>Details</dt>
+            <dd class="reports__details-text">{{ r.details }}</dd>
+          }
+          <dt>Reporter</dt>
+          <dd>{{ reporterLabel(r) }}</dd>
+          <dt>Submitted</dt>
+          <dd>{{ fmtDate(r.created_at) }}</dd>
+        </dl>
+
+        <label class="reports__field">
+          <span>Status</span>
+          <select [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
+            <option value="open">Open</option>
+            <option value="reviewing">Reviewing</option>
+            <option value="actioned">Actioned</option>
+            <option value="dismissed">Dismissed</option>
+          </select>
+        </label>
+
+        <label class="reports__field">
+          <span>Admin note (private)</span>
+          <textarea rows="4" maxlength="2000"
+            [ngModel]="editNote()" (ngModelChange)="editNote.set($event)"
+            placeholder="What did you do about it?"></textarea>
+        </label>
+
+        @if (editError(); as e) {
+          <div class="reports__error" role="alert">{{ e }}</div>
+        }
+
+        <div class="reports__modal-actions">
+          <button type="button" class="reports__btn" (click)="closeEdit()" [disabled]="saving()">Cancel</button>
+          <button type="button" class="reports__btn reports__btn--primary" (click)="save()" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

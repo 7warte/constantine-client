@@ -1,0 +1,104 @@
+<section class="error-logs">
+  <header class="error-logs__head">
+    <h1>Error logs</h1>
+    <p>Server-side errors captured by the API. Default window: last 30 days.</p>
+  </header>
+
+  <div class="error-logs__filters">
+    <label>
+      <span>From</span>
+      <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+    </label>
+    <label>
+      <span>To</span>
+      <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+    </label>
+    <label>
+      <span>Method</span>
+      <select [ngModel]="method()" (ngModelChange)="method.set($event)">
+        <option value="">All</option>
+        @for (m of facets().methods; track m) { <option [value]="m">{{ m }}</option> }
+      </select>
+    </label>
+    <label>
+      <span>Status</span>
+      <select [ngModel]="status()" (ngModelChange)="status.set($event)">
+        <option value="">All</option>
+        @for (s of facets().statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </label>
+    <label class="error-logs__filter--wide">
+      <span>Search (message / path)</span>
+      <input type="text" placeholder="endpoint or error text…"
+             [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    </label>
+    <div class="error-logs__filter-actions">
+      <button type="button" class="error-logs__btn error-logs__btn--primary" (click)="reload()">Apply</button>
+      <button type="button" class="error-logs__btn" (click)="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="error-logs__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="error-logs__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+      <p class="error-logs__count">
+        Showing {{ d.rows.length }} of {{ d.total }} error{{ d.total === 1 ? '' : 's' }}.
+      </p>
+
+      @if (d.rows.length === 0) {
+        <p class="error-logs__empty">No errors in this window. 🎉</p>
+      } @else {
+        <div class="error-logs__table-wrap">
+          <table class="error-logs__table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Status</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of d.rows; track r.id) {
+                <tr class="error-logs__row" (click)="toggleExpand(r.id)">
+                  <td>{{ fmtDate(r.created_at) }}</td>
+                  <td>@if (r.method) { <code>{{ r.method }}</code> }</td>
+                  <td><code>{{ r.path || '—' }}</code></td>
+                  <td>
+                    @if (r.status_code != null) {
+                      <span class="error-logs__chip" [class]="statusClass(r.status_code)">{{ r.status_code }}</span>
+                    } @else { — }
+                  </td>
+                  <td class="error-logs__msg">{{ r.message }}</td>
+                </tr>
+                @if (expanded() === r.id) {
+                  <tr class="error-logs__detail-row">
+                    <td colspan="5">
+                      <dl class="error-logs__detail">
+                        @if (r.user_id) { <dt>User</dt>      <dd><code>{{ r.user_id }}</code></dd> }
+                        @if (r.ip)      { <dt>IP</dt>        <dd>{{ r.ip }}</dd> }
+                        @if (r.user_agent) { <dt>User Agent</dt> <dd>{{ r.user_agent }}</dd> }
+                        @if (r.metadata) {
+                          <dt>Metadata</dt>
+                          <dd><pre>{{ r.metadata | json }}</pre></dd>
+                        }
+                        @if (r.stack) {
+                          <dt>Stack</dt>
+                          <dd><pre class="error-logs__stack">{{ r.stack }}</pre></dd>
+                        }
+                      </dl>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+</section>

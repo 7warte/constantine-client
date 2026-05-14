@@ -1,0 +1,59 @@
+<button type="button" class="report-btn" (click)="openModal()" title="Report this content">
+  <span class="report-btn__icon" aria-hidden="true">⚐</span>
+  {{ label }}
+</button>
+
+@if (open()) {
+  <div class="report-modal__backdrop" (click)="closeModal()">
+    <div class="report-modal" (click)="$event.stopPropagation()">
+
+      @if (done()) {
+        <h2 class="report-modal__title">Thanks for letting us know</h2>
+        <p class="report-modal__text">We've recorded your report and our team will review it shortly.</p>
+        <div class="report-modal__actions">
+          <button type="button" class="report-modal__btn report-modal__btn--primary" (click)="closeModal()">Close</button>
+        </div>
+      } @else {
+        <h2 class="report-modal__title">Report this {{ targetType }}</h2>
+        <p class="report-modal__text">Help us keep Constantine safe. Reports are reviewed by a human.</p>
+
+        <label class="report-modal__field">
+          <span>Reason</span>
+          <select [ngModel]="reason()" (ngModelChange)="reason.set($event)">
+            @for (r of reasons; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </label>
+
+        <label class="report-modal__field">
+          <span>Details (optional)</span>
+          <textarea rows="3" maxlength="2000"
+            placeholder="What happened?"
+            [ngModel]="details()" (ngModelChange)="details.set($event)"></textarea>
+        </label>
+
+        @if (!isLoggedIn) {
+          <label class="report-modal__field">
+            <span>Your email</span>
+            <input type="email" placeholder="you@example.com" maxlength="255"
+              [ngModel]="email()" (ngModelChange)="email.set($event)" />
+            <small>So we can follow up if needed. Not shown publicly.</small>
+          </label>
+        }
+
+        <!-- Invisible captcha — solves in background -->
+        <app-captcha />
+
+        @if (error(); as e) {
+          <div class="report-modal__error" role="alert">{{ e }}</div>
+        }
+
+        <div class="report-modal__actions">
+          <button type="button" class="report-modal__btn" (click)="closeModal()" [disabled]="submitting()">Cancel</button>
+          <button type="button" class="report-modal__btn report-modal__btn--primary" (click)="submit()" [disabled]="submitting()">
+            {{ submitting() ? 'Sending…' : 'Submit report' }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -60,15 +60,13 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'reports',
-        data: { title: 'Reports' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/reports/admin-reports.component').then(m => m.AdminReportsComponent),
       },
       {
         path: 'translation-jobs',
-        data: { title: 'Translation jobs' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/translation-jobs/admin-translation-jobs.component').then(m => m.AdminTranslationJobsComponent),
       },
       {
         path: 'todos',
@@ -77,9 +75,8 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'error-logs',
-        data: { title: 'Error logs' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/error-logs/admin-error-logs.component').then(m => m.AdminErrorLogsComponent),
       },
       {
         path: 'email-logs',

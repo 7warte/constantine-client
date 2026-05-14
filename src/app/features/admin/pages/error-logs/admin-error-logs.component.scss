@@ -1,0 +1,186 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.error-logs {
+  padding: $space-6;
+  max-width: 1400px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; margin: 0; }
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $space-3;
+    padding: $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    margin-bottom: $space-4;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    input, select {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: $font-weight-regular;
+
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+  }
+
+  &__filter--wide { grid-column: span 2; }
+
+  &__filter-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: $space-2;
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast;
+    &:hover { background: $bg-surface-alt; }
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  &__count { font-size: $font-size-sm; color: $text-muted; margin: 0 0 $space-3; }
+  &__loading, &__empty { color: $text-secondary; font-size: $font-size-sm; }
+  &__error { color: $color-error; font-size: $font-size-sm; }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      border-bottom: 1px solid $border-light;
+      vertical-align: top;
+    }
+
+    th {
+      background: $bg-surface-alt;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    code {
+      background: $bg-surface-alt;
+      padding: 1px 6px;
+      border-radius: $radius-sm;
+      font-size: 12px;
+      color: $text-secondary;
+    }
+  }
+
+  &__row { cursor: pointer; &:hover { background: $bg-surface-alt; } }
+
+  &__msg {
+    max-width: 480px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: $text-primary;
+  }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    background: rgba($text-muted, 0.15);
+    color: $text-muted;
+    font-variant-numeric: tabular-nums;
+
+    &--4xx { background: rgba($color-warning, 0.15); color: $color-warning; }
+    &--5xx { background: rgba($color-error, 0.15);   color: $color-error; }
+  }
+
+  &__detail-row td {
+    padding: $space-4 $space-5 !important;
+    background: $bg-surface-alt;
+  }
+
+  &__detail {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: $space-2 $space-4;
+    margin: 0;
+
+    dt {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    dd {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      word-break: break-all;
+    }
+    pre {
+      margin: 0;
+      padding: $space-3;
+      background: $bg-surface;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-size: 12px;
+      max-height: 320px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+  }
+
+  &__stack { color: $color-error; }
+}

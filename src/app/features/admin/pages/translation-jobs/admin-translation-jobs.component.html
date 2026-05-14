@@ -1,0 +1,66 @@
+<section class="t-jobs">
+  <header class="t-jobs__head">
+    <h1>Translation jobs</h1>
+    <p>All open and recent translation requests across the marketplace.</p>
+  </header>
+
+  <div class="t-jobs__filters">
+    <label>
+      <span>Status</span>
+      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); reload()">
+        <option value="">All</option>
+        <option value="open">Open</option>
+        <option value="assigned">Assigned</option>
+        <option value="in_progress">In progress</option>
+        <option value="submitted">Submitted</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </label>
+  </div>
+
+  @if (loading()) {
+    <p class="t-jobs__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="t-jobs__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="t-jobs__empty">No translation requests match this filter.</p>
+  } @else {
+    <div class="t-jobs__table-wrap">
+      <table class="t-jobs__table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Tour</th>
+            <th>Lang</th>
+            <th>Requester</th>
+            <th>Translator</th>
+            <th class="t-right">Apps</th>
+            <th class="t-right">Reward</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td><span class="t-jobs__chip" [class]="'t-jobs__chip--' + r.status">{{ r.status.replace('_', ' ') }}</span></td>
+              <td>{{ r.tour_title }}</td>
+              <td><strong>{{ r.target_language_code | uppercase }}</strong></td>
+              <td>{{ r.requester_name || ('@' + r.requester_username) }}</td>
+              <td>
+                @if (r.translator_username) {
+                  {{ r.translator_name || ('@' + r.translator_username) }}
+                } @else {
+                  <span class="t-jobs__muted">—</span>
+                }
+              </td>
+              <td class="t-right">{{ r.application_count }}</td>
+              <td class="t-right">{{ fmtCompensation(r) }}</td>
+              <td>{{ fmtDate(r.created_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
