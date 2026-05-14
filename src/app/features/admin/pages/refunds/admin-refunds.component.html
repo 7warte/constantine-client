@@ -1,0 +1,88 @@
+<section class="refunds">
+  <header class="refunds__head">
+    <h1>Refunds</h1>
+    <p>User-requested + admin-initiated refunds. Approve to release the money via Stripe.</p>
+  </header>
+
+  <!-- Hidden invisible captcha — used for the refund action -->
+  <app-captcha />
+
+  @if (loading()) {
+    <p class="refunds__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="refunds__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="refunds__empty">No refunds. The queue will populate as users request them.</p>
+  } @else {
+    <div class="refunds__table-wrap">
+      <table class="refunds__table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Buyer</th>
+            <th>Tour</th>
+            <th>Country</th>
+            <th class="t-right">Paid</th>
+            <th class="t-right">Refunded</th>
+            <th>Processed</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td>
+                <span class="refunds__chip"
+                  [class.refunds__chip--pending]="r.refund_status === 'pending' || r.refund_status === 'requires_action'"
+                  [class.refunds__chip--done]="r.refund_status === 'succeeded'"
+                  [class.refunds__chip--failed]="r.refund_status === 'failed'">
+                  {{ r.refund_status }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ r.buyer_name || r.buyer_username }}</strong>
+                <small>{{ r.buyer_email }}</small>
+              </td>
+              <td>{{ r.tour_title }}</td>
+              <td>{{ r.buyer_country || '—' }}</td>
+              <td class="t-right">{{ fmtMoney(r.amount_paid_cents) }}</td>
+              <td class="t-right">{{ fmtMoney(r.refund_amount_cents) }}</td>
+              <td>{{ fmtDate(r.refunded_at) }}</td>
+              <td>
+                @if (r.refund_status !== 'succeeded') {
+                  <button type="button" class="refunds__btn refunds__btn--primary" (click)="openConfirm(r)">
+                    Approve refund
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (confirmRow(); as row) {
+    <div class="refunds__backdrop" (click)="closeConfirm()">
+      <div class="refunds__modal" (click)="$event.stopPropagation()">
+        <h2 class="refunds__modal-title">Approve refund?</h2>
+        <p class="refunds__modal-text">
+          This will refund <strong>{{ fmtMoney(row.amount_paid_cents) }}</strong> to
+          <strong>{{ row.buyer_name || row.buyer_username }}</strong> via Stripe
+          for &ldquo;{{ row.tour_title }}&rdquo;. This cannot be undone.
+        </p>
+
+        @if (actionError(); as e) {
+          <div class="refunds__error" role="alert">{{ e }}</div>
+        }
+
+        <div class="refunds__modal-actions">
+          <button type="button" class="refunds__btn" (click)="closeConfirm()" [disabled]="submitting()">Cancel</button>
+          <button type="button" class="refunds__btn refunds__btn--danger" (click)="confirmRefund()" [disabled]="submitting()">
+            {{ submitting() ? 'Refunding…' : 'Yes, refund' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

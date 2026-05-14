@@ -1,0 +1,110 @@
+<section class="money-flow">
+  <header class="money-flow__head">
+    <h1>Money flow</h1>
+    <p>All purchases in the selected window.</p>
+  </header>
+
+  <div class="money-flow__filters">
+    <label>
+      <span>From</span>
+      <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+    </label>
+    <label>
+      <span>To</span>
+      <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+    </label>
+    <label>
+      <span>Status</span>
+      <select [ngModel]="status()" (ngModelChange)="status.set($event)">
+        <option value="">All</option>
+        <option value="none">No refund</option>
+        <option value="pending">Refund pending</option>
+        <option value="refunded">Refunded</option>
+      </select>
+    </label>
+    <label>
+      <span>Country</span>
+      <input type="text" maxlength="2" placeholder="NL"
+             [ngModel]="country()" (ngModelChange)="country.set($event)" />
+    </label>
+    <div class="money-flow__filter-actions">
+      <button type="button" class="money-flow__btn money-flow__btn--primary" (click)="reload()">Apply</button>
+      <button type="button" class="money-flow__btn" (click)="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="money-flow__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="money-flow__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+
+    <div class="money-flow__totals">
+      <div class="money-flow__total">
+        <span class="money-flow__total-label">Purchases</span>
+        <span class="money-flow__total-value">{{ d.totals.count }}</span>
+      </div>
+      <div class="money-flow__total">
+        <span class="money-flow__total-label">Gross</span>
+        <span class="money-flow__total-value">{{ fmtMoney(d.totals.gross_cents) }}</span>
+      </div>
+      <div class="money-flow__total">
+        <span class="money-flow__total-label">Refunded</span>
+        <span class="money-flow__total-value">{{ fmtMoney(d.totals.refunded_cents) }}</span>
+      </div>
+      <div class="money-flow__total money-flow__total--accent">
+        <span class="money-flow__total-label">Net</span>
+        <span class="money-flow__total-value">{{ fmtMoney(d.totals.net_cents) }}</span>
+      </div>
+    </div>
+
+    @if (d.rows.length === 0) {
+      <p class="money-flow__empty">No purchases match these filters.</p>
+    } @else {
+      <div class="money-flow__table-wrap">
+        <table class="money-flow__table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Buyer</th>
+              <th>Tour</th>
+              <th>Country</th>
+              <th class="t-right">Gross</th>
+              <th class="t-right">Refunded</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of d.rows; track r.id) {
+              <tr [class.money-flow__row--refunded]="r.refund_status === 'succeeded'">
+                <td>{{ fmtDate(r.purchased_at) }}</td>
+                <td>
+                  <strong>{{ r.buyer_name || r.buyer_username }}</strong>
+                  <small>&commat;{{ r.buyer_username }}</small>
+                </td>
+                <td>
+                  {{ r.tour_title }}
+                  <small>{{ r.variant_language | uppercase }}</small>
+                </td>
+                <td>{{ r.buyer_country || '—' }}</td>
+                <td class="t-right">{{ fmtMoney(r.amount_paid_cents) }}</td>
+                <td class="t-right">{{ r.refund_amount_cents ? fmtMoney(r.refund_amount_cents) : '—' }}</td>
+                <td>
+                  @if (r.refund_status === 'succeeded') {
+                    <span class="money-flow__chip money-flow__chip--refund">Refunded</span>
+                  } @else if (r.refund_status === 'pending' || r.refund_status === 'requires_action') {
+                    <span class="money-flow__chip money-flow__chip--pending">{{ r.refund_status }}</span>
+                  } @else {
+                    <span class="money-flow__chip money-flow__chip--ok">Paid</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    }
+  }
+</section>

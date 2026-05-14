@@ -1,0 +1,162 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.taxes {
+  padding: $space-6;
+  max-width: 900px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; margin: 0; max-width: 640px; }
+  }
+
+  &__panel {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-5 $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    margin-bottom: $space-6;
+  }
+
+  &__field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-3;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      grid-template-columns: 1fr;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    input {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: $font-weight-regular;
+
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+  }
+
+  &__quick {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__quick-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    margin-right: $space-2;
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast, border-color $transition-fast;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &--primary {
+      align-self: flex-start;
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      padding: $space-3 $space-5;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  &__error {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    border-radius: $radius-sm;
+    padding: $space-2 $space-3;
+    color: $color-error;
+    font-size: $font-size-sm;
+  }
+
+  &__note {
+    background: $bg-surface-alt;
+    border-left: 3px solid $accent-primary;
+    padding: $space-4 $space-5;
+    border-radius: 0 $radius-md $radius-md 0;
+
+    h2 {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $text-primary;
+      margin: 0 0 $space-3;
+    }
+
+    ul {
+      margin: 0 0 $space-3;
+      padding-left: $space-5;
+    }
+
+    li {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      line-height: $line-height-loose;
+    }
+
+    p {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      line-height: $line-height-loose;
+      margin: 0 0 $space-2;
+    }
+
+    code {
+      background: $bg-surface;
+      padding: 1px 5px;
+      border-radius: $radius-sm;
+      font-size: 0.9em;
+      color: $text-primary;
+    }
+  }
+
+  &__note-caveat {
+    font-size: $font-size-xs !important;
+    color: $text-muted !important;
+    font-style: italic;
+    margin-top: $space-3 !important;
+  }
+}

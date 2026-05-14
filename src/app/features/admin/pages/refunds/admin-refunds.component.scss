@@ -1,0 +1,142 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.refunds {
+  padding: $space-6;
+  max-width: 1200px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; margin: 0; }
+  }
+
+  &__loading,
+  &__empty { color: $text-secondary; font-size: $font-size-sm; }
+  &__error { color: $color-error; font-size: $font-size-sm; margin: $space-2 0; }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      border-bottom: 1px solid $border-light;
+    }
+
+    th {
+      background: $bg-surface-alt;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    .t-right { text-align: right; font-variant-numeric: tabular-nums; }
+    small { display: block; color: $text-muted; font-size: $font-size-xs; }
+  }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: capitalize;
+    background: rgba($text-muted, 0.15);
+    color: $text-muted;
+
+    &--pending { background: rgba($color-warning, 0.15); color: $color-warning; }
+    &--done    { background: rgba($color-success, 0.15); color: $color-success; }
+    &--failed  { background: rgba($color-error, 0.15);   color: $color-error; }
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast, border-color $transition-fast;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    }
+
+    &--danger {
+      background: $color-error;
+      border-color: $color-error;
+      color: $white;
+      &:hover:not(:disabled) { background: darken($color-error, 8%); border-color: darken($color-error, 8%); }
+    }
+  }
+
+  // ── Confirm modal ──────────────────────────────────────────────────────────
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: $space-4;
+  }
+
+  &__modal {
+    background: $bg-surface;
+    border-radius: $radius-md;
+    padding: $space-5 $space-6;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  &__modal-title {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    color: $text-primary;
+    margin: 0 0 $space-3;
+  }
+
+  &__modal-text {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-loose;
+    margin: 0 0 $space-4;
+  }
+
+  &__modal-actions {
+    display: flex;
+    gap: $space-3;
+    justify-content: flex-end;
+    margin-top: $space-4;
+  }
+}

@@ -1,0 +1,188 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.money-flow {
+  padding: $space-6;
+  max-width: 1280px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+
+    h1 {
+      font-family: $font-family-primary;
+      font-size: $font-size-xl;
+      color: $text-primary;
+      margin: 0 0 $space-1;
+    }
+    p {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  // ── Filters ────────────────────────────────────────────────────────────────
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $space-3;
+    padding: $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    margin-bottom: $space-5;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    input, select {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: $font-weight-regular;
+
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+  }
+
+  &__filter-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: $space-2;
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast, border-color $transition-fast;
+
+    &:hover { background: $bg-surface-alt; }
+
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  // ── Totals ─────────────────────────────────────────────────────────────────
+  &__totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+
+  &__total {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &--accent {
+      border-color: $accent-primary;
+      background: $accent-muted;
+    }
+  }
+
+  &__total-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+  }
+
+  &__total-value {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    color: $text-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  // ── Table ─────────────────────────────────────────────────────────────────
+  &__loading,
+  &__empty {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+  &__error { color: $color-error; font-size: $font-size-sm; }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      border-bottom: 1px solid $border-light;
+    }
+
+    th {
+      background: $bg-surface-alt;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    tbody tr:hover { background: $bg-surface-alt; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .t-right { text-align: right; font-variant-numeric: tabular-nums; }
+    small { display: block; color: $text-muted; font-size: $font-size-xs; }
+  }
+
+  &__row--refunded td { color: $text-muted; }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: capitalize;
+
+    &--ok      { background: rgba($color-success, 0.15); color: $color-success; }
+    &--pending { background: rgba($color-warning, 0.15); color: $color-warning; }
+    &--refund  { background: rgba($text-muted, 0.15);    color: $text-muted; }
+  }
+}

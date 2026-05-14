@@ -45,21 +45,18 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'money-flow',
-        data: { title: 'Money flow' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/money-flow/admin-money-flow.component').then(m => m.AdminMoneyFlowComponent),
       },
       {
         path: 'refunds',
-        data: { title: 'Refunds' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/refunds/admin-refunds.component').then(m => m.AdminRefundsComponent),
       },
       {
         path: 'taxes',
-        data: { title: 'Taxes (Netherlands)' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/taxes/admin-taxes.component').then(m => m.AdminTaxesComponent),
       },
       {
         path: 'tickets',

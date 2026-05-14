@@ -18,14 +18,10 @@ export class AdminAuthService {
   private readonly _isLoggedIn = signal(false);
   readonly isLoggedIn = this._isLoggedIn.asReadonly();
 
-  fetchAltchaChallenge(): Observable<unknown> {
-    return this.http.get(`${this.base}/altcha-challenge`, { withCredentials: true });
-  }
-
-  login(password: string, altcha: string): Observable<{ ok: true; expires_in: number }> {
+  login(password: string, captchaToken: string): Observable<{ ok: true; expires_in: number }> {
     return this.http.post<{ ok: true; expires_in: number }>(
       `${this.base}/login`,
-      { password, altcha },
+      { password, captcha_token: captchaToken },
       { withCredentials: true },
     ).pipe(tap(() => this._isLoggedIn.set(true)));
   }

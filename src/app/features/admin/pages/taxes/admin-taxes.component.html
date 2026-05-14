@@ -1,0 +1,53 @@
+<section class="taxes">
+  <header class="taxes__head">
+    <h1>Taxes — Netherlands</h1>
+    <p>Export a CSV of all purchases in a window with assumed VAT broken out per buyer country.
+       Hand it to your accountant for the quarterly BTW / OSS declaration.</p>
+  </header>
+
+  <div class="taxes__panel">
+    <div class="taxes__field-row">
+      <label>
+        <span>From</span>
+        <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+      </label>
+      <label>
+        <span>To</span>
+        <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+      </label>
+    </div>
+
+    <div class="taxes__quick">
+      <span class="taxes__quick-label">Quick ranges</span>
+      <button type="button" class="taxes__btn" (click)="setQuarter(1)">Q1</button>
+      <button type="button" class="taxes__btn" (click)="setQuarter(2)">Q2</button>
+      <button type="button" class="taxes__btn" (click)="setQuarter(3)">Q3</button>
+      <button type="button" class="taxes__btn" (click)="setQuarter(4)">Q4</button>
+      <button type="button" class="taxes__btn" (click)="setYTD()">Year to date</button>
+    </div>
+
+    <button type="button" class="taxes__btn taxes__btn--primary" (click)="download()" [disabled]="downloading()">
+      {{ downloading() ? 'Preparing…' : 'Download CSV' }}
+    </button>
+
+    @if (error(); as e) {
+      <div class="taxes__error" role="alert">{{ e }}</div>
+    }
+  </div>
+
+  <div class="taxes__note">
+    <h2>How the VAT column is computed</h2>
+    <ul>
+      <li><strong>Buyer in NL:</strong> 21% VAT (Dutch domestic rate, on digital services).</li>
+      <li><strong>Buyer in another EU country:</strong> the local rate applies under the OSS scheme (e.g. 19% in DE, 20% in FR).</li>
+      <li><strong>Buyer outside the EU:</strong> 0% (export of services).</li>
+      <li><strong>Buyer country unknown:</strong> shown as <code>UNKNOWN</code> with 0% — the accountant decides.</li>
+    </ul>
+    <p>VAT is computed as <em>VAT-inclusive</em>: <code>vat = net × rate / (100 + rate)</code>. We assume B2C consumers;
+       if you start invoicing EU businesses with VAT numbers (reverse charge), tell me and we'll add that flag.</p>
+    <p class="taxes__note-caveat">
+      This is a data-export tool, not tax-compliance software. Final filing should be done by a qualified
+      Dutch accountant using this CSV as input.
+    </p>
+  </div>
+</section>

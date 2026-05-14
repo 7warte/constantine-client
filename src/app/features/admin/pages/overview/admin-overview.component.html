@@ -1,7 +1,7 @@
 <section class="admin-overview">
   <header class="admin-overview__head">
     <h1>Dashboard</h1>
-    <p>High-level snapshot of the platform.</p>
+    <p>A high-level snapshot of Constantine.</p>
   </header>
 
   @if (loading()) {
@@ -10,6 +10,30 @@
     <div class="admin-overview__error" role="alert">{{ error() }}</div>
   } @else {
     @if (data(); as d) {
+
+      <!-- ── Money ─────────────────────────────────────────────────── -->
+      <h2 class="admin-overview__section-title">Money</h2>
+      <div class="admin-overview__cards">
+        <div class="admin-overview__card admin-overview__card--accent">
+          <span class="admin-overview__card-label">Revenue (lifetime)</span>
+          <span class="admin-overview__card-value">{{ fmtMoney(d.revenue.lifetime_cents) }}</span>
+          <span class="admin-overview__card-foot">Net of refunds</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Revenue (30d)</span>
+          <span class="admin-overview__card-value">{{ fmtMoney(d.revenue.last_30_days_cents) }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Refunds pending</span>
+          <span class="admin-overview__card-value"
+                [class.admin-overview__card-value--warn]="d.refunds_pending > 0">
+            {{ d.refunds_pending }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Users & Tours ─────────────────────────────────────────── -->
+      <h2 class="admin-overview__section-title">Users &amp; Tours</h2>
       <div class="admin-overview__cards">
         <div class="admin-overview__card">
           <span class="admin-overview__card-label">Users</span>
@@ -25,9 +49,64 @@
         </div>
       </div>
 
-      <p class="admin-overview__note">
-        Phase 2 will add revenue, Cloudinary usage, and per-section breakdowns.
-      </p>
+      <h2 class="admin-overview__section-title">Tour stats</h2>
+      <div class="admin-overview__cards">
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Avg price</span>
+          <span class="admin-overview__card-value">{{ fmtMoney(d.tour_stats.avg_price_cents) }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Avg duration</span>
+          <span class="admin-overview__card-value">{{ fmtMinutes(d.tour_stats.avg_duration_min) }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Longest tour</span>
+          <span class="admin-overview__card-value">{{ fmtMinutes(d.tour_stats.longest_min) }}</span>
+        </div>
+        <div class="admin-overview__card">
+          <span class="admin-overview__card-label">Shortest tour</span>
+          <span class="admin-overview__card-value">{{ fmtMinutes(d.tour_stats.shortest_min) }}</span>
+        </div>
+      </div>
+
+      <!-- ── Cloudinary ───────────────────────────────────────────── -->
+      <h2 class="admin-overview__section-title">Cloudinary</h2>
+      @if (d.cloudinary; as c) {
+        <div class="admin-overview__cards">
+          @if (c.storage_bytes != null) {
+            <div class="admin-overview__card">
+              <span class="admin-overview__card-label">Storage used</span>
+              <span class="admin-overview__card-value">{{ fmtBytes(c.storage_bytes) }}</span>
+              @if (pctOf(c.storage_bytes, c.storage_limit); as pct) {
+                <div class="admin-overview__bar"><div class="admin-overview__bar-fill" [style.width.%]="pct"></div></div>
+                <span class="admin-overview__card-foot">{{ pct }}% of {{ fmtBytes(c.storage_limit) }}</span>
+              }
+            </div>
+          }
+          @if (c.bandwidth_bytes != null) {
+            <div class="admin-overview__card">
+              <span class="admin-overview__card-label">Bandwidth (this month)</span>
+              <span class="admin-overview__card-value">{{ fmtBytes(c.bandwidth_bytes) }}</span>
+              @if (pctOf(c.bandwidth_bytes, c.bandwidth_limit); as pct) {
+                <div class="admin-overview__bar"><div class="admin-overview__bar-fill" [style.width.%]="pct"></div></div>
+                <span class="admin-overview__card-foot">{{ pct }}% of {{ fmtBytes(c.bandwidth_limit) }}</span>
+              }
+            </div>
+          }
+          @if (c.credits_used != null) {
+            <div class="admin-overview__card">
+              <span class="admin-overview__card-label">Credits used</span>
+              <span class="admin-overview__card-value">{{ c.credits_used }}</span>
+              @if (pctOf(c.credits_used, c.credits_limit); as pct) {
+                <div class="admin-overview__bar"><div class="admin-overview__bar-fill" [style.width.%]="pct"></div></div>
+                <span class="admin-overview__card-foot">{{ pct }}% of {{ c.credits_limit }}</span>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="admin-overview__note">Cloudinary usage unavailable (env vars not set or API call failed).</p>
+      }
     }
   }
 </section>
