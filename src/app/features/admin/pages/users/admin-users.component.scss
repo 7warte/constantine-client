@@ -1,0 +1,118 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.users {
+  padding: $space-6;
+  max-width: 1200px;
+
+  @media (max-width: #{$bp-md - 1px}) { padding: $space-4 $space-3; }
+
+  &__head {
+    margin-bottom: $space-5;
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; margin: 0; }
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: $space-3;
+    align-items: end;
+    padding: $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    margin-bottom: $space-4;
+
+    @media (max-width: #{$bp-md - 1px}) { grid-template-columns: 1fr; }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+
+    input, select {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: $font-weight-regular;
+    }
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+
+    &:hover { background: $bg-surface-alt; }
+
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  &__loading, &__empty { color: $text-secondary; font-size: $font-size-sm; }
+  &__error { color: $color-error; font-size: $font-size-sm; }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      border-bottom: 1px solid $border-light;
+    }
+    th {
+      background: $bg-surface-alt;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    small { display: block; color: $text-muted; font-size: $font-size-xs; margin-top: 2px; }
+    .t-right { text-align: right; font-variant-numeric: tabular-nums; }
+  }
+
+  &__row { cursor: pointer; &:hover { background: $bg-surface-alt; } }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    &--active    { background: rgba($color-success, 0.18); color: $color-success; }
+    &--suspended { background: rgba($color-error, 0.18);   color: $color-error; }
+  }
+}

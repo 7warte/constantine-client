@@ -1,0 +1,82 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.support-new {
+  min-height: calc(100dvh - 64px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: $space-6 $space-4;
+  background: $bg-base;
+
+  &__card {
+    width: 100%;
+    max-width: 600px;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0; }
+    p  { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; margin: 0; }
+  }
+
+  &__sub { margin-bottom: $space-2 !important; }
+  &__hint { font-size: $font-size-xs !important; color: $text-muted !important; }
+  &__loading { color: $text-secondary; font-size: $font-size-sm; }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    span {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    input, textarea {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-family: $font-family-secondary;
+      font-size: $font-size-base;
+      color: $text-primary;
+      background: $bg-light;
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+    textarea { resize: vertical; min-height: 120px; }
+  }
+
+  &__error {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    border-radius: $radius-sm;
+    padding: $space-2 $space-3;
+    color: $color-error;
+    font-size: $font-size-sm;
+  }
+
+  &__btn {
+    margin-top: $space-2;
+    align-self: flex-start;
+    padding: $space-3 $space-5;
+    background: $accent-primary;
+    border: 1px solid $accent-primary;
+    border-radius: $radius-sm;
+    color: $white;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

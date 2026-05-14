@@ -1,0 +1,183 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.ticket {
+  padding: $space-6;
+  max-width: 880px;
+
+  @media (max-width: #{$bp-md - 1px}) { padding: $space-4 $space-3; }
+
+  &__back {
+    display: inline-block;
+    margin-bottom: $space-3;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    text-decoration: none;
+    &:hover { color: $text-primary; }
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-2; word-break: break-word; }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-wrap: wrap;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__meta-sep { color: $text-muted; }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: capitalize;
+    background: rgba($text-muted, 0.15);
+    color: $text-muted;
+
+    &--open     { background: rgba($color-warning, 0.18); color: $color-warning; }
+    &--pending  { background: rgba($color-info, 0.18);    color: $color-info; }
+    &--resolved { background: rgba($color-success, 0.18); color: $color-success; }
+    &--archived { background: rgba($text-muted, 0.15);    color: $text-muted; }
+  }
+
+  &__status-bar {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-wrap: wrap;
+    padding: $space-3 $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    margin-bottom: $space-4;
+  }
+
+  &__status-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    margin-right: $space-2;
+  }
+
+  &__status-btn {
+    padding: $space-1 $space-3;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; color: $text-primary; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &__loading { color: $text-secondary; font-size: $font-size-sm; }
+  &__error   { color: $color-error; font-size: $font-size-sm; }
+
+  // ── Thread ────────────────────────────────────────────────────────────────
+  &__thread {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    margin-bottom: $space-5;
+  }
+
+  &__msg {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-3 $space-4;
+
+    &--admin {
+      background: $accent-muted;
+      border-color: $accent-primary;
+    }
+  }
+
+  &__msg-head {
+    display: flex;
+    justify-content: space-between;
+    gap: $space-2;
+    align-items: baseline;
+    margin-bottom: $space-1;
+  }
+
+  &__msg-when { font-size: $font-size-xs; color: $text-muted; }
+
+  &__msg-body {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    line-height: $line-height-loose;
+    white-space: pre-wrap;
+  }
+
+  // ── Reply ─────────────────────────────────────────────────────────────────
+  &__reply {
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: $space-3;
+    }
+    span {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    textarea {
+      padding: $space-3 $space-4;
+      border: 1px solid $border-default;
+      border-radius: $radius-md;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      resize: vertical;
+      min-height: 100px;
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+  }
+
+  &__reply-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__btn {
+    padding: $space-3 $space-5;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+}

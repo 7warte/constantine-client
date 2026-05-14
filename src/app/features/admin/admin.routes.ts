@@ -27,9 +27,13 @@ export const ADMIN_ROUTES: Routes = [
       // ── Stubs (filled in later phases) ────────────────────────────────────
       {
         path: 'users',
-        data: { title: 'Users' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/users/admin-users.component').then(m => m.AdminUsersComponent),
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () =>
+          import('./pages/users/admin-user-detail.component').then(m => m.AdminUserDetailComponent),
       },
       {
         path: 'tours',
@@ -54,9 +58,13 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'tickets',
-        data: { title: 'Tickets' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/tickets/admin-tickets.component').then(m => m.AdminTicketsComponent),
+      },
+      {
+        path: 'tickets/:id',
+        loadComponent: () =>
+          import('./pages/tickets/admin-ticket-detail.component').then(m => m.AdminTicketDetailComponent),
       },
       {
         path: 'reports',

@@ -1,0 +1,140 @@
+<section class="tickets">
+  <header class="tickets__head">
+    <div>
+      <h1>Tickets</h1>
+      <p>Support conversations. Open one yourself, or invite a user to start their own.</p>
+    </div>
+    <div class="tickets__head-actions">
+      <button type="button" class="tickets__btn" (click)="openModal('invite')">Invite a user</button>
+      <button type="button" class="tickets__btn tickets__btn--primary" (click)="openModal('new')">New ticket</button>
+    </div>
+  </header>
+
+  <div class="tickets__filters">
+    <label>
+      <span>Status</span>
+      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); reload()">
+        <option value="">All</option>
+        <option value="open">Open</option>
+        <option value="pending">Pending</option>
+        <option value="resolved">Resolved</option>
+        <option value="archived">Archived</option>
+      </select>
+    </label>
+  </div>
+
+  @if (actionMsg(); as m) {
+    <div class="tickets__success" role="status">{{ m }}</div>
+  }
+
+  @if (loading()) {
+    <p class="tickets__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="tickets__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="tickets__empty">No tickets in this view yet.</p>
+  } @else {
+    <div class="tickets__table-wrap">
+      <table class="tickets__table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Subject</th>
+            <th>User</th>
+            <th>Opened by</th>
+            <th class="t-right">Messages</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr [routerLink]="['/admin/tickets', r.id]" class="tickets__row">
+              <td><span class="tickets__chip" [class]="'tickets__chip--' + r.status">{{ r.status }}</span></td>
+              <td>{{ r.subject }}</td>
+              <td>
+                @if (r.user_username) { {{ r.user_name || ('@' + r.user_username) }} }
+                @else { {{ r.user_email }} }
+              </td>
+              <td>{{ r.opened_by }}</td>
+              <td class="t-right">{{ r.message_count }}</td>
+              <td>{{ fmtDate(r.last_message_at || r.updated_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (modal() === 'new') {
+    <div class="tickets__backdrop" (click)="closeModal()">
+      <div class="tickets__modal" (click)="$event.stopPropagation()">
+        <h2 class="tickets__modal-title">New ticket</h2>
+        <p class="tickets__modal-text">Open a support thread for a specific user. They can be optionally CC'd by email.</p>
+
+        <label class="tickets__field">
+          <span>User email</span>
+          <input type="email" placeholder="user@example.com"
+                 [ngModel]="newEmail()" (ngModelChange)="newEmail.set($event)" />
+        </label>
+
+        <label class="tickets__field">
+          <span>Subject</span>
+          <input type="text" maxlength="200"
+                 [ngModel]="newSubject()" (ngModelChange)="newSubject.set($event)" />
+        </label>
+
+        <label class="tickets__field">
+          <span>Message</span>
+          <textarea rows="5" [ngModel]="newBody()" (ngModelChange)="newBody.set($event)"></textarea>
+        </label>
+
+        <label class="tickets__check">
+          <input type="checkbox" [ngModel]="newCC()" (ngModelChange)="newCC.set($event)" />
+          <span>Also send a copy of this message to the user by email</span>
+        </label>
+
+        @if (actionErr(); as e) { <div class="tickets__error" role="alert">{{ e }}</div> }
+
+        <div class="tickets__modal-actions">
+          <button type="button" class="tickets__btn" (click)="closeModal()" [disabled]="busy()">Cancel</button>
+          <button type="button" class="tickets__btn tickets__btn--primary" (click)="createTicket()" [disabled]="busy()">
+            {{ busy() ? 'Creating…' : 'Create ticket' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modal() === 'invite') {
+    <div class="tickets__backdrop" (click)="closeModal()">
+      <div class="tickets__modal" (click)="$event.stopPropagation()">
+        <h2 class="tickets__modal-title">Invite a user to open a ticket</h2>
+        <p class="tickets__modal-text">
+          Sends a one-time link to the user (valid for 7 days). They click it,
+          describe their issue, and a new ticket appears in this inbox.
+        </p>
+
+        <label class="tickets__field">
+          <span>User email</span>
+          <input type="email" placeholder="user@example.com"
+                 [ngModel]="invEmail()" (ngModelChange)="invEmail.set($event)" />
+        </label>
+
+        <label class="tickets__field">
+          <span>Suggested subject <small>(optional, shown to the user as a hint)</small></span>
+          <input type="text" maxlength="200"
+                 [ngModel]="invHint()" (ngModelChange)="invHint.set($event)" />
+        </label>
+
+        @if (actionErr(); as e) { <div class="tickets__error" role="alert">{{ e }}</div> }
+
+        <div class="tickets__modal-actions">
+          <button type="button" class="tickets__btn" (click)="closeModal()" [disabled]="busy()">Cancel</button>
+          <button type="button" class="tickets__btn tickets__btn--primary" (click)="sendInvite()" [disabled]="busy()">
+            {{ busy() ? 'Sending…' : 'Send invite' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

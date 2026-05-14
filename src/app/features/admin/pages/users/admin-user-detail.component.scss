@@ -1,0 +1,232 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.user-detail {
+  padding: $space-6;
+  max-width: 1100px;
+
+  @media (max-width: #{$bp-md - 1px}) { padding: $space-4 $space-3; }
+
+  &__back {
+    display: inline-block;
+    margin-bottom: $space-3;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    text-decoration: none;
+    &:hover { color: $text-primary; }
+  }
+
+  &__loading { color: $text-secondary; font-size: $font-size-sm; }
+  &__error {
+    color: $color-error;
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    padding: $space-2 $space-3;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    margin: $space-2 0;
+  }
+  &__success {
+    color: $color-success;
+    background: rgba($color-success, 0.1);
+    border: 1px solid $color-success;
+    padding: $space-2 $space-3;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    margin: $space-2 0;
+  }
+  &__empty { color: $text-muted; font-size: $font-size-sm; }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $space-4;
+    flex-wrap: wrap;
+    padding: $space-5;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    margin-bottom: $space-4;
+  }
+
+  &__profile {
+    display: flex;
+    gap: $space-4;
+    align-items: flex-start;
+    min-width: 0;
+
+    h1 {
+      font-family: $font-family-primary;
+      font-size: $font-size-lg;
+      color: $text-primary;
+      margin: 0 0 4px;
+    }
+  }
+
+  &__avatar {
+    width: 56px; height: 56px;
+    border-radius: $radius-full;
+    object-fit: cover;
+    background: $bg-surface-alt;
+
+    &--empty {
+      display: flex; align-items: center; justify-content: center;
+      font-family: $font-family-primary;
+      font-weight: $font-weight-bold;
+      color: $text-muted;
+      font-size: $font-size-lg;
+    }
+  }
+
+  &__handle, &__bio, &__meta {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0 0 4px;
+  }
+  &__meta { font-size: $font-size-xs; color: $text-muted; }
+
+  &__head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    &--active    { background: rgba($color-success, 0.18); color: $color-success; }
+    &--suspended { background: rgba($color-error, 0.18);   color: $color-error; }
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &--danger {
+      background: rgba($color-error, 0.08);
+      border-color: $color-error;
+      color: $color-error;
+      &:hover:not(:disabled) { background: $color-error; color: $white; }
+    }
+  }
+
+  &__suspended-banner {
+    background: rgba($color-error, 0.08);
+    border: 1px solid $color-error;
+    padding: $space-3 $space-4;
+    border-radius: $radius-sm;
+    color: $color-error;
+    font-size: $font-size-sm;
+    margin-bottom: $space-4;
+  }
+
+  &__section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    margin: $space-5 0 $space-2;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      border-bottom: 1px solid $border-light;
+    }
+    th {
+      background: $bg-surface-alt;
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    .t-right { text-align: right; font-variant-numeric: tabular-nums; }
+  }
+
+  &__tours {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: $space-2 $space-3;
+      background: $bg-surface;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      margin-bottom: $space-1;
+      font-size: $font-size-sm;
+
+      small { display: block; color: $text-muted; font-size: $font-size-xs; margin-top: 2px; }
+    }
+  }
+
+  // ── Modal ─────────────────────────────────────────────────────────────────
+  &__backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: $space-4;
+  }
+  &__modal {
+    background: $bg-surface;
+    border-radius: $radius-md;
+    padding: $space-5 $space-6;
+    max-width: 460px; width: 100%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    display: flex; flex-direction: column; gap: $space-3;
+
+    h2 { font-family: $font-family-primary; font-size: $font-size-lg; color: $text-primary; margin: 0; }
+    p  { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; margin: 0; }
+  }
+  &__modal-actions { display: flex; gap: $space-2; justify-content: flex-end; margin-top: $space-2; }
+
+  &__field {
+    display: flex; flex-direction: column; gap: 4px;
+    span {
+      font-size: $font-size-xs;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: $text-muted;
+      font-weight: $font-weight-bold;
+    }
+    input {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $bg-light;
+      &:focus { outline: none; border-color: $accent-primary; }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+<section class="ticket">
+  <header class="ticket__head">
+    <a routerLink="/admin/tickets" class="ticket__back">← Tickets</a>
+
+    @if (data(); as d) {
+      <h1>{{ d.subject }}</h1>
+      <div class="ticket__meta">
+        <span class="ticket__chip" [class]="'ticket__chip--' + d.status">{{ d.status }}</span>
+        <span class="ticket__meta-sep">·</span>
+        <span>Opened by {{ d.opened_by }}</span>
+        <span class="ticket__meta-sep">·</span>
+        <span>{{ d.user_name || ('@' + (d.user_username ?? d.user_email)) }}</span>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <p class="ticket__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="ticket__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+
+    <div class="ticket__status-bar">
+      <span class="ticket__status-label">Set status:</span>
+      <button type="button" class="ticket__status-btn" [disabled]="statusBusy() || d.status === 'open'"     (click)="setStatus('open')">Open</button>
+      <button type="button" class="ticket__status-btn" [disabled]="statusBusy() || d.status === 'pending'"  (click)="setStatus('pending')">Pending</button>
+      <button type="button" class="ticket__status-btn" [disabled]="statusBusy() || d.status === 'resolved'" (click)="setStatus('resolved')">Resolved</button>
+      <button type="button" class="ticket__status-btn" [disabled]="statusBusy() || d.status === 'archived'" (click)="setStatus('archived')">Archive</button>
+    </div>
+
+    <div class="ticket__thread">
+      @for (m of d.messages; track m.id) {
+        <article class="ticket__msg" [class.ticket__msg--admin]="m.author_kind === 'admin'">
+          <header class="ticket__msg-head">
+            <strong>{{ m.author_kind === 'admin' ? 'Admin (you)' : 'User' }}</strong>
+            <span class="ticket__msg-when">{{ fmtDateTime(m.created_at) }}</span>
+          </header>
+          <p class="ticket__msg-body">{{ m.body }}</p>
+        </article>
+      }
+    </div>
+
+    <form class="ticket__reply" (ngSubmit)="send()">
+      <label>
+        <span>Reply</span>
+        <textarea rows="4" placeholder="Write a reply…"
+          [ngModel]="reply()" (ngModelChange)="reply.set($event)"
+          name="reply"></textarea>
+      </label>
+      <div class="ticket__reply-actions">
+        <button type="submit" class="ticket__btn ticket__btn--primary" [disabled]="sending() || !reply().trim()">
+          {{ sending() ? 'Sending…' : 'Send reply' }}
+        </button>
+      </div>
+    </form>
+    }
+  }
+</section>

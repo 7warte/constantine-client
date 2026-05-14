@@ -1,0 +1,38 @@
+<section class="support-new">
+  <div class="support-new__card">
+    @if (loading()) {
+      <p class="support-new__loading">Verifying your invite…</p>
+    } @else if (error()) {
+      <h1>Sorry</h1>
+      <p class="support-new__error" role="alert">{{ error() }}</p>
+      <p class="support-new__hint">If you believe this is a mistake, contact us at <a href="mailto:support&#64;seshtawi.com">support&#64;seshtawi.com</a>.</p>
+    } @else if (done()) {
+      <h1>Thanks — we'll be in touch</h1>
+      <p>Your ticket has been received. We'll reply to <strong>{{ userEmail() }}</strong> shortly.</p>
+    } @else {
+      <h1>Open a support ticket</h1>
+      <p class="support-new__sub">Hi! The Constantine team invited you to open a support ticket. Tell us what's going on and we'll get back to <strong>{{ userEmail() }}</strong>.</p>
+
+      <label class="support-new__field">
+        <span>Subject</span>
+        <input type="text" maxlength="200" [ngModel]="subject()" (ngModelChange)="subject.set($event)" />
+      </label>
+
+      <label class="support-new__field">
+        <span>Message</span>
+        <textarea rows="6" placeholder="Describe what happened…"
+          [ngModel]="body()" (ngModelChange)="body.set($event)"></textarea>
+      </label>
+
+      <app-captcha />
+
+      @if (submitErr(); as e) {
+        <div class="support-new__error" role="alert">{{ e }}</div>
+      }
+
+      <button type="button" class="support-new__btn" (click)="submit()" [disabled]="submitting()">
+        {{ submitting() ? 'Submitting…' : 'Submit ticket' }}
+      </button>
+    }
+  </div>
+</section>

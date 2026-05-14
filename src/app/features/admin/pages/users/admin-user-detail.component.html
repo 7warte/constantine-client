@@ -1,0 +1,138 @@
+<section class="user-detail">
+  <a routerLink="/admin/users" class="user-detail__back">← Users</a>
+
+  <!-- Invisible captcha — reused by suspend + refund-all -->
+  <app-captcha />
+
+  @if (loading()) {
+    <p class="user-detail__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="user-detail__error" role="alert">{{ error() }}</div>
+  } @else {
+    @if (data(); as d) {
+
+    <header class="user-detail__head">
+      <div class="user-detail__profile">
+        @if (d.avatar_url) {
+          <img [src]="d.avatar_url" alt="" class="user-detail__avatar" />
+        } @else {
+          <div class="user-detail__avatar user-detail__avatar--empty">{{ d.display_name[0] | uppercase }}</div>
+        }
+        <div>
+          <h1>{{ d.display_name }}</h1>
+          <p class="user-detail__handle">&commat;{{ d.username }} · {{ d.email }}</p>
+          @if (d.bio) { <p class="user-detail__bio">{{ d.bio }}</p> }
+          <p class="user-detail__meta">
+            Joined {{ fmtDate(d.created_at) }} ·
+            {{ d.purchases.length }} purchase(s) ·
+            {{ d.tours.length }} tour(s)
+            @if (d.stripe_account_id) { · Stripe Connect linked }
+          </p>
+        </div>
+      </div>
+
+      <div class="user-detail__head-actions">
+        @if (d.suspended_at) {
+          <span class="user-detail__chip user-detail__chip--suspended">Suspended</span>
+          <button type="button" class="user-detail__btn" [disabled]="busy()" (click)="unsuspend()">Reactivate</button>
+        } @else {
+          <span class="user-detail__chip user-detail__chip--active">Active</span>
+          <button type="button" class="user-detail__btn user-detail__btn--danger" (click)="openModal('suspend')">Suspend</button>
+        }
+        @if (unrefundedPaidCount(d) > 0) {
+          <button type="button" class="user-detail__btn user-detail__btn--danger" (click)="openModal('refund-all')">
+            Refund all ({{ unrefundedPaidCount(d) }})
+          </button>
+        }
+      </div>
+    </header>
+
+    @if (d.suspended_at) {
+      <div class="user-detail__suspended-banner">
+        Suspended {{ fmtDate(d.suspended_at) }}@if (d.suspended_reason) { — {{ d.suspended_reason }} }
+      </div>
+    }
+
+    @if (actionMsg(); as m) { <div class="user-detail__success">{{ m }}</div> }
+    @if (actionErr(); as e) { <div class="user-detail__error" role="alert">{{ e }}</div> }
+
+    <h2 class="user-detail__section-title">Purchases ({{ d.purchases.length }})</h2>
+    @if (d.purchases.length === 0) {
+      <p class="user-detail__empty">No purchases.</p>
+    } @else {
+      <div class="user-detail__table-wrap">
+        <table class="user-detail__table">
+          <thead><tr><th>Date</th><th>Tour</th><th>Lang</th><th class="t-right">Paid</th><th class="t-right">Refunded</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (p of d.purchases; track p.id) {
+              <tr>
+                <td>{{ fmtDate(p.purchased_at) }}</td>
+                <td>{{ p.tour_title }}</td>
+                <td>{{ p.variant_language | uppercase }}</td>
+                <td class="t-right">{{ fmtMoney(p.amount_paid_cents) }}</td>
+                <td class="t-right">{{ fmtMoney(p.refund_amount_cents) }}</td>
+                <td>
+                  @if (p.refund_status === 'succeeded') { Refunded }
+                  @else if (p.refund_status) { {{ p.refund_status }} }
+                  @else { Paid }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <h2 class="user-detail__section-title">Tours created ({{ d.tours.length }})</h2>
+    @if (d.tours.length === 0) {
+      <p class="user-detail__empty">No tours.</p>
+    } @else {
+      <ul class="user-detail__tours">
+        @for (t of d.tours; track t.id) {
+          <li>
+            <strong>{{ t.title }}</strong>
+            <small>{{ t.status }} · {{ fmtDate(t.created_at) }}</small>
+          </li>
+        }
+      </ul>
+    }
+    }
+  }
+
+  @if (modal() === 'suspend' && data()) {
+    <div class="user-detail__backdrop" (click)="closeModal()">
+      <div class="user-detail__modal" (click)="$event.stopPropagation()">
+        <h2>Suspend this account?</h2>
+        <p>The user won't be able to log in. Their tours will be hidden from explore. Existing buyers' library access continues working until their session expires.</p>
+        <label class="user-detail__field">
+          <span>Reason (optional, internal)</span>
+          <input type="text" maxlength="200"
+            [ngModel]="suspendReason()" (ngModelChange)="suspendReason.set($event)" />
+        </label>
+        @if (actionErr(); as e) { <div class="user-detail__error" role="alert">{{ e }}</div> }
+        <div class="user-detail__modal-actions">
+          <button type="button" class="user-detail__btn" (click)="closeModal()" [disabled]="busy()">Cancel</button>
+          <button type="button" class="user-detail__btn user-detail__btn--danger" (click)="confirmSuspend()" [disabled]="busy()">
+            {{ busy() ? 'Suspending…' : 'Yes, suspend' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modal() === 'refund-all' && data(); as d) {
+    <div class="user-detail__backdrop" (click)="closeModal()">
+      <div class="user-detail__modal" (click)="$event.stopPropagation()">
+        <h2>Refund all purchases?</h2>
+        <p>This will issue a Stripe refund for <strong>{{ unrefundedPaidCount(d) }}</strong> purchase(s). Already-refunded and free purchases are skipped. Cannot be undone.</p>
+        @if (actionErr(); as e) { <div class="user-detail__error" role="alert">{{ e }}</div> }
+        <div class="user-detail__modal-actions">
+          <button type="button" class="user-detail__btn" (click)="closeModal()" [disabled]="busy()">Cancel</button>
+          <button type="button" class="user-detail__btn user-detail__btn--danger" (click)="confirmRefundAll()" [disabled]="busy()">
+            {{ busy() ? 'Refunding…' : 'Yes, refund all' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,70 @@
+<section class="users">
+  <header class="users__head">
+    <h1>Users</h1>
+    <p>Browse, search, and manage user accounts.</p>
+  </header>
+
+  <div class="users__filters">
+    <label class="users__filter--wide">
+      <span>Search</span>
+      <input type="text" placeholder="username, display name, or email"
+        [ngModel]="search()" (ngModelChange)="search.set($event)"
+        (keydown.enter)="reload()" />
+    </label>
+    <label>
+      <span>Status</span>
+      <select [ngModel]="suspended()" (ngModelChange)="suspended.set($event); reload()">
+        <option value="">All</option>
+        <option value="false">Active</option>
+        <option value="true">Suspended</option>
+      </select>
+    </label>
+    <div class="users__filter-actions">
+      <button type="button" class="users__btn users__btn--primary" (click)="reload()">Apply</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="users__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="users__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="users__empty">No users match.</p>
+  } @else {
+    <div class="users__table-wrap">
+      <table class="users__table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th class="t-right">Purchases</th>
+            <th class="t-right">Tours</th>
+            <th>Joined</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of rows(); track u.id) {
+            <tr class="users__row" [routerLink]="['/admin/users', u.id]">
+              <td>
+                <strong>{{ u.display_name }}</strong>
+                <small>&commat;{{ u.username }}</small>
+              </td>
+              <td>{{ u.email }}</td>
+              <td class="t-right">{{ u.purchase_count }}</td>
+              <td class="t-right">{{ u.tour_count }}</td>
+              <td>{{ fmtDate(u.created_at) }}</td>
+              <td>
+                @if (u.suspended_at) {
+                  <span class="users__chip users__chip--suspended" title="{{ u.suspended_reason }}">Suspended</span>
+                } @else {
+                  <span class="users__chip users__chip--active">Active</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

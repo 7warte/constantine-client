@@ -35,6 +35,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/accept-invite/accept-invite.component').then(m => m.AcceptInviteComponent),
   },
 
+  // ── Support: open a ticket via admin invite token (public, no auth) ───────
+  {
+    path: 'support/new/:token',
+    loadComponent: () => import('./pages/support-new/support-new.component').then(m => m.SupportNewComponent),
+  },
+
   // ── Auth (redirect if already logged in) ───────────────────────────────────
   {
     path: 'auth',
