@@ -1,134 +1,147 @@
-<!-- ── Hero with slideshow ──────────────────────────────────────── -->
-<section class="hero">
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<section class="hero" [class.hero--text-light]="activeTextColor() === 'light'">
   @for (img of heroImages; track $index) {
     <div
       class="hero__slide"
       [class.hero__slide--active]="activeSlide() === $index"
-      [style.backgroundImage]="'url(' + img + ')'"
+      [style.backgroundImage]="'url(' + img.src + ')'"
     ></div>
   }
-  <div class="hero__overlay"></div>
   <div class="hero__content container">
     <h1 class="hero__title">Discover the world<br>through its stories</h1>
     <p class="hero__sub">
-      Audio-guided tours created by people who truly know the places.
+      Audio-guided tours created by people who truly know the places.<br>
       Explore museums, landmarks, cities — on your terms.
     </p>
     <div class="hero__actions">
       <app-button routerLink="/explore" variant="primary" size="lg">
-        Explore Tours
+        Explore tours
       </app-button>
-      <app-button routerLink="/auth/register" variant="outline" size="lg">
+      <app-button routerLink="/auth/register" variant="outline" size="lg" class="hero__creator">
         Become a Creator
       </app-button>
     </div>
-    <div class="hero__dots">
-      @for (img of heroImages; track $index) {
-        <span
-          class="hero__dot"
-          [class.hero__dot--active]="activeSlide() === $index"
-        ></span>
-      }
+  </div>
+</section>
+
+<!-- ── Three features ──────────────────────────────────────────── -->
+<section class="features">
+  <div class="container">
+    <h2 class="features__title">Enjoy and explore at your own pace</h2>
+    <div class="features__grid">
+      <article class="feature">
+        <div class="feature__head">
+          <img src="assets/homepage/temple.svg" alt="" class="feature__icon" />
+          <h3 class="feature__heading">Authentic information</h3>
+        </div>
+        <p class="feature__body">Stories told by people who actually live where you visit. Real history, hidden corners, and local voices — not recycled guidebook scripts.</p>
+      </article>
+      <article class="feature">
+        <div class="feature__head">
+          <img src="assets/homepage/person-hiking.svg" alt="" class="feature__icon" />
+          <h3 class="feature__heading">Walk while learning</h3>
+        </div>
+        <p class="feature__body">Let your phone do the talking while your eyes stay on the street. Hands-free audio guides keep you moving at your own pace.</p>
+      </article>
+      <article class="feature">
+        <div class="feature__head">
+          <img src="assets/homepage/world.svg" alt="" class="feature__icon" />
+          <h3 class="feature__heading">Worldwide available</h3>
+        </div>
+        <p class="feature__body">From Rome to Reykjavik, browse tours across dozens of cities. New routes from new creators arrive every week.</p>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- ── Categories ─────────────────────────────────────────────── -->
-<section class="categories section">
-  <div class="container">
-    <h2 class="section__title">Browse by category</h2>
-    <ul class="categories__grid">
-      @for (cat of categories(); track cat.id) {
+<!-- ── How it works (flat: list left, illustration right) ──────── -->
+<section class="how">
+  <div class="container how__wrap">
+    <div class="how__col">
+      <p class="eyebrow">How does it work?</p>
+      <ol class="numbered-list">
         <li>
-          <a [routerLink]="['/explore']" [queryParams]="{ category: cat.slug }" class="category-chip">
-            {{ cat.name }}
-          </a>
+          <span class="numbered-list__num">1</span>
+          <span>🔎 Find a <span class="numbered-list__hl">Tour in your area</span> of interest</span>
         </li>
-      }
-    </ul>
-  </div>
-</section>
-
-<!-- ── Featured tours ─────────────────────────────────────────── -->
-<section class="featured section">
-  <div class="container">
-    <h2 class="section__title">Top rated tours</h2>
-    <div class="featured__grid">
-      @for (tour of featuredTours(); track tour.id) {
-        <app-card [tour]="tour" />
-      } @empty {
-        <p class="text-secondary">Loading tours…</p>
-      }
-    </div>
-    <div class="featured__cta">
-      <app-button routerLink="/explore" variant="ghost">
-        View all tours →
+        <li>
+          <span class="numbered-list__num">2</span>
+          <span>🧭 Explore while enjoying <span class="numbered-list__hl">valuable informations</span> fruition</span>
+        </li>
+        <li>
+          <span class="numbered-list__num">3</span>
+          <span>📱 Follow direction <span class="numbered-list__hl">on your mobile</span> at your own pace as many times as you want</span>
+        </li>
+      </ol>
+      <app-button routerLink="/explore" size="lg" class="btn-wheat">
+        Explore tours
       </app-button>
     </div>
+    <div class="how__illustration">
+      <img src="assets/homepage/tourist.jpg" alt="Tourists exploring with audio tours" />
+    </div>
   </div>
 </section>
 
-<!-- ── Quote ──────────────────────────────────────────────────── -->
-<section class="quote-section">
+<!-- ── Quote ────────────────────────────────────────────────────── -->
+<section class="quote">
   <div class="container">
-    <blockquote class="quote">
+    <blockquote>
       <p class="quote__text">"{{ activeQuote.text }}"</p>
-      <cite class="quote__author">— {{ activeQuote.author }}</cite>
+      <cite class="quote__author">{{ activeQuote.author }}</cite>
     </blockquote>
   </div>
 </section>
 
-<!-- ── How it works ───────────────────────────────────────────── -->
-<section class="how-it-works section">
+<!-- ── FAQ ──────────────────────────────────────────────────────── -->
+<section class="faq">
   <div class="container">
-    <h2 class="section__title">How it works</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step__image">
-          <img [src]="heroImages[1]" alt="Explore destinations" loading="lazy" />
-        </div>
-        <div class="step__content">
-          <span class="step__number">01</span>
-          <h3>Find a tour</h3>
-          <p>Browse hundreds of audio-guided tours across cities, museums, and landmarks worldwide.</p>
-        </div>
-      </div>
-      <div class="step step--reverse">
-        <div class="step__image">
-          <img [src]="heroImages[3]" alt="Listen and explore" loading="lazy" />
-        </div>
-        <div class="step__content">
-          <span class="step__number">02</span>
-          <h3>Listen and explore</h3>
-          <p>Play the tour on your phone as you walk. Audio, images, and directions guide you at every stop.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step__image">
-          <img [src]="heroImages[4]" alt="Create and earn" loading="lazy" />
-        </div>
-        <div class="step__content">
-          <span class="step__number">03</span>
-          <h3>Create and earn</h3>
-          <p>Know a place well? Record your own tour, set your price, and earn from every download.</p>
-        </div>
-      </div>
-    </div>
+    <p class="eyebrow">Frequently asked questions</p>
+    <ul class="faq__list">
+      @for (item of faqItems(); track item.id) {
+        <li class="faq__item" [class.faq__item--open]="openFaq() === item.id">
+          <button class="faq__question" (click)="toggleFaq(item.id)" [attr.aria-expanded]="openFaq() === item.id">
+            <span>{{ item.question }}</span>
+            <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          @if (openFaq() === item.id) {
+            <div class="faq__answer">{{ item.answer }}</div>
+          }
+        </li>
+      }
+    </ul>
+    @if (faqItems().length > 0) {
+      <a routerLink="/faq" class="faq__more">See all questions →</a>
+    }
   </div>
 </section>
 
-<!-- ── Creator CTA ────────────────────────────────────────────── -->
-<section class="creators-cta section">
-  <div class="container creators-cta__inner">
-    <div class="creators-cta__text">
-      <h2>Share your knowledge.<br>Earn from your stories.</h2>
-      <p>
-        Create tours in any language, collaborate with translators,
-        and build passive income from every download.
-      </p>
+<!-- ── Creators (flat: illustration left, list + button right) ── -->
+<section class="creators">
+  <div class="container creators__wrap">
+    <div class="creators__illustration">
+      <img src="assets/homepage/creators.png" alt="Creators making audio tours" />
     </div>
-    <app-button routerLink="/auth/register" variant="primary" size="lg">
-      Start creating for free
-    </app-button>
+    <div class="creators__col">
+      <ol class="numbered-list">
+        <li>
+          <span class="numbered-list__num">1</span>
+          <span>Design your tour in the <span class="numbered-list__hl">Studio section of this website</span></span>
+        </li>
+        <li>
+          <span class="numbered-list__num">2</span>
+          <span>Choose the price you want to sell your tour for and publish it so the world can see it!</span>
+        </li>
+        <li>
+          <span class="numbered-list__num">3</span>
+          <span>Compliments! You are contributing to <span class="numbered-list__hl">sharing knowledge with the world!</span></span>
+        </li>
+      </ol>
+      <app-button routerLink="/auth/register" size="lg" class="btn-wheat">
+        Create tours and start earning
+      </app-button>
+    </div>
   </div>
 </section>

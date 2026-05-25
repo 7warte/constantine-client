@@ -1,23 +1,43 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
+
+interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, ButtonComponent, CardComponent],
+  imports: [RouterLink, CommonModule, ButtonComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
 
-  readonly featuredTours = signal<any[]>([]);
-  readonly categories    = signal<any[]>([]);
+  readonly faqItems      = signal<Faq[]>([]);
+  readonly openFaq       = signal<string | null>(null);
   readonly activeSlide   = signal(0);
+
+  // Each image declares its text color so the hero title/sub stay readable.
+  // Use 'dark' for light/bright photos, 'light' for dim/dark photos.
+  readonly heroImages: { src: string; textColor: 'dark' | 'light' }[] = [
+    { src: 'assets/homepage/chris-czermak.jpg',                       textColor: 'dark'  },
+    { src: 'assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg',    textColor: 'light' },
+    { src: 'assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg', textColor: 'light' },
+    { src: 'assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg',     textColor: 'light' },
+    { src: 'assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',  textColor: 'light' },
+    { src: 'assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg', textColor: 'light' },
+  ];
+
+  readonly activeTextColor = computed(() => this.heroImages[this.activeSlide()].textColor);
+
+  private slideTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly quotes = [
     { text: 'The world is a book and those who do not travel read only one page.', author: 'Saint Augustine' },
@@ -54,22 +74,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   readonly activeQuote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
 
-  readonly heroImages = [
-    'assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg',
-    'assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg',
-    'assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg',
-    'assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',
-    'assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg',
-  ];
-
-  private slideTimer: ReturnType<typeof setInterval> | null = null;
-
   ngOnInit(): void {
-    this.api.get<any[]>('/tours', { limit: 6, sort: 'top_rated' })
-      .subscribe(tours => this.featuredTours.set(tours));
-
-    this.api.get<any[]>('/categories')
-      .subscribe(cats => this.categories.set(cats));
+    this.api.get<Faq[]>('/faqs', { home: 1 })
+      .subscribe(items => {
+        this.faqItems.set(items);
+        if (items.length > 0) this.openFaq.set(items[0].id);
+      });
 
     this.slideTimer = setInterval(() => {
       this.activeSlide.update(i => (i + 1) % this.heroImages.length);
@@ -78,5 +88,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.slideTimer) clearInterval(this.slideTimer);
+  }
+
+  toggleFaq(id: string): void {
+    this.openFaq.update(curr => (curr === id ? null : id));
   }
 }

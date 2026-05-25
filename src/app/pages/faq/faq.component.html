@@ -1,0 +1,27 @@
+<section class="faq-page">
+  <div class="container">
+    <h1 class="faq-page__title">Frequently Asked Questions</h1>
+
+    @if (loading()) {
+      <p class="faq-page__loading">Loading…</p>
+    } @else if (faqs().length === 0) {
+      <p class="faq-page__empty">No questions yet.</p>
+    } @else {
+      <ul class="faq-page__list">
+        @for (f of faqs(); track f.id) {
+          <li class="faq-page__item" [class.faq-page__item--open]="openId() === f.id">
+            <button class="faq-page__question" (click)="toggle(f.id)" [attr.aria-expanded]="openId() === f.id">
+              <span>{{ f.question }}</span>
+              <svg class="faq-page__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            @if (openId() === f.id) {
+              <div class="faq-page__answer">{{ f.answer }}</div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

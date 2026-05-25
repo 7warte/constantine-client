@@ -2,57 +2,119 @@
 @use '../../../../styles/mixins' as *;
 
 .footer {
-  border-top: 1px solid $border-default;
-  padding-block: $space-10;
-  background: $bg-surface-alt;
+  background: $dusty-rose;
+  color: $white;
+  padding-block: $space-8;
+
+  @include lg {
+    min-height: 320px;            // 64px × 5
+    display: flex;
+    align-items: center;
+    padding-block: 0;
+  }
 
   &__inner {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: $space-6;
-    text-align: center;
+    width: 100%;
+  }
+
+  &__cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-8;
 
     @include md {
-      flex-direction: row;
-      justify-content: space-between;
-      text-align: left;
+      grid-template-columns: 2fr 1fr 1fr;
     }
   }
 
+  &__col {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__col-title {
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $white;
+    margin: 0 0 $space-2 0;
+  }
+
+  // ── Brand column ─────────────────────────────────────────────────────────
   &__brand {
     display: flex;
     align-items: center;
     gap: $space-2;
   }
 
-  &__glyph {
-    font-size: $font-size-xl;
-    color: $accent-primary;
+  &__mark {
+    width: 22px;
+    height: 22px;
+    background: $white;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   &__name {
     font-family: $font-family-primary;
-    font-size: $font-size-lg;
-    color: $text-primary;
+    font-size: $font-size-md;
+    color: $white;
   }
 
-  &__nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: $space-6;
+  &__tagline {
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: rgba($white, 0.85);
+    margin: 0;
+    max-width: 320px;
+    line-height: $line-height-normal;
+  }
+
+  &__address {
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-style: normal;
+    color: rgba($white, 0.85);
+    line-height: $line-height-normal;
 
     a {
-      font-size: $font-size-sm;
-      color: $text-secondary;
-      transition: color $transition-fast;
-      &:hover { color: $text-primary; }
+      color: rgba($white, 0.85);
+      text-decoration: none;
+      &:hover { color: $white; text-decoration: underline; }
     }
   }
 
+  // ── Link columns ─────────────────────────────────────────────────────────
+  &__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+
+    a {
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: rgba($white, 0.85);
+      text-decoration: none;
+      transition: color $transition-fast;
+
+      &:hover { color: $white; }
+    }
+  }
+
+  // ── Copyright row ────────────────────────────────────────────────────────
   &__copy {
+    font-family: $font-family-secondary;
     font-size: $font-size-xs;
-    color: $text-muted;
+    color: rgba($white, 0.7);
+    margin: 0;
+    padding-top: $space-4;
+    border-top: 1px solid rgba($white, 0.2);
   }
 }

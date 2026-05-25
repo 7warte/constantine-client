@@ -50,10 +50,11 @@ export class AdminLayoutComponent {
     {
       label: 'System',
       items: [
-        { label: 'Error logs',           icon: 'bug_report', path: '/admin/error-logs' },
-        { label: 'Email log',            icon: 'mail',       path: '/admin/email-logs' },
-        { label: 'Terms & conditions',   icon: 'gavel',      path: '/admin/legal/terms' },
-        { label: 'Privacy policy',       icon: 'shield',     path: '/admin/legal/privacy' },
+        { label: 'Error logs',           icon: 'bug_report',   path: '/admin/error-logs' },
+        { label: 'Email log',            icon: 'mail',         path: '/admin/email-logs' },
+        { label: 'Terms & conditions',   icon: 'gavel',        path: '/admin/legal/terms' },
+        { label: 'Privacy policy',       icon: 'shield',       path: '/admin/legal/privacy' },
+        { label: 'FAQs',                 icon: 'help_outline', path: '/admin/faqs' },
       ],
     },
     {

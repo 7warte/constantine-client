@@ -1,0 +1,90 @@
+<section class="faqs">
+  <header class="faqs__head">
+    <h1>FAQs</h1>
+    <p>Questions shown on the homepage and the public <code>/faq</code> page.</p>
+  </header>
+
+  <form class="faqs__add" (ngSubmit)="add()">
+    <input
+      type="text"
+      class="faqs__input"
+      placeholder="Question…"
+      maxlength="500"
+      [ngModel]="newQuestion()"
+      (ngModelChange)="newQuestion.set($event)"
+      name="newQuestion" />
+    <textarea
+      class="faqs__input faqs__input--area"
+      placeholder="Answer…"
+      maxlength="5000"
+      rows="3"
+      [ngModel]="newAnswer()"
+      (ngModelChange)="newAnswer.set($event)"
+      name="newAnswer"></textarea>
+    <button type="submit" class="faqs__btn faqs__btn--primary"
+      [disabled]="adding() || !newQuestion().trim() || !newAnswer().trim()">
+      {{ adding() ? 'Adding…' : 'Add FAQ' }}
+    </button>
+  </form>
+
+  @if (loading()) {
+    <p class="faqs__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="faqs__error" role="alert">{{ error() }}</div>
+  } @else if (faqs().length === 0) {
+    <p class="faqs__empty">No FAQs yet.</p>
+  } @else {
+    <ul class="faqs__list">
+      @for (f of faqs(); track f.id; let i = $index) {
+        <li class="faqs__item" [class.faqs__item--draft]="!f.is_published">
+          <div class="faqs__order">
+            <button class="faqs__icon-btn" title="Move up"
+              [disabled]="i === 0" (click)="move(f, -1)">↑</button>
+            <button class="faqs__icon-btn" title="Move down"
+              [disabled]="i === faqs().length - 1" (click)="move(f, 1)">↓</button>
+          </div>
+
+          <div class="faqs__body">
+            @if (editingId() === f.id) {
+              <input
+                #qInput
+                type="text"
+                class="faqs__input"
+                [value]="f.question"
+                maxlength="500" />
+              <textarea
+                #aInput
+                class="faqs__input faqs__input--area"
+                rows="4"
+                maxlength="5000">{{ f.answer }}</textarea>
+              <div class="faqs__edit-actions">
+                <button type="button" class="faqs__btn faqs__btn--primary"
+                  (click)="saveEdit(f, qInput.value, aInput.value)">Save</button>
+                <button type="button" class="faqs__btn" (click)="cancelEdit()">Cancel</button>
+              </div>
+            } @else {
+              <p class="faqs__question">{{ f.question }}</p>
+              <p class="faqs__answer">{{ f.answer }}</p>
+            }
+          </div>
+
+          <div class="faqs__controls">
+            <label class="faqs__toggle" [title]="f.is_published ? 'Published' : 'Draft'">
+              <input type="checkbox" [checked]="f.is_published" (change)="togglePublished(f)" />
+              <span>Published</span>
+            </label>
+            <label class="faqs__toggle" [title]="f.show_on_home ? 'Shown on homepage' : 'Hidden from homepage'">
+              <input type="checkbox" [checked]="f.show_on_home" (change)="toggleHome(f)" />
+              <span>On home</span>
+            </label>
+
+            @if (editingId() !== f.id) {
+              <button class="faqs__icon-btn" title="Edit" (click)="startEdit(f)">✎</button>
+            }
+            <button class="faqs__icon-btn faqs__icon-btn--danger" title="Delete" (click)="remove(f)">×</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

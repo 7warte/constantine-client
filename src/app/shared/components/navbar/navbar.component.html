@@ -2,11 +2,7 @@
   <div class="navbar__inner container">
     <!-- Brand -->
     <a routerLink="/" class="navbar__brand" (click)="closeMenu()">
-      <svg class="navbar__brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5"/>
-        <path d="M2 12l10 5 10-5"/>
-      </svg>
+      <span class="navbar__brand-mark" aria-hidden="true"></span>
       <span class="navbar__brand-name">Constantine</span>
     </a>
 
@@ -35,8 +31,7 @@
         </a>
         <app-button variant="ghost" size="sm" (click)="auth.logout()">Sign out</app-button>
       } @else {
-        <app-button routerLink="/auth/login"    variant="ghost"   size="sm">Sign in</app-button>
-        <app-button routerLink="/auth/register" variant="primary" size="sm">Get started</app-button>
+        <a routerLink="/auth/login" class="navbar__link">Sign in</a>
       }
     </div>
 

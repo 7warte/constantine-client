@@ -18,7 +18,8 @@
   }
 
   &__inner {
-    @include flex-between;
+    display: flex;
+    align-items: center;
     height: 100%;
   }
 
@@ -33,10 +34,11 @@
     padding-block: 0;
   }
 
-  &__brand-icon {
+  &__brand-mark {
     width: 22px;
     height: 22px;
-    color: $white;
+    background: $white;
+    border-radius: 50%;
     flex-shrink: 0;
 
     @media (max-width: #{$bp-lg - 1px}) {
@@ -61,6 +63,7 @@
     display: none;
     align-items: center;
     gap: $space-6;
+    margin-left: auto;        // push to the right edge
 
     @include lg { display: flex; }
   }
@@ -80,6 +83,7 @@
     display: none;
     align-items: center;
     gap: $space-3;
+    margin-left: $space-6;
 
     @include lg { display: flex; }
   }
@@ -119,6 +123,7 @@
     gap: 5px;
     padding: $space-2;
     cursor: pointer;
+    margin-left: auto;        // keep on the right when nav is hidden
 
     @include lg { display: none; }
 

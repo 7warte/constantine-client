@@ -97,6 +97,11 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/legal/admin-legal.component').then(m => m.AdminLegalComponent),
       },
       {
+        path: 'faqs',
+        loadComponent: () =>
+          import('./pages/faqs/admin-faqs.component').then(m => m.AdminFaqsComponent),
+      },
+      {
         path: 'analytics',
         loadComponent: () =>
           import('./pages/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent),

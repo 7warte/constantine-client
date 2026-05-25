@@ -1,0 +1,175 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.faqs {
+  padding: $space-6;
+  max-width: 960px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-5;
+
+    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0 0 $space-1; }
+    p  { font-size: $font-size-sm; color: $text-secondary; margin: 0; }
+    code {
+      font-family: monospace;
+      background: $bg-surface-alt;
+      padding: 1px 4px;
+      border-radius: $radius-sm;
+    }
+  }
+
+  &__add {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    margin-bottom: $space-5;
+    padding: $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    background: $bg-light;
+    color: $text-primary;
+    line-height: $line-height-normal;
+    resize: vertical;
+
+    &:focus { outline: none; border-color: $accent-primary; }
+    &--area { font-family: $font-family-secondary; }
+  }
+
+  &__btn {
+    padding: $space-2 $space-4;
+    background: $bg-light;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    cursor: pointer;
+    transition: background $transition-fast;
+    align-self: flex-start;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    &--primary {
+      background: $accent-primary;
+      border-color: $accent-primary;
+      color: $white;
+      &:hover:not(:disabled) { background: $accent-hover; border-color: $accent-hover; }
+    }
+  }
+
+  &__loading,
+  &__empty,
+  &__error { font-size: $font-size-sm; }
+  &__error { color: $color-error; }
+  &__empty,
+  &__loading { color: $text-secondary; }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: start;
+    gap: $space-3;
+    padding: $space-3;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    transition: background $transition-fast;
+
+    &:hover { background: $bg-surface-alt; }
+    &--draft { opacity: 0.6; border-left: 3px solid $color-warning; }
+  }
+
+  &__order {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__question {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0;
+    line-height: $line-height-tight;
+  }
+
+  &__answer {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+    line-height: $line-height-normal;
+    overflow-wrap: anywhere;
+  }
+
+  &__edit-actions {
+    display: flex;
+    gap: $space-2;
+  }
+
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: $space-2;
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  &__icon-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: $font-size-base;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: $radius-sm;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover:not(:disabled) { background: $bg-surface-alt; color: $text-primary; }
+    &:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    &--danger:hover { color: $color-error; }
+  }
+}
