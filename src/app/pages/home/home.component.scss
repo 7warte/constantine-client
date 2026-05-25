@@ -149,6 +149,7 @@
     display: flex;
     align-items: center;
     gap: $space-2;
+    line-height: 1;            // keeps icon + heading vertically centered
   }
 
   &__icon {
@@ -156,14 +157,16 @@
     height: 24px;
     object-fit: contain;
     flex-shrink: 0;
+    display: block;
   }
 
   &__heading {
     font-family: $font-family-primary;
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-regular;
     color: $text-primary;
     margin: 0;
+    line-height: 1;
   }
 
   &__body {
