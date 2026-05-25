@@ -162,7 +162,7 @@
 
   &__heading {
     font-family: $font-family-primary;
-    font-size: $font-size-sm;
+    font-size: $font-size-base;
     font-weight: $font-weight-regular;
     color: $text-primary;
     margin: 0;
@@ -428,5 +428,38 @@
     background: $black !important;
     color: $wheat !important;
     border-color: $black !important;
+  }
+}
+
+// ── Mobile: stop buttons from blowing past the viewport ─────────────────────
+// The default `.btn` has `white-space: nowrap` + `padding-inline: $space-8`
+// at lg size — long CTA labels (e.g. "Create tours and start earning")
+// overflow on phones and cause horizontal scroll.
+@media (max-width: #{$bp-md - 1px}) {
+
+  // Hero: stack buttons vertically, centered, capped width
+  .hero__actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  // Wheat CTAs: center within their flex column on mobile
+  ::ng-deep .btn-wheat {
+    align-self: center;
+  }
+
+  // Apply to every app-button on the homepage
+  ::ng-deep app-button {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+
+    .btn {
+      width: 100%;
+      white-space: normal;
+      padding-inline: $space-4;
+      line-height: $line-height-tight;
+    }
   }
 }
