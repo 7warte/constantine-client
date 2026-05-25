@@ -20,6 +20,10 @@
   align-items: center;
   overflow: hidden;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    min-height: 60dvh;
+  }
+
   &__slide {
     position: absolute;
     inset: 0;
@@ -35,6 +39,10 @@
     position: relative;
     z-index: $z-raised;
     padding-block: $space-8;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      padding-block: $space-6;
+    }
   }
 
   &__title {
@@ -47,6 +55,10 @@
     transition: color 400ms ease;
 
     @include lg { font-size: $font-size-3xl; }
+
+    @media (max-width: #{$bp-sm - 1px}) {
+      font-size: $font-size-xl;
+    }
   }
 
   &__sub {
@@ -57,6 +69,10 @@
     margin-bottom: $space-5;
     max-width: 520px;
     transition: color 400ms ease;
+
+    @media (max-width: #{$bp-sm - 1px}) {
+      font-size: $font-size-sm;
+    }
   }
 
   // Light text mode (for dark/dim photos)
@@ -93,6 +109,10 @@
   padding-block: $space-10;
   background: $bg-surface;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-8;
+  }
+
   &__title {
     text-align: center;
     font-family: $font-family-primary;
@@ -100,6 +120,11 @@
     font-weight: $font-weight-bold;
     color: $text-primary;
     margin-bottom: $space-8;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      margin-bottom: $space-6;
+      font-size: $font-size-base;
+    }
   }
 
   &__grid {
@@ -109,6 +134,7 @@
 
     @media (max-width: #{$bp-md - 1px}) {
       grid-template-columns: 1fr;
+      gap: $space-5;
     }
   }
 }
@@ -134,7 +160,7 @@
 
   &__heading {
     font-family: $font-family-primary;
-    font-size: $font-size-md;
+    font-size: $font-size-base;
     font-weight: $font-weight-semibold;
     color: $text-primary;
     margin: 0;
@@ -168,6 +194,11 @@
     font-size: $font-size-base;
     color: $text-primary;
     line-height: $line-height-normal;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      grid-template-columns: 32px 1fr;
+      font-size: $font-size-sm;
+    }
   }
 
   &__num {
@@ -177,6 +208,10 @@
     color: $text-primary;
     text-align: left;
     line-height: 1;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-md;
+    }
   }
 
   &__hl {
@@ -189,6 +224,10 @@
   padding-block: $space-8;
   background: $bg-surface;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
   &__wrap {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -197,6 +236,7 @@
 
     @media (max-width: #{$bp-md - 1px}) {
       grid-template-columns: 1fr;
+      gap: $space-6;
     }
   }
 
@@ -215,6 +255,10 @@
       width: 100%;
       height: auto;
       display: block;
+
+      @media (max-width: #{$bp-md - 1px}) {
+        max-width: 360px;
+      }
     }
   }
 }
@@ -225,6 +269,10 @@
   background: $bg-surface;
   text-align: center;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
+
   blockquote { margin: 0; }
 
   &__text {
@@ -234,6 +282,10 @@
     color: $text-primary;
     line-height: $line-height-tight;
     margin: 0 0 $space-4 0;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xl;
+    }
   }
 
   &__author {
@@ -248,6 +300,10 @@
 .faq {
   padding-block: $space-8;
   background: $bg-surface;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6;
+  }
 
   &__list {
     list-style: none;
@@ -315,6 +371,10 @@
   padding-block: $space-8 $space-10;
   background: $bg-surface;
 
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6 $space-8;
+  }
+
   &__wrap {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -323,6 +383,7 @@
 
     @media (max-width: #{$bp-md - 1px}) {
       grid-template-columns: 1fr;
+      gap: $space-6;
     }
   }
 
@@ -335,6 +396,10 @@
       width: 100%;
       height: auto;
       display: block;
+
+      @media (max-width: #{$bp-md - 1px}) {
+        max-width: 360px;
+      }
     }
   }
 
@@ -346,15 +411,19 @@
 }
 
 // ── Wheat button override ────────────────────────────────────────────────────
+// `!important` is required because the button component's `.btn--primary`
+// rule (which is the default variant) lives inside an encapsulated stylesheet
+// with higher specificity. We want the CTA to read as $wheat (#dfcb8f).
 ::ng-deep .btn-wheat .btn {
-  background: $wheat;
-  color: $text-primary;
-  border: 1px solid $black;
+  background: $wheat !important;
+  color: $text-primary !important;
+  border: 1px solid $black !important;
+  box-shadow: none !important;
   transition: background 400ms ease, color 400ms ease, border-color 400ms ease;
 
   &:hover:not(:disabled) {
-    background: $black;
-    color: $wheat;
-    border-color: $black;
+    background: $black !important;
+    color: $wheat !important;
+    border-color: $black !important;
   }
 }

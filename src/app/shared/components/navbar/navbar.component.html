@@ -55,9 +55,8 @@
       <a routerLink="/account/profile" class="navbar__mobile-link">Account</a>
       <button class="navbar__mobile-link" (click)="auth.logout()">Sign out</button>
     } @else {
-      <a routerLink="/about" class="navbar__mobile-link">About</a>
-      <a routerLink="/auth/login"    class="navbar__mobile-link">Sign in</a>
-      <a routerLink="/auth/register" class="navbar__mobile-link navbar__mobile-link--accent">Get started</a>
+      <a routerLink="/about"      class="navbar__mobile-link">About</a>
+      <a routerLink="/auth/login" class="navbar__mobile-link">Sign in</a>
     }
   </div>
 }

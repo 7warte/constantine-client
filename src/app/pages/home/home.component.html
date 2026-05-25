@@ -93,31 +93,6 @@
   </div>
 </section>
 
-<!-- ── FAQ ──────────────────────────────────────────────────────── -->
-<section class="faq">
-  <div class="container">
-    <p class="eyebrow">Frequently asked questions</p>
-    <ul class="faq__list">
-      @for (item of faqItems(); track item.id) {
-        <li class="faq__item" [class.faq__item--open]="openFaq() === item.id">
-          <button class="faq__question" (click)="toggleFaq(item.id)" [attr.aria-expanded]="openFaq() === item.id">
-            <span>{{ item.question }}</span>
-            <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </button>
-          @if (openFaq() === item.id) {
-            <div class="faq__answer">{{ item.answer }}</div>
-          }
-        </li>
-      }
-    </ul>
-    @if (faqItems().length > 0) {
-      <a routerLink="/faq" class="faq__more">See all questions →</a>
-    }
-  </div>
-</section>
-
 <!-- ── Creators (flat: illustration left, list + button right) ── -->
 <section class="creators">
   <div class="container creators__wrap">
@@ -143,5 +118,30 @@
         Create tours and start earning
       </app-button>
     </div>
+  </div>
+</section>
+
+<!-- ── FAQ ──────────────────────────────────────────────────────── -->
+<section class="faq">
+  <div class="container">
+    <p class="eyebrow">Frequently asked questions</p>
+    <ul class="faq__list">
+      @for (item of faqItems(); track item.id) {
+        <li class="faq__item" [class.faq__item--open]="openFaq() === item.id">
+          <button class="faq__question" (click)="toggleFaq(item.id)" [attr.aria-expanded]="openFaq() === item.id">
+            <span>{{ item.question }}</span>
+            <svg class="faq__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          @if (openFaq() === item.id) {
+            <div class="faq__answer">{{ item.answer }}</div>
+          }
+        </li>
+      }
+    </ul>
+    @if (faqItems().length > 0) {
+      <a routerLink="/faq" class="faq__more">See all questions →</a>
+    }
   </div>
 </section>
