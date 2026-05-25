@@ -1,12 +1,11 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonComponent],
+  imports: [RouterLink, ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './about.component.html',
   styleUrl: './about.component.scss',

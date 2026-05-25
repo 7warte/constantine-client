@@ -1,197 +1,246 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
-.about {
-  background: $bg-base;
+// ── Eyebrow (mirrors homepage) ──────────────────────────────────────────────
+.eyebrow {
+  font-family: $font-family-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $text-primary;
+  margin: 0 0 $space-5 0;
 }
 
-// ── Hero / Choice cards ───────────────────────────────────────────────────────
-.about-hero {
-  padding: $space-6 0 $space-5;
+// ── Hero ────────────────────────────────────────────────────────────────────
+.ah-hero {
+  background: $bg-surface;
+  padding-block: $space-10 $space-8;
+  text-align: center;
 
-  @include sm {
-    padding: $space-8 0 $space-6;
-  }
-
-  &__inner {
-    text-align: center;
-    max-width: 1200px;
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-8 $space-6;
   }
 
   &__title {
-    font-size: $font-size-xl;
+    font-family: $font-family-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
     color: $text-primary;
-    margin-bottom: $space-3;
+    line-height: $line-height-tight;
+    margin: 0 0 $space-4 0;
 
-    @include sm { font-size: $font-size-2xl; }
-    @include md { font-size: $font-size-3xl; }
+    @include lg { font-size: $font-size-3xl; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xl;
+    }
+    @media (max-width: #{$bp-sm - 1px}) {
+      font-size: $font-size-lg;
+    }
   }
 
   &__sub {
+    font-family: $font-family-secondary;
     font-size: $font-size-base;
     color: $text-secondary;
+    line-height: $line-height-normal;
     max-width: 560px;
     margin: 0 auto $space-6;
-    line-height: $line-height-normal;
-  }
-}
 
-.about-choices {
-  display: grid;
-  gap: $space-4;
-  grid-template-columns: 1fr;
-  max-width: 1000px;
-  margin: 0 auto;
-
-  @include md {
-    grid-template-columns: 1fr 1fr;
-    gap: $space-5;
-  }
-}
-
-.about-choice {
-  position: relative;
-  border: 1px solid $border-default;
-  padding: 0;
-  cursor: pointer;
-  border-radius: $radius-lg;
-  overflow: hidden;
-  height: 220px;
-  background: $bg-surface;
-  text-align: left;
-  transition: transform $transition-normal, box-shadow $transition-normal, border-color $transition-fast;
-
-  @include sm { height: 260px; }
-  @include md { height: 300px; }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
-    border-color: $border-strong;
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-sm;
+    }
   }
 
-  &__img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-    filter: grayscale(40%) brightness(0.55);
-    transition: filter $transition-normal, transform $transition-slow;
-  }
-
-  &:hover &__img {
-    filter: grayscale(10%) brightness(0.6);
-    transform: scale(1.03);
-  }
-
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
+  &__choices {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: $space-4;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.7) 100%);
-    color: $white;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: $space-4;
+    margin-top: $space-6;
 
-    @include sm { padding: $space-5; }
-  }
-
-  &__title {
-    font-size: $font-size-lg;
-    margin-bottom: $space-2;
-    color: $white;
-
-    @include sm { font-size: $font-size-xl; }
-  }
-
-  &__blurb {
-    font-size: $font-size-sm;
-    margin-bottom: $space-3;
-    color: rgba(#fff, 0.88);
-    line-height: $line-height-normal;
-
-    @include sm { font-size: $font-size-base; }
-  }
-
-  &__cta {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: $white;
+    @media (max-width: #{$bp-md - 1px}) {
+      flex-direction: column;
+      align-items: center;
+    }
   }
 }
 
-// ── Topic sections ────────────────────────────────────────────────────────────
-.about-section {
-  padding: $space-6 0;
-  scroll-margin-top: 72px;
-
-  @include sm { padding: $space-8 0; }
-
-  &--alt { background: $bg-surface; }
+// ── Mission intro ───────────────────────────────────────────────────────────
+.ah-intro {
+  background: $bg-surface;
+  padding-block: $space-8;
 
   &__heading {
+    font-family: $font-family-primary;
     font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
     color: $text-primary;
-    text-align: center;
-    margin-bottom: $space-3;
+    line-height: $line-height-tight;
+    margin: 0 0 $space-5 0;
 
-    @include sm { font-size: $font-size-2xl; }
+    @include lg { font-size: $font-size-2xl; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-lg;
+    }
   }
 
   &__lede {
-    font-size: $font-size-base;
-    color: $text-secondary;
-    text-align: center;
-    max-width: 640px;
-    margin: 0 auto $space-6;
-    line-height: $line-height-normal;
-  }
-
-  &__cta {
-    text-align: center;
-    margin-top: $space-6;
-  }
-}
-
-.about-block {
-  display: grid;
-  gap: $space-4;
-  align-items: center;
-  margin-bottom: $space-6;
-  grid-template-columns: 1fr;
-
-  @include md {
-    grid-template-columns: 1fr 1fr;
-    gap: $space-8;
-    margin-bottom: $space-8;
-
-    &--reverse .about-block__copy { order: 2; }
-    &--reverse .about-block__img  { order: 1; }
-  }
-
-  &__title {
-    font-size: $font-size-lg;
-    color: $text-primary;
-    margin-bottom: $space-3;
-  }
-
-  &__copy p {
+    font-family: $font-family-secondary;
     font-size: $font-size-base;
     color: $text-secondary;
     line-height: $line-height-loose;
+    margin: 0;
+  }
+}
+
+// ── Story (For explorers / For creators) ────────────────────────────────────
+.ah-story {
+  background: $bg-surface;
+  padding-block: $space-8 $space-10;
+  scroll-margin-top: 72px;       // keep heading clear of sticky navbar
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-6 $space-8;
   }
 
-  &__img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: $radius-lg;
-    filter: grayscale(20%);
+  &__lead {
+    margin-bottom: $space-6;
+  }
+
+  &__heading {
+    font-family: $font-family-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: $line-height-tight;
+    margin: 0;
+
+    @include lg { font-size: $font-size-3xl; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-xl;
+    }
+  }
+}
+
+// ── The alternating grid (corners touch — no gap between cells) ──────────────
+.ah-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: $space-8;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Illustration placeholder (light grey panel, edge to edge) ───────────────
+.ah-illust {
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-6;
+  text-align: center;
+
+  span {
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-style: italic;
+    color: $text-secondary;
+    max-width: 280px;
+    line-height: $line-height-normal;
+  }
+}
+
+// ── Text cell ───────────────────────────────────────────────────────────────
+.ah-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: $space-6 $space-8;
+  background: $bg-surface;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-6 $space-4;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0 0 $space-3 0;
+    line-height: $line-height-tight;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-base;
+    }
+  }
+
+  p {
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+    margin: 0;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// ── Section CTA (wheat button, centered) ────────────────────────────────────
+.ah-cta {
+  display: flex;
+  justify-content: center;
+  padding-inline: $container-padding;
+}
+
+// ── Closing ─────────────────────────────────────────────────────────────────
+.ah-closing {
+  background: $bg-surface-alt;
+  padding-block: $space-10;
+  text-align: center;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding-block: $space-8;
+  }
+
+  &__heading {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: $line-height-tight;
+    margin: 0 0 $space-4 0;
+
+    @include lg { font-size: $font-size-2xl; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: $font-size-lg;
+    }
+  }
+
+  &__body {
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+    max-width: 640px;
+    margin: 0 auto;
+
+    a {
+      color: $accent-primary;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
   }
 }

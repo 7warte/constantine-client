@@ -1,130 +1,177 @@
-<section class="about">
-  <!-- ── Intro / Choice cards ────────────────────────────────────────── -->
-  <header class="about-hero">
-    <div class="container about-hero__inner">
-      <h1 class="about-hero__title">Welcome to Constantine</h1>
-      <p class="about-hero__sub">
-        Audio tours, made by people who actually know the place.
-        What brings you here?
-      </p>
-
-      <div class="about-choices">
-        <button type="button" class="about-choice" (click)="scrollTo('enjoy')">
-          <img src="assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg" alt="" class="about-choice__img" />
-          <div class="about-choice__overlay">
-            <h2 class="about-choice__title">Enjoy Tours</h2>
-            <p class="about-choice__blurb">Discover, buy, and listen to audio tours from creators around the world.</p>
-            <span class="about-choice__cta">See how →</span>
-          </div>
-        </button>
-
-        <button type="button" class="about-choice" (click)="scrollTo('create')">
-          <img src="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" class="about-choice__img" />
-          <div class="about-choice__overlay">
-            <h2 class="about-choice__title">Be a Tour Creator</h2>
-            <p class="about-choice__blurb">Share what you know, build a tour, and earn from every listener.</p>
-            <span class="about-choice__cta">See how →</span>
-          </div>
-        </button>
-      </div>
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<section class="ah-hero">
+  <div class="container">
+    <h1 class="ah-hero__title">About Constantine</h1>
+    <p class="ah-hero__sub">
+      Audio tours, told by the people who actually know the places.<br>
+      What brings you here?
+    </p>
+    <div class="ah-hero__choices">
+      <app-button size="lg" class="btn-wheat" (click)="scrollTo('explorer')">
+        Explorer
+      </app-button>
+      <app-button size="lg" class="btn-wheat" (click)="scrollTo('creator')">
+        Creator
+      </app-button>
     </div>
-  </header>
+  </div>
+</section>
 
-  <!-- ── Enjoy Tours ─────────────────────────────────────────────────── -->
-  <section id="enjoy" class="about-section">
-    <div class="container">
-      <h2 class="about-section__heading">Enjoy Tours</h2>
-      <p class="about-section__lede">
-        Constantine is a marketplace of audio tours — built around real places by people who know them.
-        Here's what to expect as a listener.
-      </p>
+<!-- ── Mission intro ───────────────────────────────────────────── -->
+<section class="ah-intro">
+  <div class="container">
+    <p class="eyebrow">Our mission</p>
+    <h2 class="ah-intro__heading">
+      To put the world's stories<br>in your headphones.
+    </h2>
+    <p class="ah-intro__lede">
+      Constantine connects curious travellers with the people who can really tell a place — its history,
+      its quirks, the corners you'd never find in a guidebook. We're a marketplace where anyone with
+      deep local knowledge can build an audio tour, and anyone visiting can hear the place as a local would.
+    </p>
+  </div>
+</section>
 
-      <div class="about-block">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Browse stories curated by locals and experts</h3>
-          <p>
-            Find tours by city, topic, language, or favourite creator. Every tour is built around a real place —
-            a museum hall, a neighbourhood, a hike, a cathedral — and comes with audio, photos, and the kind of context
-            only an insider can give.
-          </p>
-        </div>
-        <img src="assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
+<!-- ── For Explorers (alternating rows, corners touch) ─────────── -->
+<section class="ah-story" id="explorer">
+  <div class="container ah-story__lead">
+    <h2 class="ah-story__heading">Explorer</h2>
+  </div>
 
-      <div class="about-block about-block--reverse">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Buy once, listen anytime</h3>
-          <p>
-            A tour is yours after a single purchase — no subscription, no expiry. Open it from your library whenever you
-            visit the place, pause when something catches your eye, and pick up where you left off.
-          </p>
-        </div>
-        <img src="assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
-
-      <div class="about-block">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Navigate with confidence</h3>
-          <p>
-            Each stop has a precise location. A built-in compass points you toward the next stop, a map shows how the
-            venues connect, and walking directions tell you what to expect on the way. Walk, listen, and explore at your
-            own pace.
-          </p>
-        </div>
-        <img src="assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
-
-      <div class="about-section__cta">
-        <app-button routerLink="/explore" variant="primary" size="lg">Browse the marketplace</app-button>
-      </div>
+  <div class="ah-grid">
+    <!-- Row 1: illust left, text right -->
+    <div class="ah-illust">
+      <span>Browse stories curated by locals and experts illustration here.</span>
     </div>
-  </section>
-
-  <!-- ── Be a Tour Creator ───────────────────────────────────────────── -->
-  <section id="create" class="about-section about-section--alt">
-    <div class="container">
-      <h2 class="about-section__heading">Be a Tour Creator</h2>
-      <p class="about-section__lede">
-        If you know a place better than anyone, Constantine gives you the tools to turn that into a polished audio tour
-        — and to earn from it.
+    <div class="ah-text">
+      <h3 class="ah-text__title">Stories curated by locals and experts</h3>
+      <p>
+        Tours are organised by city, topic, language, or creator. Whether you want a brisk hour through
+        central Rome or a deep dive into a single museum hall, you'll find someone who's already done
+        the homework. Every tour starts as a real place, told by someone who knows it well.
       </p>
-
-      <div class="about-block">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Tell the stories you know best</h3>
-          <p>
-            Whether it's the alleys of your hometown, the collection of a small museum, or a hike only you've walked,
-            you start with what you already know. The studio walks you through structuring it into a tour, step by step.
-          </p>
-        </div>
-        <img src="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
-
-      <div class="about-block about-block--reverse">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Build it your way</h3>
-          <p>
-            Group stops into venues — rooms, squares, viewpoints — upload audio clips, attach photos, write transitions,
-            and pin every stop on a real map. Preview each step as you go, and edit any time after publishing.
-          </p>
-        </div>
-        <img src="assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
-
-      <div class="about-block">
-        <div class="about-block__copy">
-          <h3 class="about-block__title">Reach a global audience</h3>
-          <p>
-            Translators on the platform can offer localised versions of your tour, expanding your reach without extra
-            work. You set the price; payments are handled via Stripe and paid out to your account directly.
-          </p>
-        </div>
-        <img src="assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg" alt="" class="about-block__img" />
-      </div>
-
-      <div class="about-section__cta">
-        <app-button routerLink="/studio" variant="primary" size="lg">Open my studio</app-button>
-      </div>
     </div>
-  </section>
+
+    <!-- Row 2: text left, illust right -->
+    <div class="ah-text">
+      <h3 class="ah-text__title">Buy once, listen anytime</h3>
+      <p>
+        A tour is a one-time purchase — no subscription, no expiry. Open it from your library the moment
+        you arrive, pause when something catches your eye, and pick up where you left off, even months
+        later. Tours you've bought stay yours.
+      </p>
+    </div>
+    <div class="ah-illust">
+      <span>Buy once, listen anytime illustration here.</span>
+    </div>
+
+    <!-- Row 3: illust left, text right -->
+    <div class="ah-illust">
+      <span>Walk at your own pace illustration here.</span>
+    </div>
+    <div class="ah-text">
+      <h3 class="ah-text__title">Walk at your own pace</h3>
+      <p>
+        Every stop is pinned on a real map. A built-in compass points you toward the next stop, walking
+        directions tell you what to expect on the way, and you decide when to move on. No tour guide
+        checking their watch, no group to keep up with.
+      </p>
+    </div>
+
+    <!-- Row 4: text left, illust right -->
+    <div class="ah-text">
+      <h3 class="ah-text__title">Hear it in your language</h3>
+      <p>
+        Tours can be translated into multiple languages by trusted contributors on the platform. The
+        original creator stays at the centre — translations are reviewed and tied to the same tour, so
+        you experience the same story in the voice you're most at home with.
+      </p>
+    </div>
+    <div class="ah-illust">
+      <span>Hear it in your language illustration here.</span>
+    </div>
+  </div>
+
+  <div class="ah-cta">
+    <app-button routerLink="/explore" size="lg" class="btn-wheat">Browse the marketplace</app-button>
+  </div>
+</section>
+
+<!-- ── For Creators ────────────────────────────────────────────── -->
+<section class="ah-story" id="creator">
+  <div class="container ah-story__lead">
+    <h2 class="ah-story__heading">Creator</h2>
+  </div>
+
+  <div class="ah-grid">
+    <!-- Row 1: illust left, text right -->
+    <div class="ah-illust">
+      <span>Tell the stories you know best illustration here.</span>
+    </div>
+    <div class="ah-text">
+      <h3 class="ah-text__title">Tell the stories you know best</h3>
+      <p>
+        Whether it's the alleys of your hometown, the collection of a small museum, or a hike only
+        you've walked, you start with what you already know. The studio walks you through structuring
+        it into a tour — venues, stops, audio, and the connective tissue in between.
+      </p>
+    </div>
+
+    <!-- Row 2: text left, illust right -->
+    <div class="ah-text">
+      <h3 class="ah-text__title">Build it your way in the studio</h3>
+      <p>
+        Group stops into venues — rooms, squares, viewpoints — upload audio clips, attach photos, write
+        transitions, and pin every stop on a real map. Preview every step as you go, and edit any time
+        after publishing. Your tour, your pace.
+      </p>
+    </div>
+    <div class="ah-illust">
+      <span>Build it your way in the studio illustration here.</span>
+    </div>
+
+    <!-- Row 3: illust left, text right -->
+    <div class="ah-illust">
+      <span>Reach a global audience illustration here.</span>
+    </div>
+    <div class="ah-text">
+      <h3 class="ah-text__title">Reach a global audience</h3>
+      <p>
+        Translators on the platform offer localised versions of your tour, expanding your reach without
+        extra work. You set the price, you stay attributed as the original creator, and every translated
+        listener still arrives via your tour.
+      </p>
+    </div>
+
+    <!-- Row 4: text left, illust right -->
+    <div class="ah-text">
+      <h3 class="ah-text__title">Get paid for what you know</h3>
+      <p>
+        Payments are handled through Stripe and paid out directly to your account. You see every sale,
+        every review, every payout in your studio dashboard. No middlemen, no hidden cuts — what your
+        listeners pay is what you earn (minus standard processing fees).
+      </p>
+    </div>
+    <div class="ah-illust">
+      <span>Get paid for what you know illustration here.</span>
+    </div>
+  </div>
+
+  <div class="ah-cta">
+    <app-button routerLink="/auth/register" size="lg" class="btn-wheat">Become a creator</app-button>
+  </div>
+</section>
+
+<!-- ── Closing ─────────────────────────────────────────────────── -->
+<section class="ah-closing">
+  <div class="container">
+    <p class="eyebrow">A small team, a long mission</p>
+    <h2 class="ah-closing__heading">Built by travellers, for travellers.</h2>
+    <p class="ah-closing__body">
+      Constantine is a small team based in Amsterdam, building the tools we wished existed while
+      travelling ourselves. We're early — every tour, every creator, every listener helps shape what
+      this becomes. Reach us any time at
+      <a href="mailto:hello@constantine.tours">hello&#64;constantine.tours</a>.
+    </p>
+  </div>
 </section>

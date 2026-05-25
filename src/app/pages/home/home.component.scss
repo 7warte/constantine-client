@@ -47,32 +47,31 @@
 
   &__title {
     font-family: $font-family-primary;
-    font-size: $font-size-2xl;
+    font-size: $font-size-xl;          // mobile default
     font-weight: $font-weight-bold;
     color: $text-primary;
     line-height: $line-height-tight;
     margin-bottom: $space-4;
     transition: color 400ms ease;
 
+    @include md { font-size: $font-size-2xl; }
     @include lg { font-size: $font-size-3xl; }
 
     @media (max-width: #{$bp-sm - 1px}) {
-      font-size: $font-size-xl;
+      font-size: $font-size-lg;
     }
   }
 
   &__sub {
     font-family: $font-family-secondary;
-    font-size: $font-size-base;
+    font-size: $font-size-sm;          // mobile default
     color: $text-primary;
     line-height: $line-height-normal;
     margin-bottom: $space-5;
     max-width: 520px;
     transition: color 400ms ease;
 
-    @media (max-width: #{$bp-sm - 1px}) {
-      font-size: $font-size-sm;
-    }
+    @include md { font-size: $font-size-base; }
   }
 
   // Light text mode (for dark/dim photos)
