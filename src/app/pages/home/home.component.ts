@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { CardComponent } from '../../shared/components/card/card.component';
 
 interface Faq {
   id: string;
@@ -13,16 +15,21 @@ interface Faq {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, ButtonComponent],
+  imports: [RouterLink, CommonModule, ReactiveFormsModule, ButtonComponent, CardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private readonly api = inject(ApiService);
+  private readonly api    = inject(ApiService);
+  private readonly router = inject(Router);
 
-  readonly faqItems      = signal<Faq[]>([]);
-  readonly openFaq       = signal<string | null>(null);
-  readonly activeSlide   = signal(0);
+  readonly faqItems        = signal<Faq[]>([]);
+  readonly openFaq         = signal<string | null>(null);
+  readonly activeSlide     = signal(0);
+  readonly indoorTours     = signal<any[]>([]);
+  readonly outdoorTours    = signal<any[]>([]);
+  readonly topRatedTours   = signal<any[]>([]);
+  readonly destinationCtrl = new FormControl('', { nonNullable: true });
 
   // Each image declares its text color so the hero title/sub stay readable.
   // Use 'dark' for light/bright photos, 'light' for dim/dark photos.
@@ -81,6 +88,15 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (items.length > 0) this.openFaq.set(items[0].id);
       });
 
+    this.api.get<any[]>('/tours', { sort: 'top_rated', limit: '2' })
+      .subscribe(tours => this.topRatedTours.set(tours.slice(0, 2)));
+
+    this.api.get<any[]>('/tours', { tag: 'indoor', limit: '2' })
+      .subscribe(tours => this.indoorTours.set(tours.slice(0, 2)));
+
+    this.api.get<any[]>('/tours', { tag: 'outdoor', limit: '2' })
+      .subscribe(tours => this.outdoorTours.set(tours.slice(0, 2)));
+
     this.slideTimer = setInterval(() => {
       this.activeSlide.update(i => (i + 1) % this.heroImages.length);
     }, 5000);
@@ -92,5 +108,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   toggleFaq(id: string): void {
     this.openFaq.update(curr => (curr === id ? null : id));
+  }
+
+  onSearchDestination(): void {
+    const q = this.destinationCtrl.value.trim();
+    this.router.navigate(['/explore'], q ? { queryParams: { search: q } } : undefined);
   }
 }

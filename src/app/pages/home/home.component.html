@@ -24,10 +24,65 @@
   </div>
 </section>
 
+<!-- ── Mobile only: Indoor / Outdoor / Most rated tour rows ────── -->
+<section class="m-tour-rows">
+  <div class="container">
+    @if (indoorTours().length > 0) {
+      <div class="m-tour-rows__row">
+        <p class="m-tour-rows__label">Indoor</p>
+        <div class="m-tour-rows__grid">
+          @for (tour of indoorTours(); track tour.variant_id) {
+            <app-card [tour]="tour" />
+          }
+        </div>
+      </div>
+    }
+    @if (outdoorTours().length > 0) {
+      <div class="m-tour-rows__row">
+        <p class="m-tour-rows__label">Outdoor</p>
+        <div class="m-tour-rows__grid">
+          @for (tour of outdoorTours(); track tour.variant_id) {
+            <app-card [tour]="tour" />
+          }
+        </div>
+      </div>
+    }
+    @if (topRatedTours().length > 0) {
+      <div class="m-tour-rows__row">
+        <p class="m-tour-rows__label">Most rated</p>
+        <p class="m-tour-rows__sub">Enjoy the city of Rome</p>
+        <div class="m-tour-rows__grid">
+          @for (tour of topRatedTours(); track tour.variant_id) {
+            <app-card [tour]="tour" />
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ── Mobile only: Search destination ─────────────────────────── -->
+<section class="m-destination">
+  <div class="container">
+    <form class="m-destination__form" (ngSubmit)="onSearchDestination()">
+      <div class="m-destination__field">
+        <input
+          class="m-destination__input"
+          type="text"
+          [formControl]="destinationCtrl"
+          placeholder="Rome"
+          aria-label="Destination"
+        />
+      </div>
+      <button class="m-destination__btn" type="submit">Search destination</button>
+    </form>
+  </div>
+</section>
+
 <!-- ── Three features ──────────────────────────────────────────── -->
 <section class="features">
   <div class="container">
-    <h2 class="features__title">Enjoy and explore at your own pace</h2>
+    <h2 class="features__title">Learn and explore at your own pace</h2>
     <div class="features__grid">
       <article class="feature">
         <div class="feature__head">
@@ -143,5 +198,12 @@
     @if (faqItems().length > 0) {
       <a routerLink="/faq" class="faq__more">See all questions →</a>
     }
+  </div>
+</section>
+
+<!-- ── Mobile only: Find your dream tour CTA ───────────────────── -->
+<section class="m-find-tour">
+  <div class="container">
+    <a routerLink="/explore" class="m-find-tour__btn">Find your dream tour</a>
   </div>
 </section>

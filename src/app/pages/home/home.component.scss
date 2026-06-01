@@ -1,6 +1,13 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
+// Host as flex column so we can reorder sections per breakpoint
+// (mobile pushes FAQ before Creators, places the mobile-only CTA between them).
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
 // ── Eyebrow label (used on "How does it work" + "Frequently asked questions")
 .eyebrow {
   font-family: $font-family-secondary;
@@ -103,6 +110,136 @@
   }
 }
 
+// ── Mobile only: Indoor / Outdoor / Most rated tour rows ────────────────────
+.m-tour-rows {
+  display: block;
+  padding-block: $space-5 $space-4;
+  background: $bg-surface;
+
+  @include lg { display: none; }
+
+  &__row + &__row { margin-top: $space-5; }
+
+  &__label {
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0 0 $space-3 0;
+  }
+
+  &__label + &__grid { margin-top: $space-3; }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $space-3;
+  }
+}
+
+// ── Mobile only: Search destination box ─────────────────────────────────────
+.m-destination {
+  display: block;
+  padding-block: $space-4 $space-6;
+  background: $bg-surface;
+
+  @include lg { display: none; }
+
+  // Button height drives the field height (field is exactly 2× the button).
+  $btn-height: 44px;
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  // Wheat container — 2× button height, holds a smaller white input inside.
+  // Bottom corners are sharp so it joins flush with the button below.
+  &__field {
+    width: 100%;
+    height: $btn-height * 2;
+    background: $wheat;
+    border-radius: $radius-md $radius-md 0 0;
+    display: flex;
+    align-items: center;
+    padding: 0 $space-4;
+  }
+
+  // Inner white input — shorter than the wheat container so wheat shows above/below.
+  &__input {
+    width: 100%;
+    height: $btn-height;
+    background: $white;
+    border: 1px solid $border-default;
+    border-radius: $radius-sm;
+    padding: 0 $space-4;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    text-align: left;
+    transition: border-color $transition-fast;
+
+    &::placeholder { color: $text-muted; }
+
+    &:focus {
+      outline: none;
+      border-color: $text-primary;
+    }
+  }
+
+  &__btn {
+    width: 100%;
+    height: $btn-height;
+    background: $accent-blue;
+    color: $text-primary;
+    border: none;
+    border-radius: 0 0 $radius-md $radius-md;
+    padding: 0 $space-5;
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover { background: darken($mist, 8%); }
+  }
+}
+
+// ── Mobile only: "Find your dream tour" CTA (between FAQ and Creators) ──────
+.m-find-tour {
+  display: block;
+  padding-block: $space-5 $space-4;
+  background: $bg-surface;
+
+  @include lg { display: none; }
+
+  &__btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: $accent-blue;
+    color: $text-primary;
+    border-radius: $radius-full;
+    padding: $space-4 $space-5;
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    text-decoration: none;
+    transition: background $transition-fast;
+
+    &:hover { background: darken($mist, 8%); }
+  }
+}
+
 // ── Three features ───────────────────────────────────────────────────────────
 .features {
   padding-block: $space-10;
@@ -114,15 +251,16 @@
 
   &__title {
     text-align: center;
-    font-family: $font-family-primary;
-    font-size: $font-size-md;
-    font-weight: $font-weight-bold;
+    font-family: $font-family-display;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-regular;
     color: $text-primary;
+    letter-spacing: 0.01em;
     margin-bottom: $space-8;
 
     @media (max-width: #{$bp-md - 1px}) {
       margin-bottom: $space-6;
-      font-size: $font-size-base;
+      font-size: $font-size-md;
     }
   }
 
@@ -461,4 +599,36 @@
       line-height: $line-height-tight;
     }
   }
+}
+
+// ── Mobile layout: hide desktop blocks and reorder sections ─────────────────
+// On phones the design hides Features and the numbered "How does it work"
+// list, keeps the people/globe illustration, and floats Creators (illustration
+// + wheat CTA) below FAQ + the "Find your dream tour" button.
+@media (max-width: #{$bp-lg - 1px}) {
+
+  // Hide whole Features block (Learn and explore at your own pace)
+  .features { display: none; }
+
+  // How: keep illustration, drop numbered list + wheat CTA
+  .how__col { display: none; }
+
+  // Creators: keep illustration + wheat CTA, drop numbered list
+  .creators__col .numbered-list { display: none; }
+
+  // Reorder: FAQ moves above Creators; mobile-only CTA sits between them.
+  // Default order is 0 (HTML order), so only the movers need an override.
+  .m-find-tour { order: 50; }
+  .creators    { order: 99; }
+
+  // Spacing audit: visible blocks all converge on ~$space-5 top/bottom; the
+  // tour rows + search pair tighter since they read as one unit, and the
+  // find-tour CTA + creators block do the same at the bottom.
+  .m-tour-rows   { padding-block: $space-5 $space-3; }
+  .m-destination { padding-block: $space-3 $space-5; }
+  .how           { padding-block: $space-4; }
+  .quote         { padding-block: $space-5; }
+  .faq           { padding-block: $space-5; }
+  .m-find-tour   { padding-block: $space-4 $space-3; }
+  .creators      { padding-block: $space-3 $space-6; }
 }
