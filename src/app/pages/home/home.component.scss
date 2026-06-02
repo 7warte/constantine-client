@@ -138,10 +138,14 @@
 
   &__label + &__grid { margin-top: $space-3; }
 
+  // `minmax(0, 1fr)` lets columns shrink below their content's intrinsic
+  // width — without it, long titles/usernames push the row past the viewport.
   &__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: $space-3;
+
+    > * { min-width: 0; }
   }
 }
 

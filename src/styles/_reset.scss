@@ -40,6 +40,17 @@ select {
   color: inherit;
 }
 
+// iOS Safari auto-zooms when a focused input's font-size is below 16px.
+// Force a 16px floor on form fields at mobile widths — desktop keeps its
+// smaller sizes ($font-size-sm etc.) where the zoom behavior doesn't apply.
+@media (max-width: #{$bp-lg - 1px}) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 button {
   cursor: pointer;
   border: none;
