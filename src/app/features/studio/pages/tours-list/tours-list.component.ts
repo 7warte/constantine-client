@@ -65,8 +65,13 @@ export class ToursListComponent implements OnInit {
       rows.push({ ...tour, _type: 'tour' });
       if (this.expandedTourIds().has(tour.id)) {
         const variants = this.variantsMap()[tour.id] ?? [];
-        for (const v of variants) {
-          rows.push({ ...v, _type: 'variant', _tourId: tour.id });
+        for (const [i, v] of variants.entries()) {
+          rows.push({
+            ...v,
+            _type: 'variant',
+            _tourId: tour.id,
+            _isLast: i === variants.length - 1,
+          });
         }
       }
     }

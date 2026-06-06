@@ -54,6 +54,15 @@
                 </span>
               </div>
             </div>
+          } @else {
+            <svg class="tours-table__variant-l" viewBox="0 0 100 48" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                [attr.d]="row._isLast ? 'M 50 0 L 50 24 L 100 24' : 'M 50 0 L 50 48 M 50 24 L 100 24'"
+                stroke="currentColor"
+                stroke-width="1"
+                fill="none"
+                vector-effect="non-scaling-stroke" />
+            </svg>
           }
         </td>
       </ng-container>
