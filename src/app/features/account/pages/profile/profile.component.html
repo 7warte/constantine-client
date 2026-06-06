@@ -1,36 +1,6 @@
 <div class="account-page container">
   <h1 class="account-page__title">Edit Profile</h1>
 
-  <!-- ── Share card ─────────────────────────────────────────────── -->
-  <div class="share-card">
-    <div class="share-card__profile">
-      <div class="share-card__avatar">
-        @if (avatarPreview()) {
-          <img [src]="avatarPreview()!" alt="Your avatar" />
-        } @else {
-          <span class="share-card__avatar-fallback">
-            {{ (form.controls.display_name.value || 'U')[0] | uppercase }}
-          </span>
-        }
-      </div>
-      <div class="share-card__info">
-        <h2 class="share-card__name">{{ form.controls.display_name.value }}</h2>
-        @if (form.controls.bio.value) {
-          <p class="share-card__bio">{{ form.controls.bio.value }}</p>
-        }
-        <span class="share-card__stats">{{ tourCount() }} published tour(s)</span>
-      </div>
-    </div>
-    <div class="share-card__actions">
-      <button class="share-card__btn share-card__btn--share" (click)="share()">
-        Share profile
-      </button>
-      <button class="share-card__btn share-card__btn--copy" (click)="copyLink()">
-        {{ copied() ? 'Copied!' : 'Copy link' }}
-      </button>
-    </div>
-  </div>
-
   <form [formGroup]="form" (ngSubmit)="save()" class="account-form" novalidate>
     @if (success()) {
       <div class="account-form__success" role="status">Profile updated successfully.</div>
@@ -39,47 +9,65 @@
       <div class="account-form__error" role="alert">{{ error() }}</div>
     }
 
-    <!-- Avatar -->
-    <div class="avatar-field">
-      <label class="avatar-field__label">Profile picture</label>
-      <div class="avatar-field__row">
-        <div class="avatar-field__preview">
-          @if (avatarPreview()) {
-            <img [src]="avatarPreview()!" alt="Avatar preview" />
-          } @else {
-            <span class="avatar-field__fallback">
-              {{ (form.controls.display_name.value || 'U')[0] | uppercase }}
-            </span>
-          }
-        </div>
-        <div class="avatar-field__actions">
-          <label class="avatar-field__upload-btn">
+    <!-- ── Share card with inline avatar + name editing ───────────── -->
+    <div class="share-card">
+      <div class="share-card__profile">
+        <div class="share-card__avatar-col">
+          <div class="share-card__avatar">
+            @if (avatarPreview()) {
+              <img [src]="avatarPreview()!" alt="Your avatar" />
+            } @else {
+              <span class="share-card__avatar-fallback">
+                {{ (form.controls.display_name.value || 'U')[0] | uppercase }}
+              </span>
+            }
+          </div>
+          <label class="share-card__avatar-btn">
             @if (uploadingAvatar()) {
               Uploading…
             } @else {
-              Upload photo
+              Change photo
             }
-            <input type="file" accept="image/*" (change)="onAvatarSelect($event)" [disabled]="uploadingAvatar()" hidden />
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onAvatarSelect($event)"
+              [disabled]="uploadingAvatar()"
+              hidden />
           </label>
-          <span class="avatar-field__hint">or paste a URL below</span>
+        </div>
+
+        <div class="share-card__info">
+          <app-input
+            label=""
+            formControlName="display_name"
+            class="share-card__name-input"
+            [invalid]="form.controls.display_name.invalid && form.controls.display_name.touched"
+            errorMessage="Display name is required"
+          />
+          @if (form.controls.bio.value) {
+            <p class="share-card__bio">{{ form.controls.bio.value }}</p>
+          }
+          <span class="share-card__stats">{{ tourCount() }} published tour(s)</span>
         </div>
       </div>
-      <app-input
-        label=""
-        formControlName="avatar_url"
-        hint="External image URL (optional)"
-      />
+
+      <div class="share-card__actions">
+        <button type="button" class="share-card__btn share-card__btn--share" (click)="share()">
+          Share profile
+        </button>
+        <button type="button" class="share-card__btn share-card__btn--copy" (click)="copyLink()">
+          {{ copied() ? 'Copied!' : 'Copy link' }}
+        </button>
+      </div>
     </div>
 
     <app-input
-      label="Display name"
-      formControlName="display_name"
-      [invalid]="form.controls.display_name.invalid && form.controls.display_name.touched"
-      errorMessage="Display name is required"
-    />
-    <app-input
       label="Bio"
       formControlName="bio"
+      [multiline]="true"
+      [rows]="5"
+      placeholder="Tell visitors who you are, where you tour, and what kind of stories you love telling."
       hint="Up to 500 characters"
     />
 

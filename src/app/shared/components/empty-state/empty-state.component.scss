@@ -1,0 +1,43 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.empty-state {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: $space-6;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &__illust {
+    position: absolute;
+    top: $space-3;
+    right: $space-3;
+    width: 140px;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      width: 96px;
+    }
+  }
+
+  &__text {
+    font-family: $font-family-secondary;
+    font-size: $font-size-base;
+    color: $text-secondary;
+    text-align: center;
+    line-height: $line-height-normal;
+    margin: 0;
+    max-width: 360px;
+  }
+}

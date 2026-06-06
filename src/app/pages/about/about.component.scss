@@ -61,8 +61,36 @@
     margin-top: $space-6;
 
     @media (max-width: #{$bp-md - 1px}) {
-      flex-direction: column;
-      align-items: center;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: $space-3;
+    }
+  }
+}
+
+// Hero choice cell: button on desktop, illustration-on-top + button on mobile.
+.ah-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  &__illust {
+    display: none;
+  }
+
+  @media (max-width: #{$bp-md - 1px}) {
+    flex: 1 1 0;
+    min-width: 0;
+    align-items: center;
+    gap: $space-2;
+
+    &__illust {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: $bg-surface-alt;
+      border: 1px solid $border-default;
+      border-radius: $radius-md;
     }
   }
 }
@@ -135,10 +163,21 @@
 
   @media (max-width: #{$bp-md - 1px}) {
     grid-template-columns: 1fr;
+
+    // Rows alternate illust-first / text-first on desktop. When stacked,
+    // reorder each pair so it always reads as title/text then illustration.
+    > :nth-child(1) { order: 2; }  // row 1 illust → after row 1 text
+    > :nth-child(2) { order: 1; }  // row 1 text
+    > :nth-child(3) { order: 3; }  // row 2 text
+    > :nth-child(4) { order: 4; }  // row 2 illust
+    > :nth-child(5) { order: 6; }  // row 3 illust → after row 3 text
+    > :nth-child(6) { order: 5; }  // row 3 text
+    > :nth-child(7) { order: 7; }  // row 4 text
+    > :nth-child(8) { order: 8; }  // row 4 illust
   }
 }
 
-// ── Illustration placeholder (light grey panel, edge to edge) ───────────────
+// ── Illustration panel (light grey panel, edge to edge) ─────────────────────
 .ah-illust {
   background: $bg-surface-alt;
   border: 1px solid $border-default;
@@ -148,6 +187,16 @@
   justify-content: center;
   padding: $space-6;
   text-align: center;
+  overflow: hidden;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
 
   span {
     font-family: $font-family-secondary;

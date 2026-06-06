@@ -17,7 +17,7 @@
       <app-button routerLink="/explore" variant="primary" size="lg">
         Explore tours
       </app-button>
-      <app-button routerLink="/auth/register" variant="outline" size="lg" class="hero__creator">
+      <app-button routerLink="/studio" variant="outline" size="lg" class="hero__creator">
         Become a Creator
       </app-button>
     </div>
@@ -80,9 +80,9 @@
 </section>
 
 <!-- ── Three features ──────────────────────────────────────────── -->
-<section class="features">
+<section class="features" appReveal>
   <div class="container">
-    <h2 class="features__title">Learn and explore at your own pace</h2>
+    <h2 class="features__title" appTypewriter>Learn and explore at your own pace</h2>
     <div class="features__grid">
       <article class="feature">
         <div class="feature__head">
@@ -110,10 +110,10 @@
 </section>
 
 <!-- ── How it works (flat: list left, illustration right) ──────── -->
-<section class="how">
+<section class="how" appReveal>
   <div class="container how__wrap">
     <div class="how__col">
-      <p class="eyebrow">How does it work?</p>
+      <p class="eyebrow" appTypewriter>How does it work?</p>
       <ol class="numbered-list">
         <li>
           <span class="numbered-list__num">1</span>
@@ -139,7 +139,7 @@
 </section>
 
 <!-- ── Quote ────────────────────────────────────────────────────── -->
-<section class="quote">
+<section class="quote" appReveal>
   <div class="container">
     <blockquote>
       <p class="quote__text">"{{ activeQuote.text }}"</p>
@@ -149,7 +149,7 @@
 </section>
 
 <!-- ── Creators (flat: illustration left, list + button right) ── -->
-<section class="creators">
+<section class="creators" appReveal>
   <div class="container creators__wrap">
     <div class="creators__illustration">
       <img src="assets/homepage/creators.png" alt="Creators making audio tours" />
@@ -169,7 +169,7 @@
           <span>Compliments! You are contributing to <span class="numbered-list__hl">sharing knowledge with the world!</span></span>
         </li>
       </ol>
-      <app-button routerLink="/auth/register" size="lg" class="btn-wheat">
+      <app-button routerLink="/studio" size="lg" class="btn-wheat">
         Create tours and start earning
       </app-button>
     </div>
@@ -177,9 +177,9 @@
 </section>
 
 <!-- ── FAQ ──────────────────────────────────────────────────────── -->
-<section class="faq">
+<section class="faq" appReveal>
   <div class="container">
-    <p class="eyebrow">Frequently asked questions</p>
+    <p class="eyebrow" appTypewriter>Frequently asked questions</p>
     <ul class="faq__list">
       @for (item of faqItems(); track item.id) {
         <li class="faq__item" [class.faq__item--open]="openFaq() === item.id">

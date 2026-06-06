@@ -7,7 +7,19 @@
 
   &__hero {
     margin-bottom: $space-4;
-    h1 { @include heading($font-size-2xl); margin-bottom: $space-3; }
+    h1 {
+      @include heading($font-size-2xl);
+      margin-bottom: $space-3;
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+  }
+
+  &__hero-icon {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
   }
 
   &__filters { margin-bottom: $space-8; }
@@ -55,6 +67,32 @@
     @include sm { grid-template-columns: repeat(2, 1fr); }
     @include lg { grid-template-columns: repeat(3, 1fr); }
     @include xl { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  // Mobile: lay each card out horizontally (image left, info right)
+  // so more tours are scannable per screen.
+  @media (max-width: #{$bp-md - 1px}) {
+    &__grid { gap: $space-3; }
+
+    ::ng-deep .tour-card {
+      flex-direction: row;
+      align-items: stretch;
+
+      &__cover {
+        flex: 0 0 40%;
+        aspect-ratio: 1 / 1;
+      }
+
+      &__body {
+        flex: 1;
+        padding: $space-3 $space-4;
+        gap: $space-1;
+      }
+
+      &__title { font-size: $font-size-base; }
+
+      &__footer { padding-top: $space-2; }
+    }
   }
 }
 

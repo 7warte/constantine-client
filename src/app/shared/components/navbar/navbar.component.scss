@@ -1,10 +1,17 @@
 @use '../../../../styles/variables' as *;
 @use '../../../../styles/mixins' as *;
 
-.navbar {
+// Sticky lives on the host (not the inner <header>) so its containing block
+// is the page-level flow (<app-root>). If sticky lived on the 64px <header>,
+// it would unstick the moment the user scrolled past 64px.
+:host {
+  display: block;
   position: sticky;
   top: 0;
   z-index: $z-nav;
+}
+
+.navbar {
   height: 64px;
   background: rgba($dusty-rose, 0.95);
   backdrop-filter: blur(12px);
@@ -58,14 +65,9 @@
     }
   }
 
-  // ── Desktop nav ─────────────────────────────────────────────────────────────
+  // ── Inline nav (unused — hamburger handles every breakpoint) ────────────────
   &__nav {
     display: none;
-    align-items: center;
-    gap: $space-6;
-    margin-left: auto;        // push to the right edge
-
-    @include lg { display: flex; }
   }
 
   &__link {
@@ -78,14 +80,9 @@
     &.active { border-bottom: 2px solid $accent-primary; padding-bottom: 2px; }
   }
 
-  // ── Actions ─────────────────────────────────────────────────────────────────
+  // ── Inline actions (unused — auth controls live in the overlay menu) ────────
   &__actions {
     display: none;
-    align-items: center;
-    gap: $space-3;
-    margin-left: $space-6;
-
-    @include lg { display: flex; }
   }
 
   &__avatar {
@@ -125,8 +122,6 @@
     cursor: pointer;
     margin-left: auto;        // keep on the right when nav is hidden
 
-    @include lg { display: none; }
-
     span {
       display: block;
       width: 22px;
@@ -137,7 +132,7 @@
     }
   }
 
-  // ── Mobile menu ─────────────────────────────────────────────────────────────
+  // ── Overlay menu (used at every breakpoint now) ─────────────────────────────
   &__mobile {
     position: fixed;
     inset: 64px 0 0 0;
@@ -150,8 +145,6 @@
     border-top: 1px solid rgba($white, 0.2);
     animation: slide-down $transition-normal;
     overflow-y: auto;
-
-    @include lg { display: none; }
   }
 
   &__mobile-link {
@@ -167,6 +160,11 @@
     background: none;
     border: none;
     cursor: pointer;
+
+    @include lg {
+      font-size: $font-size-lg;
+      padding: $space-5 $space-6;
+    }
 
     &:hover { color: $white; background: rgba($white, 0.08); }
 

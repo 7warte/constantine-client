@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../core/services/api.service';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-library-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, EmptyStateComponent],
   templateUrl: './library-list.component.html',
   styleUrl: './library-list.component.scss',
 })

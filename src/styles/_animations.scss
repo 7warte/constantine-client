@@ -1,0 +1,49 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Scroll-triggered animations (paired with shared directives).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Reveal on view ──────────────────────────────────────────────────────────
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity   700ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &--in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Typewriter on view ──────────────────────────────────────────────────────
+.typewriter {
+  // Step is set per-element via the directive (defaults to 35ms).
+  --typewriter-step: 35ms;
+
+  &__char {
+    opacity: 0;
+  }
+
+  &--in &__char {
+    animation: typewriter-char-in 80ms ease-out forwards;
+    animation-delay: calc(var(--i, 0) * var(--typewriter-step));
+  }
+}
+
+@keyframes typewriter-char-in {
+  to { opacity: 1; }
+}
+
+// ── Reduced motion fallback ─────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .typewriter__char {
+    opacity: 1;
+    animation: none;
+  }
+}

@@ -10,12 +10,7 @@
   @if (loading()) {
     <div class="page-loading" role="status">Loading your library…</div>
   } @else if (purchases().length === 0) {
-    <div class="library__empty">
-      <span class="library__empty-icon" aria-hidden="true">&#127911;</span>
-      <h2>Your library is empty</h2>
-      <p>Purchase audio tours to access them here.</p>
-      <a routerLink="/explore" class="btn btn--primary">Explore tours</a>
-    </div>
+    <app-empty-state text="Your library is empty"></app-empty-state>
   } @else {
     <div class="purchase-grid">
       @for (purchase of purchases(); track purchase.id) {

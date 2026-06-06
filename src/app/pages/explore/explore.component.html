@@ -1,6 +1,9 @@
 <div class="explore container">
   <div class="explore__hero">
-    <h1>Explore Tours</h1>
+    <h1>
+      <img src="assets/font_awesome_icons/compass.svg" alt="" class="explore__hero-icon" aria-hidden="true" />
+      Explore Tours
+    </h1>
     <p class="text-secondary">Discover guided audio, image, and video tours for any place in the world.</p>
   </div>
 
@@ -43,7 +46,7 @@
     @if (loading()) {
       <p class="text-secondary">Loading tours…</p>
     } @else if (tours().length === 0) {
-      <p class="text-secondary">No tours found. Try adjusting your filters.</p>
+      <app-empty-state text="No tours found. Try adjusting your filters."></app-empty-state>
     } @else {
       <div class="explore__grid">
         @for (tour of tours(); track tour.id) {

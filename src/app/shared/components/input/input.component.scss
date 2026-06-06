@@ -36,6 +36,13 @@
     }
   }
 
+  &__input--multiline {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    line-height: $line-height-normal;
+  }
+
   &__message {
     min-height: 1em;
     line-height: 1;

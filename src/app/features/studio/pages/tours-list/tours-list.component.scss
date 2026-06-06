@@ -27,8 +27,16 @@
   }
 
   &__new-btn {
-    background: $accent-primary !important;
-    color: #ffffff !important;
+    background: $wheat !important;
+    color: $text-primary !important;
+    border: 1px solid $black !important;
+    border-radius: 3px !important;
+    transition: background $transition-fast, color $transition-fast !important;
+
+    &:hover {
+      background: $black !important;
+      color: $wheat !important;
+    }
 
     @media (max-width: #{$bp-md - 1px}) {
       width: 100%;
@@ -272,9 +280,19 @@
   font-weight: $font-weight-semibold;
   text-transform: capitalize;
 
-  &--published { background: rgba(#34a853, 0.12); color: #34a853; }
-  &--draft     { background: rgba(#999999, 0.12); color: #999999; }
-  &--archived  { background: rgba(#f9ab00, 0.12); color: #f9ab00; }
+  &::before {
+    margin-right: 4px;
+  }
+
+  &--published { background: rgba(#34a853, 0.12); color: #34a853;
+    &::before { content: '\2705'; } // ✅
+  }
+  &--draft     { background: rgba(#999999, 0.12); color: #999999;
+    &::before { content: '\270F\FE0F'; } // ✏️
+  }
+  &--archived  { background: rgba(#f9ab00, 0.12); color: #f9ab00;
+    &::before { content: '\1F4E6'; } // 📦
+  }
 }
 
 // ── Delete modal ─────────────────────────────────────────────────────────────

@@ -25,6 +25,8 @@ export class InputComponent implements ControlValueAccessor {
   @Input() errorMessage = '';
   @Input() invalid     = false;
   @Input() disabled    = false;
+  @Input() multiline   = false;
+  @Input() rows        = 3;
 
   value    = '';
   onChange = (_: string) => {};
@@ -36,7 +38,7 @@ export class InputComponent implements ControlValueAccessor {
   setDisabledState(disabled: boolean) { this.disabled = disabled; }
 
   onInput(event: Event): void {
-    this.value = (event.target as HTMLInputElement).value;
+    this.value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
     this.onChange(this.value);
   }
 }

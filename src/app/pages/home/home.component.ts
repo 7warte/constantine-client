@@ -5,6 +5,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
+import { RevealOnViewDirective } from '../../shared/directives/reveal-on-view.directive';
+import { TypewriterOnViewDirective } from '../../shared/directives/typewriter-on-view.directive';
 
 interface Faq {
   id: string;
@@ -15,7 +17,7 @@ interface Faq {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, ReactiveFormsModule, ButtonComponent, CardComponent],
+  imports: [RouterLink, CommonModule, ReactiveFormsModule, ButtonComponent, CardComponent, RevealOnViewDirective, TypewriterOnViewDirective],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })

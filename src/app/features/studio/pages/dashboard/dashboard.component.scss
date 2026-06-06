@@ -152,9 +152,19 @@
   font-weight: $font-weight-semibold;
   text-transform: capitalize;
 
-  &--published { background: rgba($color-success, 0.15); color: $color-success; }
-  &--draft     { background: rgba($text-secondary, 0.15); color: $text-secondary; }
-  &--archived  { background: rgba($color-warning, 0.15); color: $color-warning; }
+  &::before {
+    margin-right: 4px;
+  }
+
+  &--published { background: rgba($color-success, 0.15); color: $color-success;
+    &::before { content: '\2705'; } // ✅
+  }
+  &--draft     { background: rgba($text-secondary, 0.15); color: $text-secondary;
+    &::before { content: '\270F\FE0F'; } // ✏️
+  }
+  &--archived  { background: rgba($color-warning, 0.15); color: $color-warning;
+    &::before { content: '\1F4E6'; } // 📦
+  }
 }
 
 // ── Quick links ───────────────────────────────────────────────────────────────
@@ -188,18 +198,22 @@
 .btn {
   display: inline-block;
   padding: $space-3 $space-6;
-  border-radius: $radius-md;
+  border-radius: 3px;
   font-weight: $font-weight-semibold;
   font-size: $font-size-base;
   text-decoration: none;
   cursor: pointer;
-  border: none;
-  transition: background $transition-fast;
+  border: 1px solid $black;
+  transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
 
   &--primary {
-    background: $accent-primary;
+    background: $wheat;
     color: $text-primary;
-    &:hover { background: $accent-hover; }
+    &:hover {
+      background: $black;
+      color: $wheat;
+      border-color: $black;
+    }
   }
 }
 

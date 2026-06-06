@@ -3,7 +3,6 @@
 
 .account-page {
   padding-block: $space-12;
-  max-width: 640px;
 
   @media (max-width: #{$bp-md - 1px}) {
     padding-block: $space-6;

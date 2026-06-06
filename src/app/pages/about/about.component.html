@@ -7,12 +7,18 @@
       What brings you here?
     </p>
     <div class="ah-hero__choices">
-      <app-button size="lg" class="btn-wheat" (click)="scrollTo('explorer')">
-        Explorer
-      </app-button>
-      <app-button size="lg" class="btn-wheat" (click)="scrollTo('creator')">
-        Creator
-      </app-button>
+      <div class="ah-choice">
+        <div class="ah-choice__illust" aria-hidden="true"></div>
+        <app-button size="lg" class="btn-wheat" (click)="scrollTo('explorer')">
+          Explorer
+        </app-button>
+      </div>
+      <div class="ah-choice">
+        <div class="ah-choice__illust" aria-hidden="true"></div>
+        <app-button size="lg" class="btn-wheat" (click)="scrollTo('creator')">
+          Creator
+        </app-button>
+      </div>
     </div>
   </div>
 </section>
@@ -41,7 +47,7 @@
   <div class="ah-grid">
     <!-- Row 1: illust left, text right -->
     <div class="ah-illust">
-      <span>Browse stories curated by locals and experts illustration here.</span>
+      <img src="assets/illustrations/Currency%20Crush%20-%20Graphs-1.svg" alt="" aria-hidden="true">
     </div>
     <div class="ah-text">
       <h3 class="ah-text__title">Stories curated by locals and experts</h3>
@@ -62,12 +68,12 @@
       </p>
     </div>
     <div class="ah-illust">
-      <span>Buy once, listen anytime illustration here.</span>
+      <img src="assets/illustrations/Moneyverse%20-%20Save%20Money-2.svg" alt="" aria-hidden="true">
     </div>
 
     <!-- Row 3: illust left, text right -->
     <div class="ah-illust">
-      <span>Walk at your own pace illustration here.</span>
+      <img src="assets/illustrations/Tutto%20Ricco%20-%20Marching-3.svg" alt="" aria-hidden="true">
     </div>
     <div class="ah-text">
       <h3 class="ah-text__title">Walk at your own pace</h3>
@@ -88,7 +94,7 @@
       </p>
     </div>
     <div class="ah-illust">
-      <span>Hear it in your language illustration here.</span>
+      <img src="assets/illustrations/Shiny%20Happy%20-%20Sweet%20Delight-4.svg" alt="" aria-hidden="true">
     </div>
   </div>
 
@@ -106,7 +112,7 @@
   <div class="ah-grid">
     <!-- Row 1: illust left, text right -->
     <div class="ah-illust">
-      <span>Tell the stories you know best illustration here.</span>
+      <img src="assets/illustrations/The%20Band%20-%20Torso%20-5.svg" alt="" aria-hidden="true">
     </div>
     <div class="ah-text">
       <h3 class="ah-text__title">Tell the stories you know best</h3>
@@ -127,12 +133,12 @@
       </p>
     </div>
     <div class="ah-illust">
-      <span>Build it your way in the studio illustration here.</span>
+      <img src="assets/illustrations/The%20Little%20Things%20-%20Studying-6.svg" alt="" aria-hidden="true">
     </div>
 
     <!-- Row 3: illust left, text right -->
     <div class="ah-illust">
-      <span>Reach a global audience illustration here.</span>
+      <img src="assets/illustrations/Hands%20-%20Earth-7.svg" alt="" aria-hidden="true">
     </div>
     <div class="ah-text">
       <h3 class="ah-text__title">Reach a global audience</h3>
@@ -153,12 +159,12 @@
       </p>
     </div>
     <div class="ah-illust">
-      <span>Get paid for what you know illustration here.</span>
+      <img src="assets/illustrations/Moneyverse%20-%20Home%20Office-8.svg" alt="" aria-hidden="true">
     </div>
   </div>
 
   <div class="ah-cta">
-    <app-button routerLink="/auth/register" size="lg" class="btn-wheat">Become a creator</app-button>
+    <app-button routerLink="/studio" size="lg" class="btn-wheat">Become a creator</app-button>
   </div>
 </section>
 

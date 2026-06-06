@@ -2,15 +2,27 @@
   @if (label) {
     <label class="field__label">{{ label }}</label>
   }
-  <input
-    class="field__input"
-    [type]="type"
-    [placeholder]="placeholder"
-    [value]="value"
-    [disabled]="disabled"
-    (input)="onInput($event)"
-    (blur)="onTouched()"
-  />
+  @if (multiline) {
+    <textarea
+      class="field__input field__input--multiline"
+      [rows]="rows"
+      [placeholder]="placeholder"
+      [value]="value"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    ></textarea>
+  } @else {
+    <input
+      class="field__input"
+      [type]="type"
+      [placeholder]="placeholder"
+      [value]="value"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    />
+  }
   <span class="field__message">
     @if (invalid && errorMessage) {
       <span class="field__error" role="alert">{{ errorMessage }}</span>

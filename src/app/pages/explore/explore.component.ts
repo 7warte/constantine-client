@@ -5,12 +5,13 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-explore',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CardComponent, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CardComponent, ButtonComponent, EmptyStateComponent],
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.scss',
 })
@@ -31,15 +32,16 @@ export class ExploreComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const p = this.route.snapshot.queryParams;
-    this.filters.patchValue({
-      tag:      p['tag']      ?? '',
-      language: p['language'] ?? '',
-      search:   p['search']   ?? '',
-      sort:     p['sort']     ?? 'newest',
-    });
+    this.route.queryParamMap.subscribe(p => {
+      this.filters.patchValue({
+        tag:      p.get('tag')      ?? '',
+        language: p.get('language') ?? '',
+        search:   p.get('search')   ?? '',
+        sort:     p.get('sort')     ?? 'newest',
+      }, { emitEvent: false });
 
-    this.loadTours();
+      this.loadTours();
+    });
   }
 
   loadTours(): void {
