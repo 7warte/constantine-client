@@ -2,19 +2,19 @@
 @use '../../../../../styles/mixins' as *;
 
 .account-page {
-  padding-block: $space-12;
+  padding-block: $space-6;
 
   @media (max-width: #{$bp-md - 1px}) {
-    padding-block: $space-6;
+    padding-block: $space-5;
   }
 
   &__title {
-    font-size: $font-size-2xl;
-    margin-bottom: $space-8;
+    font-size: $font-size-xl;
+    margin-bottom: $space-4;
 
     @media (max-width: #{$bp-md - 1px}) {
-      font-size: $font-size-xl;
-      margin-bottom: $space-5;
+      font-size: $font-size-lg;
+      margin-bottom: $space-3;
     }
   }
 }
@@ -22,7 +22,7 @@
 .account-form {
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-4;
 
   &__success {
     background: rgba($color-success, 0.1);
@@ -46,10 +46,9 @@
 // ── Share card ───────────────────────────────────────────────────────────────
 .share-card {
   @include card;
-  margin-bottom: $space-8;
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: $space-4;
 
   @include md {
     flex-direction: row;
