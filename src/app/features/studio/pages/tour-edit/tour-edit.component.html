@@ -35,7 +35,7 @@
           }
           <div class="tour-hero__scrim"></div>
 
-          <input class="tour-hero__title" type="text" formControlName="title"
+          <input #heroTitle class="tour-hero__title" type="text" formControlName="title"
             placeholder="My tour title" maxlength="200" aria-label="Tour title" />
 
           <button type="button" class="tour-hero__edit" (click)="toggleBgPicker()"

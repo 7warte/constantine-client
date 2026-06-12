@@ -2,9 +2,8 @@
 @use '../../../../../styles/mixins' as *;
 
 .tour-edit {
-  @include container;
-  padding-block: $space-8;
-  max-width: none;
+  @include container;          // same 1400px container as the navbar, so the
+  padding-block: $space-8;     // tabs & content line up with the navbar content
 
   @media (max-width: #{$bp-md - 1px}) {
     padding-inline: 0;
@@ -30,11 +29,11 @@
   margin-bottom: $space-6;
   border-bottom: 1px solid $border-default;
 
-  // Sticky header — stays in view while the form scrolls.
+  // Sticky sub-bar — sits just under the 64px navbar while the form scrolls.
   position: sticky;
-  top: 0;
+  top: 64px;
   z-index: $z-raised;
-  background: $bg-base;
+  background: $accent-muted;
 
   @media (max-width: #{$bp-md - 1px}) {
     gap: $space-4;

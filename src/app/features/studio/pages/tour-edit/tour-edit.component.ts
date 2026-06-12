@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, Component, OnInit, OnDestroy, AfterViewChecked, inject,
-  signal, computed,
+  ChangeDetectionStrategy, Component, OnInit, OnDestroy, AfterViewChecked, AfterViewInit,
+  ElementRef, viewChild, inject, signal, computed,
 } from '@angular/core';
 import * as L from 'leaflet';
 import html2canvas from 'html2canvas';
@@ -43,7 +43,7 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   templateUrl: './tour-edit.component.html',
   styleUrl: './tour-edit.component.scss',
 })
-export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   private readonly fb     = inject(FormBuilder);
   private readonly api    = inject(ApiService);
   private readonly auth   = inject(AuthService);
@@ -84,6 +84,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly pageTitle   = computed(() => this.isNew() ? 'Create tour' : 'Edit tour');
   // Step 2 (Location) is "done" once the tour has start coordinates saved.
   readonly step2Done   = computed(() => this.tour()?.latitude != null && this.tour()?.longitude != null);
+
+  // Title field — focused automatically when creating a new tour.
+  readonly heroTitle = viewChild<ElementRef<HTMLInputElement>>('heroTitle');
 
   // ── Step 1 form ────────────────────────────────────────────────────────
   readonly form = this.fb.nonNullable.group({
@@ -541,6 +544,13 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.pickerMap?.remove();
     this.venuePickerMap?.remove();
     this.clearPendingCover();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.isNew()) {
+      // Land in the title field straight away when creating a new tour.
+      setTimeout(() => this.heroTitle()?.nativeElement.focus());
+    }
   }
 
   ngAfterViewChecked(): void {
