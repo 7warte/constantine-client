@@ -4,18 +4,16 @@
     <h1 class="page-title">{{ pageTitle() }}</h1>
   </div>
 
-  <!-- ── Stepper indicator ──────────────────────────────────────────── -->
-  <div class="stepper">
-    <button class="stepper__step" [class.stepper__step--active]="step() === 1" [class.stepper__step--done]="step() > 1" (click)="goToStep(1)" type="button">
-      <span class="stepper__num">1</span> Basics
+  <!-- ── Tabs ───────────────────────────────────────────────────────── -->
+  <div class="tabs" role="tablist">
+    <button class="tabs__tab" [class.tabs__tab--active]="step() === 1" (click)="goToStep(1)" type="button" role="tab">
+      Basics
     </button>
-    <span class="stepper__line"></span>
-    <button class="stepper__step" [class.stepper__step--active]="step() === 2" [class.stepper__step--done]="step() > 2" [disabled]="!tour()" (click)="goToStep(2)" type="button">
-      <span class="stepper__num">2</span> Location
+    <button class="tabs__tab" [class.tabs__tab--active]="step() === 2" [disabled]="!tour()" (click)="goToStep(2)" type="button" role="tab">
+      Location
     </button>
-    <span class="stepper__line"></span>
-    <button class="stepper__step" [class.stepper__step--active]="step() === 3" [disabled]="!tour()" (click)="goToStep(3)" type="button">
-      <span class="stepper__num">3</span> Stops
+    <button class="tabs__tab" [class.tabs__tab--active]="step() === 3" [disabled]="!step2Done()" (click)="goToStep(3)" type="button" role="tab">
+      Stops
     </button>
   </div>
 
@@ -29,82 +27,60 @@
 
     <!-- ═══════════════ STEP 1: BASICS ═══════════════════════════════ -->
     @if (step() === 1) {
-      <div class="edit-card">
-        <h2 class="edit-card__title">Tour details</h2>
+      <form [formGroup]="form" (ngSubmit)="saveBasics()" class="basics-form" novalidate>
+        <!-- Hero: background (gradient by default, or cover image) + overlaid title -->
+        <div class="tour-hero" [ngClass]="'cover-grad--' + coverGradient()">
+          @if (heroImage()) {
+            <div class="tour-hero__img" [style.background-image]="'url(' + heroImage() + ')'"></div>
+          }
+          <div class="tour-hero__scrim"></div>
 
-        <form [formGroup]="form" (ngSubmit)="saveBasics()" class="edit-form" novalidate>
-          <div class="form-field">
-            <label for="tour-title" class="form-field__label">Title <span class="required">*</span></label>
-            <input id="tour-title" type="text" formControlName="title" class="form-field__input"
-              [class.form-field__input--invalid]="form.controls.title.invalid && form.controls.title.touched"
-              placeholder="e.g. Ancient Rome Walking Tour" maxlength="200" />
-            @if (form.controls.title.invalid && form.controls.title.touched) {
-              <span class="form-field__error">Title is required (max 200 characters)</span>
-            }
-          </div>
+          <input class="tour-hero__title" type="text" formControlName="title"
+            placeholder="My tour title" maxlength="200" aria-label="Tour title" />
 
+          <button type="button" class="tour-hero__edit" (click)="toggleBgPicker()"
+            [class.tour-hero__edit--open]="bgPickerOpen()" aria-label="Change background">
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          @if (uploading()) { <span class="tour-hero__badge">Uploading…</span> }
+
+          @if (bgPickerOpen()) {
+            <div class="bg-picker">
+              <p class="bg-picker__label">Background</p>
+              <div class="bg-picker__grid">
+                @for (g of gradientIds; track g) {
+                  <button type="button" class="bg-picker__swatch" [ngClass]="'cover-grad--' + g"
+                    [class.bg-picker__swatch--active]="coverGradient() === g && !heroImage()"
+                    (click)="selectGradient(g)" [attr.aria-label]="'Gradient ' + g"></button>
+                }
+              </div>
+              <div class="bg-picker__actions">
+                <label class="bg-picker__btn">
+                  <mat-icon>image</mat-icon>
+                  <span>Upload image</span>
+                  <input type="file" accept="image/*" (change)="onCoverSelect($event)" hidden />
+                </label>
+                @if (heroImage()) {
+                  <button type="button" class="bg-picker__btn bg-picker__btn--danger" (click)="removeCoverImage()">
+                    <mat-icon>delete</mat-icon>
+                    <span>Remove image</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        @if (form.controls.title.invalid && form.controls.title.touched) {
+          <span class="form-field__error basics-form__title-error">Title is required (max 200 characters)</span>
+        }
+
+        <div class="edit-card">
+          <div class="edit-form basics-fields">
           <div class="form-field">
             <label for="tour-desc" class="form-field__label">Description</label>
             <textarea id="tour-desc" formControlName="description" class="form-field__textarea"
               placeholder="Describe what travellers will experience…" rows="5" maxlength="2000"></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-field__label">Cover image</label>
-            @if (coverUrl()) {
-              <div class="cover-preview">
-                <img [src]="coverUrl()" alt="Tour cover" class="cover-preview__img" />
-                <label class="btn btn--ghost btn--sm cover-preview__change">
-                  Change
-                  <input type="file" accept="image/*" (change)="onCoverSelect($event)" hidden />
-                </label>
-              </div>
-            } @else if (!isNew()) {
-              <label class="cover-upload">
-                <input type="file" accept="image/*" (change)="onCoverSelect($event)" hidden />
-                <span class="cover-upload__area">
-                  @if (uploading()) {
-                    Uploading…
-                  } @else {
-                    Click to upload a cover image
-                  }
-                </span>
-              </label>
-            } @else {
-              <span class="form-field__hint">Save the tour first, then you can upload a cover image.</span>
-            }
-          </div>
-
-          <div class="form-field">
-            <label class="form-field__label">Presentation audio</label>
-            <span class="form-field__hint">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
-            @if (presentationAudioUrl()) {
-              <div class="audio-preview">
-                <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
-                <div class="audio-preview__actions">
-                  <label class="btn btn--ghost btn--sm">
-                    Replace
-                    <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                  </label>
-                  <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
-                </div>
-              </div>
-            } @else if (!isNew()) {
-              <label class="cover-upload">
-                <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                <span class="cover-upload__area">
-                  @if (uploadingAudio()) {
-                    Uploading…
-                  } @else {
-                    Click to upload presentation audio (max 60s)
-                  }
-                </span>
-              </label>
-              <div class="form-field__or">or</div>
-              <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
-            } @else {
-              <span class="form-field__hint">Save the tour first, then you can upload a presentation audio.</span>
-            }
           </div>
 
           <div class="form-field">
@@ -113,42 +89,102 @@
             <span class="form-field__hint">Type and press Enter, comma, or space to add.</span>
           </div>
 
-          <div class="form-field">
-            <label for="tour-price" class="form-field__label">Price (EUR)</label>
-            <div class="price-input">
-              <span class="price-input__symbol">&euro;</span>
-              <input id="tour-price" type="number" formControlName="price_euros" class="form-field__input price-input__field"
-                min="0" step="0.01" placeholder="0.00 = free" />
+          <!-- Left half: audio + price squares · Right half: duration + setting -->
+          <div class="basics-split">
+          <div class="square-row">
+            <div class="form-field square-field">
+              <label class="form-field__label">Presentation audio</label>
+              <span class="form-field__hint">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
+              <div class="square-box square-box--audio" [class.square-box--filled]="!!presentationAudioUrl()">
+                @if (presentationAudioUrl()) {
+                  <div class="audio-preview">
+                    <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+                    <div class="audio-preview__actions">
+                      <label class="btn btn--ghost btn--sm">
+                        Replace
+                        <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                      </label>
+                      <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
+                    </div>
+                  </div>
+                } @else if (!isNew()) {
+                  <div class="audio-center">
+                    <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
+                    <div class="form-field__or">or</div>
+                    <label class="cover-upload">
+                      <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                      <span class="cover-upload__area">
+                        @if (uploadingAudio()) {
+                          Uploading…
+                        } @else {
+                          Click to upload audio (max 60s)
+                        }
+                      </span>
+                    </label>
+                  </div>
+                } @else {
+                  <span class="square-box__hint">Save the tour first, then you can record or upload a presentation audio.</span>
+                }
+              </div>
             </div>
-            <span class="form-field__hint">Set to 0 for a free tour</span>
+
+            <div class="form-field square-field">
+              <label for="tour-price" class="form-field__label">Price (EUR)</label>
+              <span class="form-field__hint square-field__spacer" aria-hidden="true">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
+              <div class="square-box price-square" [class.square-box--filled]="priceNum() > 0">
+                <div class="price-square__main">
+                  <span class="price-square__symbol">&euro;</span>
+                  <input id="tour-price" type="number" formControlName="price_euros" class="price-square__input"
+                    min="0" step="0.01" placeholder="0.00" aria-label="Price in euros" />
+                </div>
+                <div class="price-square__breakdown">
+                  @if (priceNum() > 0) {
+                    <div class="price-square__cell">
+                      <span class="price-square__value">&euro;{{ constantineFee() | number:'1.2-2' }}</span>
+                      <span class="price-square__label">Constantine fee</span>
+                    </div>
+                    <div class="price-square__cell price-square__cell--revenue">
+                      <span class="price-square__value">&euro;{{ creatorRevenue() | number:'1.2-2' }}</span>
+                      <span class="price-square__label">Revenue per sale</span>
+                    </div>
+                  } @else {
+                    <span class="price-square__placeholder">Set to 0 for a free tour, or enter a price to see your revenue.</span>
+                  }
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="form-row">
+          <div class="side-inputs">
+            <div class="form-field">
+              <label for="tour-duration" class="form-field__label">Avg. duration (minutes)</label>
+              <input id="tour-duration" type="number" formControlName="duration_minutes" class="form-field__input"
+                min="1" placeholder="e.g. 90" />
+              <span class="form-field__hint square-field__spacer" aria-hidden="true">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
+            </div>
+
             <div class="form-field">
               <label for="tour-setting" class="form-field__label">Setting</label>
-              <select id="tour-setting" formControlName="setting" class="form-field__select">
+              <select id="tour-setting" formControlName="setting" class="form-field__select"
+                [class.is-filled]="!!form.controls.setting.value">
                 <option value="">Not specified</option>
                 <option value="indoor">Indoor</option>
                 <option value="outdoor">Outdoor</option>
                 <option value="mixed">Indoor / Outdoor</option>
               </select>
             </div>
-
-            <div class="form-field">
-              <label for="tour-duration" class="form-field__label">Avg. duration (minutes)</label>
-              <input id="tour-duration" type="number" formControlName="duration_minutes" class="form-field__input"
-                min="1" placeholder="e.g. 90" />
-            </div>
+          </div>
           </div>
 
-          <div class="edit-form__actions">
-            <a routerLink="/studio/tours" class="btn btn--ghost">Cancel</a>
-            <button type="submit" class="btn btn--primary" [disabled]="saving()">
-              {{ saving() ? 'Saving…' : (isNew() ? 'Save & continue' : 'Save & continue') }}
+          <div class="edit-form__actions edit-form__actions--basics">
+            <a routerLink="/studio/tours" class="btn btn--ghost btn--lg">Cancel</a>
+            <button type="submit" class="btn btn--primary btn--lg" [disabled]="saving() || form.invalid">
+              {{ saving() ? 'Saving…' : 'Save & continue' }}
             </button>
           </div>
-        </form>
-      </div>
+          </div>
+        </div>
+      </form>
     }
 
     <!-- ═══════════════ STEP 2: LOCATION ═════════════════════════════ -->
@@ -250,19 +286,16 @@
               A <strong>venue</strong> is a place your visitors will stop at — a museum hall, a city square, a park entrance.
               Each venue can contain multiple stops (individual things to see or hear about).
             </p>
-            <button type="button" class="space-empty__example-btn" (click)="showExample.set(true)">See an example</button>
+            <div class="venue-bar">
+              <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
+              <input #firstVenue type="text" class="venue-bar__input" placeholder="New venue"
+                (keyup.enter)="addVenueQuick(firstVenue.value); firstVenue.value = ''" />
+              <button type="button" class="venue-bar__save" (click)="addVenueQuick(firstVenue.value); firstVenue.value = ''" aria-label="Create venue">
+                <mat-icon>save</mat-icon>
+              </button>
+            </div>
 
-            <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
-              <div class="form-field">
-                <label class="form-field__label">Venue name <span class="required">*</span></label>
-                <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Main Entrance Hall" />
-              </div>
-              <div class="form-field">
-                <label class="form-field__label">Description</label>
-                <textarea formControlName="description" class="form-field__textarea" rows="3" placeholder="Describe this venue…"></textarea>
-              </div>
-              <button type="submit" class="btn btn--primary">Create first venue</button>
-            </form>
+            <button type="button" class="space-empty__example-btn space-empty__example-btn--mt" (click)="showExample.set(true)">See an example</button>
           </div>
 
           <!-- Example modal -->
@@ -315,23 +348,45 @@
           <!-- Venues with their stops -->
           <div class="spaces-timeline">
           @for (space of spaces(); track space.id; let si = $index; let lastSpace = $last) {
-            <div class="space-block" [@slideIn]>
-              <div class="space-block__header">
-                <div class="space-block__info">
-                  <h3 class="space-block__name">{{ space.name }}</h3>
-                  @if (space.description) {
-                    <p class="space-block__desc">{{ space.description }}</p>
+            <div class="space-block space-block--venue" [@slideIn] [style.background-color]="space.color">
+              <div class="space-block__bar">
+                <div class="space-block__title-box">
+                  <span class="space-block__title-text">{{ space.name }}</span>
+                  <button type="button" class="space-block__colorize" (click)="toggleColorMenu(space.id)" aria-label="Pick venue colour">
+                    <mat-icon>colorize</mat-icon>
+                  </button>
+
+                  @if (colorMenuFor() === space.id) {
+                    <div class="color-menu">
+                      @for (c of venueColors; track c.value) {
+                        <button type="button" class="color-menu__item" (click)="setVenueColor(space, c.value)">
+                          <span class="color-menu__swatch" [style.background-color]="c.value"></span>
+                          <span class="color-menu__name">{{ c.name }}</span>
+                        </button>
+                      }
+                    </div>
                   }
                 </div>
-                <div class="space-block__actions">
-                  <button type="button" class="space-block__pin-btn" [class.space-block__pin-btn--placed]="space.latitude != null" (click)="openVenuePicker(space)">
-                    <mat-icon>place</mat-icon>
-                    {{ space.latitude != null ? 'Pinned' : 'Pin on map' }}
+
+                <button type="button" class="space-block__pin" [class.space-block__pin--placed]="space.latitude != null"
+                  (click)="openVenuePicker(space)">
+                  <mat-icon>place</mat-icon>
+                  <span>{{ space.latitude != null ? 'Pinned' : 'Pin on map' }}</span>
+                </button>
+
+                <div class="space-block__bar-right">
+                  <button type="button" class="space-block__collapse" (click)="toggleCollapse(space.id)"
+                    [attr.aria-label]="isCollapsed(space.id) ? 'Expand venue' : 'Collapse venue'">
+                    <mat-icon>{{ isCollapsed(space.id) ? 'expand_more' : 'expand_less' }}</mat-icon>
                   </button>
-                  <button type="button" class="btn-icon btn-icon--danger" (click)="deleteSpace(space.id)">&times;</button>
+                  <button type="button" class="space-block__del" (click)="deleteSpace(space.id)" aria-label="Delete venue">
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
               </div>
 
+              @if (!isCollapsed(space.id)) {
+              <div class="space-block__body">
               <!-- Stops inside this space -->
               <div class="stops-list">
                 @for (stop of getStopsForSpace(space.id); track stop.id; let i = $index; let lastStop = $last) {
@@ -347,37 +402,6 @@
                         </strong>
                         @if (stop.description) {
                           <p class="stop-card__desc">{{ stop.description }}</p>
-                        }
-                        @if (stop.media && stop.media.length > 0) {
-                          @for (m of stop.media; track m.id) {
-                            @if (m.media_type === 'audio') {
-                              <div class="stop-card__audio">
-                                <audio [src]="m.url" controls controlsList="nodownload"></audio>
-                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
-                              </div>
-                            }
-                            @if (m.media_type === 'image') {
-                              <div class="stop-card__image">
-                                <img [src]="m.url" [alt]="stop.title" />
-                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
-                                <input
-                                  type="text"
-                                  class="stop-card__caption-input"
-                                  [value]="m.caption || ''"
-                                  (blur)="updateMediaCaption(stop.id, m.id, $event)"
-                                  placeholder="Caption (optional, max 80 chars)"
-                                  maxlength="80"
-                                />
-                              </div>
-                            }
-                            @if (m.media_type === 'pdf') {
-                              <div class="stop-card__pdf">
-                                <mat-icon class="stop-card__pdf-icon">picture_as_pdf</mat-icon>
-                                <a [href]="m.url" target="_blank" class="stop-card__pdf-link">View PDF</a>
-                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
-                              </div>
-                            }
-                          }
                         }
                         <div class="stop-card__upload-actions">
                           <label class="audio-upload">
@@ -403,6 +427,31 @@
                           </label>
                         </div>
                         <app-audio-recorder (recorded)="uploadRecordedAudio(stop.id, $event)" />
+
+                        <!-- Uploaded files: one full-width row each, with editable caption -->
+                        @if (stop.media && stop.media.length > 0) {
+                          <div class="media-list">
+                            @for (m of stop.media; track m.id) {
+                              <div class="media-row" [class.media-row--audio]="m.media_type === 'audio'">
+                                @if (m.media_type === 'image') {
+                                  <img class="media-row__thumb" [src]="m.url" [alt]="m.caption || stop.title" />
+                                } @else {
+                                  <mat-icon class="media-row__icon">{{ m.media_type === 'audio' ? 'mic' : 'picture_as_pdf' }}</mat-icon>
+                                }
+
+                                @if (m.media_type === 'audio') {
+                                  <audio class="media-row__audio" [src]="m.url" controls controlsList="nodownload"></audio>
+                                } @else if (m.media_type === 'pdf') {
+                                  <a class="media-row__link" [href]="m.url" target="_blank">View PDF</a>
+                                }
+
+                                <input class="media-row__caption" [value]="m.caption || ''"
+                                  (blur)="updateMediaCaption(stop.id, m.id, $event)" placeholder="Add a caption…" maxlength="80" />
+                                <button type="button" class="btn-icon btn-icon--danger" (click)="deleteMedia(stop.id, m.id)">&times;</button>
+                              </div>
+                            }
+                          </div>
+                        }
                       </div>
                       <div class="stop-card__actions">
                         <button type="button" class="btn-icon" (click)="editStop(stop)">&#9998;</button>
@@ -448,51 +497,15 @@
                 }
               </div>
 
-              <!-- Bottom of space: add stop form or button -->
-              @if (activeSpaceId() === space.id) {
-                <div class="space-block__inline-form" [@slideIn]>
-                  <h4 class="space-block__form-title">Add a stop to "{{ space.name }}"</h4>
-                  <form [formGroup]="stopForm" (ngSubmit)="addStop()" class="edit-form" novalidate>
-                    <div class="form-field">
-                      <label class="form-field__label">Stop title <span class="required">*</span></label>
-                      <input type="text" formControlName="title" class="form-field__input" placeholder="e.g. Venus de Milo" />
-                    </div>
-                    <div class="form-field">
-                      <label class="form-field__label">Description</label>
-                      <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What visitors will see or hear about…"></textarea>
-                    </div>
-                    <div class="form-field">
-                      <label class="form-field__label">Location</label>
-                      @if (stopForm.value.latitude != null && stopForm.value.longitude != null) {
-                        <div class="stop-location">
-                          <mat-icon class="stop-location__icon">place</mat-icon>
-                          <span class="stop-location__coords">{{ stopForm.value.latitude | number:'1.5-5' }}, {{ stopForm.value.longitude | number:'1.5-5' }}</span>
-                          <button type="button" class="btn btn--ghost btn--sm" (click)="openLocationPicker()">Edit</button>
-                          <button type="button" class="btn btn--ghost btn--sm" (click)="clearStopLocation()">Clear</button>
-                        </div>
-                      } @else {
-                        <button type="button" class="btn btn--ghost btn--sm stop-location__set-btn" (click)="openLocationPicker()">
-                          <mat-icon class="stop-location__icon">place</mat-icon>
-                          Set location
-                        </button>
-                      }
-                    </div>
-                    <div class="edit-form__actions">
-                      <button type="button" class="btn btn--ghost btn--sm" (click)="activeSpaceId.set(null)">Done</button>
-                      <button type="submit" class="btn btn--primary btn--sm">Add stop</button>
-                    </div>
-                  </form>
-                </div>
-              } @else {
-                <div class="space-block__footer">
-                  <button type="button" class="space-block__add-link" (click)="activeSpaceId.set(space.id)">
-                    + Add {{ getStopsForSpace(space.id).length === 0 ? 'first' : 'another' }} stop
-                  </button>
-                  @if (getStopsForSpace(space.id).length >= 2) {
-                    <span class="space-block__footer-sep">|</span>
-                    <span class="space-block__footer-hint">Use the &#x1F6B6; controls between stops above to add directions</span>
-                  }
-                </div>
+              <!-- Add a stop (title only; expand it afterwards for media & location) -->
+              <div class="stop-add-bar">
+                <button type="button" class="stop-add-bar__btn" (click)="addStopQuick(space.id, newStop.value); newStop.value = ''" aria-label="Add stop">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <input #newStop type="text" class="stop-add-bar__input" placeholder="new stop title"
+                  (keyup.enter)="addStopQuick(space.id, newStop.value); newStop.value = ''" />
+              </div>
+              </div>
               }
             </div>
 
@@ -592,28 +605,15 @@
             </div>
           }
 
-          <!-- Add venue -->
-          @if (!addingSpace()) {
-            <button type="button" class="btn btn--ghost edit-card--mt" (click)="addingSpace.set(true)">+ Add another venue</button>
-          } @else {
-            <div class="stop-form edit-card edit-card--mt">
-              <h3>New venue</h3>
-              <form [formGroup]="spaceForm" (ngSubmit)="addSpace()" class="edit-form" novalidate>
-                <div class="form-field">
-                  <label class="form-field__label">Venue name <span class="required">*</span></label>
-                  <input type="text" formControlName="name" class="form-field__input" placeholder="e.g. Hall of Statues" />
-                </div>
-                <div class="form-field">
-                  <label class="form-field__label">Description</label>
-                  <textarea formControlName="description" class="form-field__textarea" rows="2" placeholder="What is this venue about…"></textarea>
-                </div>
-                <div class="edit-form__actions">
-                  <button type="button" class="btn btn--ghost" (click)="addingSpace.set(false)">Cancel</button>
-                  <button type="submit" class="btn btn--primary">Add venue</button>
-                </div>
-              </form>
-            </div>
-          }
+          <!-- Add another venue -->
+          <div class="venue-bar venue-bar--mt">
+            <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
+            <input #anotherVenue type="text" class="venue-bar__input" placeholder="New venue"
+              (keyup.enter)="addVenueQuick(anotherVenue.value); anotherVenue.value = ''" />
+            <button type="button" class="venue-bar__save" (click)="addVenueQuick(anotherVenue.value); anotherVenue.value = ''" aria-label="Create venue">
+              <mat-icon>save</mat-icon>
+            </button>
+          </div>
         }
 
         <!-- Venue GPS picker modal -->

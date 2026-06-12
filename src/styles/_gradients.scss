@@ -1,0 +1,29 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTINE — Cover gradients
+// 10 diagonal (45°) gradients built from the website palette. Used as the
+// default background for a tour's hero/cover before (or instead of) an image.
+// Keys g1…g10 are persisted on the tour as `cover_gradient`.
+// ─────────────────────────────────────────────────────────────────────────────
+@use 'variables' as *;
+
+$cover-gradients: (
+  'g1':  linear-gradient(45deg, #{$dusty-rose} 0%, #{$wheat} 100%),
+  'g2':  linear-gradient(45deg, #{$mist} 0%, #{$blush} 100%),
+  'g3':  linear-gradient(45deg, #{$salmon} 0%, #{$dusty-rose} 100%),
+  'g4':  linear-gradient(45deg, #{$wheat} 0%, #{$mist} 100%),
+  'g5':  linear-gradient(45deg, #{$blush} 0%, #{$salmon} 100%),
+  'g6':  linear-gradient(45deg, #{$dusty-rose} 0%, #{$mist} 100%),
+  'g7':  linear-gradient(45deg, #{$wheat} 0%, #{$blush} 100%),
+  'g8':  linear-gradient(45deg, #{$salmon} 0%, #{$mist} 100%),
+  'g9':  linear-gradient(45deg, #{$dusty-rose} 0%, #{$blush} 50%, #{$wheat} 100%),
+  'g10': linear-gradient(45deg, #{$mist} 0%, #{$salmon} 50%, #{$wheat} 100%),
+);
+
+// Emits `.cover-grad--gN { background-image: <gradient>; }` for every key.
+// Called once from the global stylesheet so the classes are available
+// anywhere (including inside emulated-encapsulation component templates).
+@mixin cover-gradient-classes {
+  @each $key, $value in $cover-gradients {
+    .cover-grad--#{$key} { background-image: $value; }
+  }
+}

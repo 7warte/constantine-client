@@ -22,13 +22,13 @@
 // ── Hero ─────────────────────────────────────────────────────────────────────
 .hero {
   position: relative;
-  min-height: 70dvh;
+  min-height: 76dvh;
   display: flex;
   align-items: center;
   overflow: hidden;
 
   @media (max-width: #{$bp-md - 1px}) {
-    min-height: 60dvh;
+    min-height: 64dvh;
   }
 
   &__slide {
@@ -69,16 +69,34 @@
     }
   }
 
+  // Translucent panel only behind the subtitle so the body copy stays
+  // readable over any hero photo. Title and buttons sit on the photo directly.
   &__sub {
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
     font-family: $font-family-secondary;
     font-size: $font-size-sm;          // mobile default
     color: $text-primary;
     line-height: $line-height-normal;
     margin-bottom: $space-5;
-    max-width: 520px;
     transition: color 400ms ease;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: $space-4 $space-5;
+    border-radius: $radius-md;
 
     @include md { font-size: $font-size-base; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      padding: $space-3 $space-4;
+    }
+  }
+
+  // Dark photos → flip the subtitle panel to a dark translucent surface
+  &--text-light &__sub {
+    background: rgba(0, 0, 0, 0.05);
   }
 
   // Light text mode (for dark/dim photos)
@@ -304,7 +322,7 @@
   &__heading {
     font-family: $font-family-primary;
     font-size: $font-size-base;
-    font-weight: $font-weight-regular;
+    font-weight: $font-weight-medium;
     color: $text-primary;
     margin: 0;
     line-height: 1;

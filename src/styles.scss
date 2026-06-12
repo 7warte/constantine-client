@@ -6,6 +6,7 @@
 @use '@angular/material' as mat;
 @use 'styles/variables' as *;
 @use 'styles/mixins'    as *;
+@use 'styles/gradients' as grad;
 @use 'styles/reset';
 @use 'styles/typography';
 @use 'styles/utilities';
@@ -28,6 +29,9 @@ $constantine-frontend-theme: mat.define-theme((
 :root {
   @include mat.all-component-themes($constantine-frontend-theme);
 }
+
+// ── Cover gradients (.cover-grad--g1 … --g10) ────────────────────────────────
+@include grad.cover-gradient-classes;
 
 // ── CSS Custom Properties ─────────────────────────────────────────────────────
 :root {

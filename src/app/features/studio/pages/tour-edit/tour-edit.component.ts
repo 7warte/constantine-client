@@ -62,6 +62,17 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly coverUrl              = signal<string | null>(null);
   readonly presentationAudioUrl  = signal<string | null>(null);
   readonly uploadingAudio        = signal(false);
+
+  // ── Cover hero (background gradient/image + overlaid title) ───────────────
+  readonly gradientIds = ['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8', 'g9', 'g10'] as const;
+  readonly coverGradient   = signal<string>('g1');
+  readonly bgPickerOpen    = signal(false);
+  // For a brand-new tour the cover can't be uploaded yet (no tour id). We hold
+  // the chosen file + a local preview and upload it once the tour is created.
+  private  pendingCoverFile      = signal<File | null>(null);
+  readonly pendingCoverPreview   = signal<string | null>(null);
+  // Background image shown in the hero: saved cover, or the not-yet-saved preview.
+  readonly heroImage = computed(() => this.coverUrl() ?? this.pendingCoverPreview());
   readonly step       = signal(1);
   readonly stops      = signal<any[]>([]);
   readonly spaces     = signal<any[]>([]);
@@ -71,6 +82,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly isNew       = computed(() => !this.routeTourId && !this.tour());
   readonly tourId      = computed(() => this.tour()?.id ?? this.routeTourId);
   readonly pageTitle   = computed(() => this.isNew() ? 'Create tour' : 'Edit tour');
+  // Step 2 (Location) is "done" once the tour has start coordinates saved.
+  readonly step2Done   = computed(() => this.tour()?.latitude != null && this.tour()?.longitude != null);
 
   // ── Step 1 form ────────────────────────────────────────────────────────
   readonly form = this.fb.nonNullable.group({
@@ -80,6 +93,15 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     setting:          [''],
     duration_minutes: [null as number | null],
   });
+
+  // ── Price breakdown (Constantine takes a 20% platform fee per sale) ──────
+  readonly PLATFORM_FEE_RATE = 0.20;
+  priceNum(): number {
+    const p = parseFloat(this.form.controls.price_euros.value || '0');
+    return isNaN(p) || p < 0 ? 0 : p;
+  }
+  constantineFee(): number { return this.priceNum() * this.PLATFORM_FEE_RATE; }
+  creatorRevenue(): number { return this.priceNum() * (1 - this.PLATFORM_FEE_RATE); }
 
   // ── Step 2 map state ───────────────────────────────────────────────────
   readonly sameAddress  = signal(false);
@@ -116,10 +138,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     const sc = this.startCoords();
     const ec = this.endCoords();
     const same = this.sameAddress();
-    if (!sc) return 'Place the starting point on the map, or enter an address above to navigate there.';
-    if (same) return 'Drag the start pin to fine-tune its position.';
-    if (!ec) return 'Now place the finishing point on the map, or enter the end address above.';
-    return 'Drag a pin to fine-tune its position.';
+    if (!sc) return 'Type the start address above and choose it to drop the start pin.';
+    if (same) return 'The pin is set from the start address above.';
+    if (!ec) return 'Now type the end address above and choose it to drop the finish pin.';
+    return 'Both pins are set from the addresses above.';
   });
 
   readonly mapThemes: { id: string; label: string; url: string; ext: string }[] = [
@@ -482,6 +504,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
           });
           if (Array.isArray(tour.tags)) this.tourTags.set(tour.tags);
           if (tour.cover_image_url) this.coverUrl.set(tour.cover_image_url);
+          if (tour.cover_gradient && this.gradientIds.includes(tour.cover_gradient)) {
+            this.coverGradient.set(tour.cover_gradient);
+          }
           if (tour.presentation_audio_url) this.presentationAudioUrl.set(tour.presentation_audio_url);
           if (tour.latitude && tour.longitude) {
             this.startCoords.set([Number(tour.latitude), Number(tour.longitude)]);
@@ -515,6 +540,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.map?.remove();
     this.pickerMap?.remove();
     this.venuePickerMap?.remove();
+    this.clearPendingCover();
   }
 
   ngAfterViewChecked(): void {
@@ -547,9 +573,15 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       shadowUrl: 'assets/leaflet/marker-shadow.png',
     });
 
+    // The tour-location map is a fixed, non-zoomable preview: pins are placed
+    // only by address/current-location, so all zoom interactions are disabled.
     this.map = L.map(el, {
-      scrollWheelZoom: true,
-      zoomControl: true,
+      scrollWheelZoom: false,
+      zoomControl: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
       preferCanvas: true,
     });
 
@@ -575,18 +607,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (sc) this.placeStartMarker(sc[0], sc[1]);
     if (!this.sameAddress() && ec) this.placeEndMarker(ec[0], ec[1]);
 
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const lat = e.latlng.lat;
-      const lng = e.latlng.lng;
-      if (!this.startCoords()) {
-        this.startCoords.set([lat, lng]);
-        this.placeStartMarker(lat, lng);
-      } else if (!this.sameAddress() && !this.endCoords()) {
-        this.endCoords.set([lat, lng]);
-        this.placeEndMarker(lat, lng);
-      }
-    });
-
+    // Pins are placed only by choosing an address (or "use my current location").
+    // The map itself is not click-to-drop and the markers are not draggable, so
+    // a pin can't be moved by accident.
     this.mapRendered = true;
   }
 
@@ -595,13 +618,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.startMarker) {
       this.startMarker.setLatLng([lat, lng]);
     } else {
-      this.startMarker = L.marker([lat, lng], { draggable: true })
+      this.startMarker = L.marker([lat, lng], { draggable: false })
         .addTo(this.map)
         .bindPopup('Start');
-      this.startMarker.on('dragend', (e: L.LeafletEvent) => {
-        const ll = (e.target as L.Marker).getLatLng();
-        this.startCoords.set([ll.lat, ll.lng]);
-      });
     }
   }
 
@@ -610,13 +629,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.endMarker) {
       this.endMarker.setLatLng([lat, lng]);
     } else {
-      this.endMarker = L.marker([lat, lng], { draggable: true })
+      this.endMarker = L.marker([lat, lng], { draggable: false })
         .addTo(this.map)
         .bindPopup('End');
-      this.endMarker.on('dragend', (e: L.LeafletEvent) => {
-        const ll = (e.target as L.Marker).getLatLng();
-        this.endCoords.set([ll.lat, ll.lng]);
-      });
     }
   }
 
@@ -658,10 +673,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   // ── Step navigation ────────────────────────────────────────────────────
 
   goToStep(s: number): void {
-    if (s >= 2 && !this.tourId()) return; // must save step 1 first
+    if (s >= 2 && !this.tourId()) return;    // Basics must be saved first
+    if (s >= 3 && !this.step2Done()) return; // Location must be set first
     this.step.set(s);
-    if (s === 2) {
-    }
     if (s === 3) {
       this.ensureVariant();
     }
@@ -680,6 +694,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       description: raw['description'] || null,
       price_cents: Math.round(parseFloat(raw['price_euros'] || '0') * 100),
       tags: this.tourTags(),
+      cover_gradient: this.coverGradient(),
     };
     if (raw['setting']) body['setting'] = raw['setting'];
     if (raw['duration_minutes'] != null) body['duration_minutes'] = raw['duration_minutes'];
@@ -693,6 +708,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       next: (tour) => {
         this.tour.set(tour);
         this.saving.set(false);
+        // A cover chosen before the tour existed can now be uploaded.
+        const pending = this.pendingCoverFile();
+        if (pending) this.uploadCover(pending);
         if (creating) {
           this.router.navigate(['/studio/tours', tour.id], { replaceUrl: true });
         }
@@ -784,16 +802,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
             return await new Promise<Blob | null>(resolve => canvas.toBlob(b => resolve(b), 'image/png'));
           };
 
-          // 1. Square (current, visible)
-          const squareBlob = await snapshot();
+          // 1. Rectangular (current, visible) — used for previews & listings.
+          const rectBlob = await snapshot();
 
-          // 2. Resize element to 16:9, let Leaflet redraw + new tiles load,
-          //    capture, then restore.
-          mapEl.classList.add('map-container--rect-snap');
+          // 2. Resize element to a square, let Leaflet redraw + new tiles load,
+          //    capture the square variant for the in-tour player, then restore.
+          mapEl.classList.add('map-container--square-snap');
           this.map.invalidateSize({ animate: false });
           await new Promise(r => setTimeout(r, 700));
-          const rectBlob = await snapshot();
-          mapEl.classList.remove('map-container--rect-snap');
+          const squareBlob = await snapshot();
+          mapEl.classList.remove('map-container--square-snap');
           this.map.invalidateSize({ animate: false });
 
           const formData = new FormData();
@@ -833,9 +851,23 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
   // ── Cover image ─────────────────────────────────────────────────────────
 
   onCoverSelect(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file || !this.tourId()) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+    this.closeBgPicker();
 
+    // New tour: no id yet — keep the file and show a local preview. It uploads
+    // once the tour is created in saveBasics().
+    if (!this.tourId()) {
+      this.setPendingCover(file);
+      return;
+    }
+
+    this.uploadCover(file);
+  }
+
+  private uploadCover(file: File): void {
     this.uploading.set(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -848,6 +880,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       next: (res) => {
         this.coverUrl.set(res.cover_image_url);
         this.tour.update(t => t ? { ...t, cover_image_url: res.cover_image_url } : t);
+        this.clearPendingCover();
         this.uploading.set(false);
       },
       error: () => {
@@ -855,6 +888,56 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.uploading.set(false);
       },
     });
+  }
+
+  private setPendingCover(file: File): void {
+    this.clearPendingCover();
+    this.pendingCoverFile.set(file);
+    this.pendingCoverPreview.set(URL.createObjectURL(file));
+  }
+
+  private clearPendingCover(): void {
+    const prev = this.pendingCoverPreview();
+    if (prev) URL.revokeObjectURL(prev);
+    this.pendingCoverFile.set(null);
+    this.pendingCoverPreview.set(null);
+  }
+
+  // ── Hero background picker ────────────────────────────────────────────────
+  toggleBgPicker(): void { this.bgPickerOpen.update(v => !v); }
+  closeBgPicker(): void { this.bgPickerOpen.set(false); }
+
+  selectGradient(g: string): void {
+    this.coverGradient.set(g);
+    // The gradient becomes the visible background, so drop any current image.
+    const hadImage = !!this.heroImage();
+    this.clearPendingCover();
+    if (this.coverUrl()) this.coverUrl.set(null);
+
+    // Persist immediately for an existing tour (clearing the cover too if needed).
+    const id = this.tourId();
+    if (id) {
+      const body: Record<string, any> = { cover_gradient: g };
+      if (hadImage) body['cover_image_url'] = null;
+      this.api.patch<any>(`/studio/tours/${id}`, body).subscribe({
+        next: (tour) => this.tour.update(t => t ? { ...t, ...tour } : t),
+        error: () => this.error.set('Failed to update background.'),
+      });
+    }
+    this.closeBgPicker();
+  }
+
+  removeCoverImage(): void {
+    const id = this.tourId();
+    const hadSavedImage = !!this.coverUrl();
+    this.clearPendingCover();
+    this.coverUrl.set(null);
+    if (id && hadSavedImage) {
+      this.api.patch<any>(`/studio/tours/${id}`, { cover_image_url: null }).subscribe({
+        next: (tour) => this.tour.update(t => t ? { ...t, ...tour } : t),
+        error: () => this.error.set('Failed to remove cover image.'),
+      });
+    }
   }
 
   // ── Presentation audio ───────────────────────────────────────────────────
@@ -965,6 +1048,53 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
   }
 
+  // ── Venue colour / collapse ────────────────────────────────────────────
+  // Soft background "vibes" a creator can give a venue. Persisted on the space.
+  readonly venueColors = [
+    { name: 'Rose',   value: '#e7c9ca' },
+    { name: 'Sand',   value: '#e8ddc7' },
+    { name: 'Sage',   value: '#cdd8c6' },
+    { name: 'Sky',    value: '#c7d6e0' },
+    { name: 'Lilac',  value: '#d7cce2' },
+    { name: 'Clay',   value: '#e2cdc2' },
+    { name: 'Mint',   value: '#c8e0d4' },
+    { name: 'Slate',  value: '#d0d4d9' },
+  ];
+  readonly colorMenuFor    = signal<string | null>(null);
+  readonly collapsedSpaces = signal<Set<string>>(new Set());
+
+  toggleColorMenu(spaceId: string): void {
+    this.colorMenuFor.update(v => v === spaceId ? null : spaceId);
+  }
+
+  setVenueColor(space: any, color: string): void {
+    const vid = this.variantId();
+    this.colorMenuFor.set(null);
+    if (!vid) return;
+    this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces/${space.id}`, { color })
+      .subscribe(updated => this.spaces.update(s => s.map(sp => sp.id === space.id ? updated : sp)));
+  }
+
+  isCollapsed(spaceId: string): boolean { return this.collapsedSpaces().has(spaceId); }
+
+  toggleCollapse(spaceId: string): void {
+    this.collapsedSpaces.update(s => {
+      const next = new Set(s);
+      next.has(spaceId) ? next.delete(spaceId) : next.add(spaceId);
+      return next;
+    });
+  }
+
+  // Quick-add a venue from the compact "New venue" bar (name only).
+  addVenueQuick(name: string): void {
+    const n = name.trim();
+    if (!n) return;
+    const vid = this.variantId();
+    if (!vid) return;
+    this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces`, { name: n, description: '' })
+      .subscribe(space => this.spaces.update(s => [...s, space]));
+  }
+
   deleteSpace(spaceId: string): void {
     const vid = this.variantId();
     if (!vid) return;
@@ -990,6 +1120,17 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.stopForm.reset({ title: '', description: '', latitude: null, longitude: null });
       // Keep the form open in the same space for sequential adding
     });
+  }
+
+  // Quick-add a stop from the compact "new stop title" bar (title only; the
+  // stop can be expanded with description, location and media afterwards).
+  addStopQuick(spaceId: string, title: string): void {
+    const t = title.trim();
+    if (!t) return;
+    const vid = this.variantId();
+    if (!vid) return;
+    this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops`, { title: t, space_id: spaceId })
+      .subscribe(() => this.loadStops());
   }
 
   editStop(stop: any): void {
