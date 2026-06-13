@@ -1,4 +1,5 @@
-<article class="tour-card" [routerLink]="['/tours', tour.variant_id]" [queryParams]="{ tourId: tour.tour_id }">
+<article class="tour-card" [routerLink]="['/tours', tour.variant_id]" [queryParams]="{ tourId: tour.tour_id }"
+  (mouseenter)="onEnter($event)" (mouseleave)="onLeave($event)">
   <div class="tour-card__cover">
     @if (tour.cover_image_url) {
       <img [src]="tour.cover_image_url" [alt]="tour.tour_title" loading="lazy" />

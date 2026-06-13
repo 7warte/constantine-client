@@ -130,3 +130,72 @@
   &--ghost   { background: transparent; color: $text-secondary; border-color: $border-default; &:hover { color: $text-primary; border-color: $text-primary; } }
   &--block   { width: 100%; text-align: center; }
 }
+
+// Bigger "Start tour" button.
+.purchase-card__start {
+  padding-block: $space-4;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+}
+
+// ── Synthetic details modal ─────────────────────────────────────────────────
+.details-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  background: rgba($black, 0.55);
+}
+
+.details-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: $bg-surface;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-lg;
+
+  &__close {
+    position: absolute;
+    top: $space-3;
+    right: $space-3;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: $radius-full;
+    background: rgba($black, 0.4);
+    color: $white;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background $transition-fast;
+    &:hover { background: rgba($black, 0.6); }
+  }
+
+  &__cover {
+    aspect-ratio: 16 / 9;
+    background: $bg-surface-alt;
+    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    &--placeholder { display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  }
+
+  &__body {
+    padding: $space-5;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__title { @include heading($font-size-lg); }
+  &__creator { font-size: $font-size-sm; color: $text-secondary; }
+  &__meta { display: flex; align-items: center; gap: $space-3; font-size: $font-size-sm; color: $text-secondary; }
+  &__desc { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; }
+  &__actions {
+    display: flex; gap: $space-3; margin-top: $space-2;
+    .btn { flex: 1; text-align: center; }
+  }
+}

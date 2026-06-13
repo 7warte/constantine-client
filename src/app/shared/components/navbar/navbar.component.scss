@@ -137,41 +137,66 @@
     position: fixed;
     inset: 64px 0 0 0;
     background: $dusty-rose;
-    display: flex;
-    flex-direction: column;
-    padding: $space-6;
-    gap: $space-2;
+    padding-block: $space-6;
     z-index: $z-nav;
     border-top: 1px solid rgba($white, 0.2);
     animation: slide-down $transition-normal;
     overflow-y: auto;
   }
 
+  // Items line up with the navbar content (same container max-width + padding).
+  &__mobile-inner {
+    @include container;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
   &__mobile-link {
-    display: block;
-    padding: $space-4;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: $space-4 $space-5;
     border-radius: $radius-md;
     font-size: $font-size-md;
     font-weight: $font-weight-semibold;
     color: rgba($white, 0.7);
-    transition: all $transition-fast;
     text-align: left;
     width: 100%;
     background: none;
     border: none;
     cursor: pointer;
+    overflow: hidden;   // clip the wipe-fill to the rounded row
 
-    @include lg {
-      font-size: $font-size-lg;
-      padding: $space-5 $space-6;
-    }
+    @include lg { font-size: $font-size-lg; }
+  }
 
-    &:hover { color: $white; background: rgba($white, 0.08); }
+  // Wheat panel that wipes in from the left on hover (GSAP animates scaleX).
+  &__mobile-fill {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: $accent-highlight;
+    border-radius: $radius-md;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
 
-    &--accent {
-      color: $accent-primary;
-      &:hover { background: $accent-muted; }
-    }
+  &__mobile-text {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    will-change: transform;
+  }
+
+  &__mobile-arrow {
+    position: relative;
+    z-index: 1;
+    margin-left: auto;
+    opacity: 0;
+    transform: translateX(-12px);
+    font-size: $font-size-lg;
+    line-height: 1;
   }
 }
 

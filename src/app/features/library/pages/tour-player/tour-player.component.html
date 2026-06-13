@@ -33,12 +33,15 @@
             </div>
           </div>
         }
+      </div>
 
+      <div class="player__welcome-itinerary">
         <h2 class="player__welcome-section-title">Itinerary</h2>
 
         <mat-accordion class="player__venues" displayMode="flat">
           @for (group of groupedStops(); track group.spaceId; let gi = $index) {
             <mat-expansion-panel class="player__venue-panel"
+              [style.background-color]="group.spaceColor"
               [expanded]="expandedVenueIdx() === gi"
               (opened)="onVenueOpen(gi)"
               (closed)="onVenueClose(gi)">

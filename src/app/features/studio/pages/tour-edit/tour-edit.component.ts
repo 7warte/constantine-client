@@ -27,6 +27,8 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+type TownKey = 'start' | 'end' | 'venue' | 'picker';
+
 @Component({
   selector: 'app-tour-edit',
   standalone: true,
@@ -34,8 +36,9 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   animations: [
     trigger('slideIn', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(-12px)', maxHeight: 0 }),
-        animate('250ms ease-out', style({ opacity: 1, transform: 'translateY(0)', maxHeight: '600px' })),
+        style({ opacity: 0, transform: 'translateX(-28px)', maxHeight: 0 }),
+        animate('400ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateX(0)', maxHeight: '600px' })),
       ]),
     ]),
   ],
@@ -84,6 +87,26 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly pageTitle   = computed(() => this.isNew() ? 'Create tour' : 'Edit tour');
   // Step 2 (Location) is "done" once the tour has start coordinates saved.
   readonly step2Done   = computed(() => this.tour()?.latitude != null && this.tour()?.longitude != null);
+  // Step 3 (Stops) is "done" once the tour has at least one stop.
+  readonly step3Done   = computed(() => this.stops().length > 0);
+  // Price shown in the publish preview.
+  readonly previewPrice = computed(() => {
+    const c = this.tour()?.price_cents ?? 0;
+    return c > 0 ? `€${(c / 100).toFixed(2)}` : 'Free';
+  });
+  readonly showPublishIntro = signal(false);
+
+  // Preview image lightbox — lets the creator view stop images as a buyer would.
+  readonly previewImages   = signal<any[]>([]);
+  readonly previewImageIdx = signal(0);
+  stopImages(stop: any): any[] { return (stop?.media ?? []).filter((m: any) => m.media_type === 'image'); }
+  openPreviewImage(images: any[], clicked: any): void {
+    this.previewImageIdx.set(Math.max(0, images.findIndex(im => im.id === clicked.id)));
+    this.previewImages.set(images);
+  }
+  closePreviewImage(): void { this.previewImages.set([]); }
+  nextPreviewImage(): void { this.previewImageIdx.update(i => (i + 1) % this.previewImages().length); }
+  prevPreviewImage(): void { this.previewImageIdx.update(i => (i - 1 + this.previewImages().length) % this.previewImages().length); }
 
   // Title field — focused automatically when creating a new tour.
   readonly heroTitle = viewChild<ElementRef<HTMLInputElement>>('heroTitle');
@@ -123,6 +146,39 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     }
   }
 
+  // Every address field has its own town/city (a tour can start in one city and
+  // end in another; a venue/stop can sit anywhere). The town scopes that field's
+  // street search. One set of signals per scope, reached via townSig().
+  readonly startTown            = signal('');
+  readonly startTownViewbox     = signal<string | null>(null);
+  readonly startTownInput       = signal('');
+  readonly startTownSuggestions = signal<any[]>([]);
+  readonly endTown              = signal('');
+  readonly endTownViewbox       = signal<string | null>(null);
+  readonly endTownInput         = signal('');
+  readonly endTownSuggestions   = signal<any[]>([]);
+  readonly venueTown            = signal('');
+  readonly venueTownViewbox     = signal<string | null>(null);
+  readonly venueTownInput       = signal('');
+  readonly venueTownSuggestions = signal<any[]>([]);
+  readonly pickerTown            = signal('');
+  readonly pickerTownViewbox     = signal<string | null>(null);
+  readonly pickerTownInput       = signal('');
+  readonly pickerTownSuggestions = signal<any[]>([]);
+
+  private townSig(which: TownKey) {
+    return {
+      start:  { name: this.startTown,  vb: this.startTownViewbox,  input: this.startTownInput,  sugg: this.startTownSuggestions },
+      end:    { name: this.endTown,    vb: this.endTownViewbox,    input: this.endTownInput,    sugg: this.endTownSuggestions },
+      venue:  { name: this.venueTown,  vb: this.venueTownViewbox,  input: this.venueTownInput,  sugg: this.venueTownSuggestions },
+      picker: { name: this.pickerTown, vb: this.pickerTownViewbox, input: this.pickerTownInput, sugg: this.pickerTownSuggestions },
+    }[which];
+  }
+
+  // Shown over the map while the save-time screenshots are captured, so the
+  // brief square resize never flashes on screen.
+  readonly capturingMap = signal(false);
+
   readonly startAddress = signal('');
   readonly endAddress   = signal('');
   readonly startCoords  = signal<[number, number] | null>(null);
@@ -130,7 +186,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly startSuggestions = signal<any[]>([]);
   readonly endSuggestions   = signal<any[]>([]);
 
-  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' | 'picker' | 'venue' }>();
+  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' | 'picker' | 'venue' | 'town-start' | 'town-end' | 'town-venue' | 'town-picker' }>();
   private geoSub!: Subscription;
   private map: L.Map | null = null;
   private mapRendered = false;
@@ -469,15 +525,26 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       debounceTime(400),
       switchMap(({ query, target }) => {
         if (query.length < 3) {
-          if (target === 'start')       this.startSuggestions.set([]);
-          else if (target === 'end')    this.endSuggestions.set([]);
-          else if (target === 'picker') this.pickerSuggestions.set([]);
-          else                          this.venuePickerSuggestions.set([]);
+          if (target === 'start')              this.startSuggestions.set([]);
+          else if (target === 'end')           this.endSuggestions.set([]);
+          else if (target === 'picker')        this.pickerSuggestions.set([]);
+          else if (target === 'venue')         this.venuePickerSuggestions.set([]);
+          else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set([]);
           return of(null);
         }
-        return this.http.get<any[]>(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
-        ).pipe(switchMap(results => of({ target, results })));
+
+        // Street searches are scoped to that field's town: we append the town
+        // name and bias results to its bounding box, so Nominatim returns the
+        // right street instead of every match worldwide. Town fields search plainly.
+        let url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=`;
+        if (target.startsWith('town-')) {
+          url += encodeURIComponent(query);
+        } else {
+          const scope = this.townSig(target as TownKey);
+          url += encodeURIComponent(scope.name() ? `${query}, ${scope.name()}` : query);
+          if (scope.vb()) url += `&viewbox=${scope.vb()}&bounded=1`;
+        }
+        return this.http.get<any[]>(url).pipe(switchMap(results => of({ target, results })));
       }),
     ).subscribe(data => {
       if (!data) return;
@@ -485,11 +552,14 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         display_name: r.display_name,
         lat: +r.lat,
         lon: +r.lon,
+        boundingbox: r.boundingbox,
       }));
-      if (data.target === 'start')       this.startSuggestions.set(suggestions);
-      else if (data.target === 'end')    this.endSuggestions.set(suggestions);
-      else if (data.target === 'picker') this.pickerSuggestions.set(suggestions);
-      else                               this.venuePickerSuggestions.set(suggestions);
+      const target = data.target;
+      if (target === 'start')              this.startSuggestions.set(suggestions);
+      else if (target === 'end')           this.endSuggestions.set(suggestions);
+      else if (target === 'picker')        this.pickerSuggestions.set(suggestions);
+      else if (target === 'venue')         this.venuePickerSuggestions.set(suggestions);
+      else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set(suggestions);
     });
 
     const id = this.routeTourId;
@@ -685,9 +755,14 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   goToStep(s: number): void {
     if (s >= 2 && !this.tourId()) return;    // Basics must be saved first
     if (s >= 3 && !this.step2Done()) return; // Location must be set first
+    if (s >= 4 && !this.step3Done()) return; // At least one stop before publishing
     this.step.set(s);
     if (s === 3) {
       this.ensureVariant();
+    }
+    if (s === 4) {
+      // Greet the creator with a "review before you publish" note.
+      this.showPublishIntro.set(true);
     }
   }
 
@@ -734,6 +809,28 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   }
 
   // ── Step 2: location ────────────────────────────────────────────────────
+
+  onTownInput(which: TownKey, event: Event): void {
+    const query = (event.target as HTMLInputElement).value;
+    const s = this.townSig(which);
+    s.input.set(query);
+    s.name.set('');          // editing invalidates the chosen scope
+    s.vb.set(null);
+    this.geocode$.next({ query, target: `town-${which}` as any });
+  }
+
+  selectTown(which: TownKey, suggestion: any): void {
+    // Keep just the town's primary name to append to street queries, and turn its
+    // boundingbox [minLat,maxLat,minLon,maxLon] into a viewbox minLon,minLat,maxLon,maxLat.
+    const townName = (suggestion.display_name as string).split(',')[0].trim();
+    const bb = suggestion.boundingbox;
+    const viewbox = (Array.isArray(bb) && bb.length === 4) ? `${bb[2]},${bb[0]},${bb[3]},${bb[1]}` : null;
+    const s = this.townSig(which);
+    s.name.set(townName);
+    s.input.set(suggestion.display_name);
+    s.sugg.set([]);
+    s.vb.set(viewbox);
+  }
 
   onAddressInput(target: 'start' | 'end', event: Event): void {
     const query = (event.target as HTMLInputElement).value;
@@ -817,12 +914,17 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
           // 2. Resize element to a square, let Leaflet redraw + new tiles load,
           //    capture the square variant for the in-tour player, then restore.
+          //    An overlay hides the resize so it never flashes on screen.
+          this.capturingMap.set(true);
           mapEl.classList.add('map-container--square-snap');
           this.map.invalidateSize({ animate: false });
           await new Promise(r => setTimeout(r, 700));
           const squareBlob = await snapshot();
           mapEl.classList.remove('map-container--square-snap');
           this.map.invalidateSize({ animate: false });
+          // Keep the overlay until the map has settled back to its rectangle.
+          await new Promise(r => setTimeout(r, 200));
+          this.capturingMap.set(false);
 
           const formData = new FormData();
           if (rectBlob   && rectBlob.size   > 5000) formData.append('file',        rectBlob,   'map-rect.png');
@@ -842,7 +944,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
             });
           }
         }
-      } catch (e) { console.error('Map screenshot failed:', e); }
+      } catch (e) { console.error('Map screenshot failed:', e); this.capturingMap.set(false); }
     }
 
     this.api.patch<any>(`/studio/tours/${this.tour()!.id}`, body).subscribe({
@@ -1095,6 +1197,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     });
   }
 
+  // Draft name shared by the (mutually-exclusive) "New venue" bars, so the save
+  // button can mute itself until something is typed.
+  readonly venueDraft = signal('');
+  submitVenue(): void {
+    const name = this.venueDraft().trim();
+    if (!name) return;
+    this.addVenueQuick(name);
+    this.venueDraft.set('');
+  }
+
   // Quick-add a venue from the compact "New venue" bar (name only).
   addVenueQuick(name: string): void {
     const n = name.trim();
@@ -1105,12 +1217,23 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       .subscribe(space => this.spaces.update(s => [...s, space]));
   }
 
+  // Deleting a venue also deletes the stops inside it, so confirm first.
+  readonly venuePendingDelete = signal<any | null>(null);
+
+  requestDeleteVenue(space: any): void { this.venuePendingDelete.set(space); }
+  cancelDeleteVenue(): void { this.venuePendingDelete.set(null); }
+  confirmDeleteVenue(): void {
+    const space = this.venuePendingDelete();
+    this.venuePendingDelete.set(null);
+    if (space) this.deleteSpace(space.id);
+  }
+
   deleteSpace(spaceId: string): void {
     const vid = this.variantId();
     if (!vid) return;
     this.api.delete(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces/${spaceId}`).subscribe(() => {
       this.spaces.update(s => s.filter(x => x.id !== spaceId));
-      this.loadStops(); // reload stops since their space_id was nulled
+      this.loadStops(); // reload stops — the venue's stops were deleted with it
     });
   }
 

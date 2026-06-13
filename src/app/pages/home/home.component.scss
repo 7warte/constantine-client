@@ -26,53 +26,91 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  // Soft pink → white backdrop — shown while loading and as the scene's sky.
+  background: linear-gradient(180deg, lighten($dusty-rose, 18%) 0%, $white 100%);
 
   @media (max-width: #{$bp-md - 1px}) {
     min-height: 64dvh;
-  }
-
-  &__slide {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center top;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-
-    &--active { opacity: 1; }
   }
 
   &__content {
     position: relative;
     z-index: $z-raised;
     padding-block: $space-8;
+    // Reserve the lower band for the town animation so the copy sits above it.
+    padding-bottom: max(80px, 14vw);
 
     @media (max-width: #{$bp-md - 1px}) {
       padding-block: $space-6;
+      padding-bottom: max(70px, 16vw);
     }
   }
 
+  // A thin pane of glass trimming the bottom of the hero — a little furniture
+  // detail. Keeps the bordered/highlighted glass look.
+  &__edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 5px;
+    z-index: $z-raised;
+    background: rgba($white, 0.14);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    border-top: 1px solid rgba($white, 0.45);
+    box-shadow: inset 0 1px 0 rgba($white, 0.55), 0 -2px 10px rgba($black, 0.10);
+    pointer-events: none;
+  }
+
+  // ── Frosted-glass panels ──────────────────────────────────────────────────
+  // The hero photo shows through, blurred, behind the title — like the copy
+  // sits on a pane of glass. The subtitle uses the same treatment.
   &__title {
+    position: relative;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+    cursor: pointer;        // click to bring on the next scene
     font-family: $font-family-primary;
     font-size: $font-size-xl;          // mobile default
     font-weight: $font-weight-bold;
     color: $text-primary;
     line-height: $line-height-tight;
     margin-bottom: $space-4;
-    transition: color 400ms ease;
+    padding: $space-4 $space-5;
+    border-radius: $radius-lg;
+    background: rgba($white, 0.10);
+    backdrop-filter: blur(12px);          // no saturate — stays neutral, never picks up the pink
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba($black, 0.16);
+    transition: color 400ms ease, background 400ms ease;
 
     @include md { font-size: $font-size-2xl; }
     @include lg { font-size: $font-size-3xl; }
+    @media (max-width: #{$bp-sm - 1px}) { font-size: $font-size-lg; }
+    @media (max-width: #{$bp-md - 1px}) { padding: $space-3 $space-4; }
 
-    @media (max-width: #{$bp-sm - 1px}) {
-      font-size: $font-size-lg;
+    // A slow light "shine" sweeping across the glass.
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -60%;
+      width: 45%;
+      background: linear-gradient(100deg, transparent 0%, rgba($white, 0.38) 50%, transparent 100%);
+      transform: skewX(-18deg);
+      pointer-events: none;
+      animation: hero-sheen 7s ease-in-out 1.5s infinite;
+
+      @media (prefers-reduced-motion: reduce) { animation: none; }
     }
   }
 
-  // Translucent panel only behind the subtitle so the body copy stays
-  // readable over any hero photo. Title and buttons sit on the photo directly.
   &__sub {
-    display: inline-block;
+    display: block;
     width: fit-content;
     max-width: 100%;
     font-family: $font-family-secondary;
@@ -80,26 +118,19 @@
     color: $text-primary;
     line-height: $line-height-normal;
     margin-bottom: $space-5;
-    transition: color 400ms ease;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    transition: color 400ms ease, background 400ms ease;
+    background: rgba($white, 0.10);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba($black, 0.12);
     padding: $space-4 $space-5;
     border-radius: $radius-md;
 
     @include md { font-size: $font-size-base; }
-
-    @media (max-width: #{$bp-md - 1px}) {
-      padding: $space-3 $space-4;
-    }
+    @media (max-width: #{$bp-md - 1px}) { padding: $space-3 $space-4; }
   }
 
-  // Dark photos → flip the subtitle panel to a dark translucent surface
-  &--text-light &__sub {
-    background: rgba(0, 0, 0, 0.05);
-  }
-
-  // Light text mode (for dark/dim photos)
+  // Light text mode (for dark/dim photos) — keep the clear glass, just flip text.
   &--text-light {
     .hero__title,
     .hero__sub {
@@ -577,18 +608,25 @@
 // rule (which is the default variant) lives inside an encapsulated stylesheet
 // with higher specificity. We want the CTA to read as $wheat (#dfcb8f).
 ::ng-deep .btn-wheat .btn {
-  background: $wheat !important;
+  // A warm gradient built from the brand palette (dusty-rose → wheat) instead
+  // of a flat yellow. The gradient drifts on hover.
+  background: linear-gradient(135deg, $dusty-rose 0%, $wheat 55%, $mist 100%) !important;
+  background-size: 180% 180% !important;
+  background-position: 0% 50% !important;
   color: $text-primary !important;
-  border: 1px solid $black !important;
-  box-shadow: none !important;
-  transition: background 400ms ease, color 400ms ease, border-color 400ms ease;
+  border: 1px solid rgba($black, 0.12) !important;
+  box-shadow: 0 6px 18px rgba($dusty-rose, 0.28) !important;
+  transition: background-position 600ms ease, box-shadow 400ms ease, transform 300ms ease;
 
   &:hover:not(:disabled) {
-    background: $black !important;
-    color: $wheat !important;
-    border-color: $black !important;
+    background-position: 100% 50% !important;
+    box-shadow: 0 10px 26px rgba($dusty-rose, 0.38) !important;
+    transform: translateY(-2px);
   }
 }
+
+// Word spans for the GSAP headline reveal.
+.features__title .g-word { display: inline-block; will-change: transform; }
 
 // ── Mobile: stop buttons from blowing past the viewport ─────────────────────
 // The default `.btn` has `white-space: nowrap` + `padding-inline: $space-8`
@@ -653,4 +691,243 @@
   .faq           { padding-block: $space-5; }
   .m-find-tour   { padding-block: $space-4 $space-3; }
   .creators      { padding-block: $space-3 $space-6; }
+}
+
+// Glass "shine" sweep for the hero title.
+@keyframes hero-sheen {
+  0%   { left: -60%; }
+  22%  { left: 140%; }
+  100% { left: 140%; }
+}
+
+// ── Easter egg: tiny tourists on the hero's glass trim ──────────────────────
+.hero__figures {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  z-index: $z-raised;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.figure {
+  position: absolute;
+  bottom: 5px;            // stand on top of the 5px glass trim
+  left: 0;
+  width: 10px;
+  height: 18px;
+  opacity: 0;             // revealed once GSAP positions it (avoids a stacked flash)
+  color: rgba($black, 0.78);
+  filter: drop-shadow(0 0 1px rgba($white, 0.7));
+  will-change: transform;
+
+  &__face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transform-origin: center bottom;
+  }
+
+  &__person {
+    position: relative;
+    width: 7px;
+    height: 16px;
+
+    &::before {            // head
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      margin-left: -2.25px;
+      width: 4.5px;
+      height: 4.5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    &::after {             // body
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      margin-left: -2.75px;
+      width: 5.5px;
+      height: 11px;
+      border-radius: 3px 3px 1.5px 1.5px;
+      background: currentColor;
+    }
+  }
+
+  &--walking &__person { animation: fig-bob 0.34s ease-in-out infinite; }
+
+  &__cam {
+    position: absolute;
+    bottom: 9px;
+    left: 50%;
+    margin-left: -3px;
+    width: 6px;
+    height: 4px;
+    border-radius: 1px;
+    background: rgba($black, 0.85);
+    opacity: 0;
+  }
+
+  &__flash {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    margin-left: -7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($white, 0.95) 0%, rgba($white, 0) 70%);
+    opacity: 0;
+  }
+
+  &__bubble {
+    position: absolute;
+    bottom: 17px;
+    left: 50%;
+    margin-left: -7px;
+    width: 14px;
+    height: 9px;
+    border-radius: 5px;
+    background: rgba($white, 0.92);
+    box-shadow: 0 1px 3px rgba($black, 0.25);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    font-weight: 800;
+    line-height: 1;
+    color: #1a1a1a;
+
+    &::after {             // little tail
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 4px;
+      width: 0;
+      height: 0;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-top: 3px solid rgba($white, 0.92);
+    }
+  }
+}
+
+@keyframes fig-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+
+// ── Easter-egg town scene (behind the hero copy when active) ────────────────
+.hero__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;                 // below the copy + figures
+  overflow: hidden;
+  background: transparent;    // while loading, the hero's pink→white shows through
+
+  // Once ready, each scene gets its own sky.
+  &--ready.hero__scene--city,
+  &--ready.hero__scene--beach {
+    background: linear-gradient(180deg, #cfe6f2 0%, #eaf4f9 100%);   // light blue sky
+  }
+  &--ready.hero__scene--museum {
+    background: #eceae6;        // soft warm gallery light
+  }
+}
+
+// City greenery — mixed greens (CSS fill overrides the inline grays).
+.hero__scene-svg {
+  .tree-foliage ellipse { fill: #8aa86f; }
+  .tree-foliage ellipse:nth-child(2) { fill: #a7c191; }
+  .tree-foliage ellipse:nth-child(3) { fill: #6f9160; }
+  .tree-foliage--b ellipse:nth-child(1) { fill: #7fa46c; }
+
+  .scene-bush ellipse { fill: #8caa72; }
+  .scene-bush ellipse:nth-child(2) { fill: #a4bf8c; }
+  .scene-bush ellipse:nth-child(4) { fill: #98b57f; }
+  .scene-bush ellipse:nth-child(5) { fill: #79965f; }
+
+  .scene-flowers circle:nth-of-type(1) { fill: #d98fa0; }
+  .scene-flowers circle:nth-of-type(2) { fill: #e6c266; }
+  .scene-flowers circle:nth-of-type(3) { fill: #b98ec2; }
+}
+
+.hero__scene-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;            // span the whole hero width; viewBox maps 1:1 to width
+  height: auto;
+  animation: scene-fade 500ms ease both;   // each scene swap fades in
+
+  .tree-foliage {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: tree-sway 4s ease-in-out infinite;
+  }
+  .tree-foliage--b {
+    animation-duration: 5.4s;
+    animation-delay: -1.6s;
+  }
+
+  .fountain-water {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: fountain-flow 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tree-foliage,
+    .fountain-water { animation: none; }
+  }
+}
+
+@keyframes fountain-flow {
+  0%, 100% { transform: scaleY(0.92); opacity: 0.85; }
+  50%      { transform: scaleY(1.06); opacity: 1; }
+}
+
+// Beach scene: drifting sea + floating albatrosses.
+.hero__scene-svg {
+  .sea-wave { animation: wave-drift 6s linear infinite; }
+  .bird { animation: bird-float 7s ease-in-out infinite; }
+  .bird--2 { animation-duration: 8.5s; animation-delay: -2s; }
+  .bird--3 { animation-duration: 6.2s; animation-delay: -4s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sea-wave, .bird { animation: none; }
+  }
+}
+
+@keyframes wave-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-200px); }
+}
+@keyframes bird-float {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(26px, -7px); }
+}
+
+// On the light town, force dark copy regardless of the (now hidden) photo.
+.hero--town .hero__title,
+.hero--town .hero__sub {
+  color: $text-primary;
+}
+
+@keyframes tree-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%      { transform: rotate(2deg); }
+}
+
+@keyframes scene-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

@@ -29,6 +29,7 @@ export class StudioLayoutComponent {
 
   readonly navItems: NavItem[] = [
     { label: 'Your tours', icon: 'map', route: '/studio/tours' },
+    { label: 'Promote your tours', icon: 'campaign', route: '/studio/promote' },
     { label: 'Earnings', icon: 'account_balance_wallet', route: '/studio/earnings' },
   ];
 

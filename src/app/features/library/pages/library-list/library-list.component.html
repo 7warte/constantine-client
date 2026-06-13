@@ -36,15 +36,46 @@
             <p class="purchase-card__creator">by {{ purchase.creator_display_name }}</p>
           </div>
           <div class="purchase-card__footer">
-            <a [routerLink]="['/library', purchase.id, 'play']" class="btn btn--primary btn--block">
+            <a [routerLink]="['/library', purchase.id, 'play']" class="btn btn--primary btn--block purchase-card__start">
               ▶ Start tour
             </a>
-            <a [routerLink]="['/tours', purchase.tour_variant_id]" [queryParams]="{ tourId: purchase.tour_id }" class="btn btn--ghost btn--block">
+            <button type="button" class="btn btn--ghost btn--block" (click)="detailsFor.set(purchase)">
               Details
-            </a>
+            </button>
           </div>
         </div>
       }
+    </div>
+  }
+
+  <!-- Synthetic details modal -->
+  @if (detailsFor(); as p) {
+    <div class="details-backdrop" (click)="detailsFor.set(null)">
+      <div class="details-modal" (click)="$event.stopPropagation()">
+        <button type="button" class="details-modal__close" (click)="detailsFor.set(null)" aria-label="Close">&times;</button>
+        <div class="details-modal__cover" [class.details-modal__cover--placeholder]="!p.cover_url">
+          @if (p.cover_url) {
+            <img [src]="p.cover_url" [alt]="p.tour_title" />
+          } @else {
+            <span aria-hidden="true">&#127911;</span>
+          }
+        </div>
+        <div class="details-modal__body">
+          <h2 class="details-modal__title">{{ p.tour_title }}</h2>
+          <p class="details-modal__creator">by {{ p.creator_display_name }}</p>
+          <div class="details-modal__meta">
+            <span class="lang-badge">{{ p.language | uppercase }}</span>
+            <span>{{ p.waypoint_count }} stops</span>
+          </div>
+          @if (p.description) {
+            <p class="details-modal__desc">{{ p.description }}</p>
+          }
+          <div class="details-modal__actions">
+            <a [routerLink]="['/library', p.id, 'play']" class="btn btn--primary">▶ Start tour</a>
+            <a [routerLink]="['/tours', p.tour_variant_id]" [queryParams]="{ tourId: p.tour_id }" class="btn btn--ghost">Full page</a>
+          </div>
+        </div>
+      </div>
     </div>
   }
 </section>

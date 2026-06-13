@@ -1,0 +1,197 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.promote {
+  max-width: 1100px;
+
+  &__header { margin-bottom: $space-6; }
+  &__sub {
+    margin-top: $space-2;
+    max-width: 640px;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+  &__loading { padding: $space-12; text-align: center; color: $text-secondary; }
+  &__hint { color: $text-muted; font-size: $font-size-sm; margin-top: $space-6; }
+}
+
+.page-title { @include heading($font-size-2xl); }
+
+// ── Option chooser ──────────────────────────────────────────────────────────
+.promo-groups {
+  display: grid;
+  gap: $space-6;
+  @include md { grid-template-columns: 1fr 1fr; }
+}
+
+.promo-group {
+  &__title {
+    display: flex; align-items: center; gap: $space-2;
+    font-family: $font-family-primary; font-size: $font-size-md; color: $text-primary;
+    margin-bottom: $space-4;
+    .mat-icon { color: $text-muted; }
+  }
+  &__cards { display: flex; flex-direction: column; gap: $space-3; }
+}
+
+.promo-opt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: $space-4; row-gap: $space-1;
+  text-align: left;
+  padding: $space-4 $space-5;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background 0.3s ease;
+
+  &__icon { grid-row: 1 / 3; align-self: center; color: $accent-primary; font-size: 30px; width: 30px; height: 30px; }
+  &__title { font-weight: $font-weight-semibold; color: $text-primary; }
+  &__desc { font-size: $font-size-xs; color: $text-secondary; line-height: $line-height-loose; }
+
+  &:hover { border-color: $border-strong; }
+  &--active { border-color: $accent-primary; background: $accent-muted; }
+}
+
+// ── Builder ─────────────────────────────────────────────────────────────────
+.builder {
+  display: grid;
+  gap: $space-6;
+  margin-top: $space-8;
+  @include lg { grid-template-columns: 320px 1fr; align-items: start; }
+}
+
+.builder__controls {
+  display: flex; flex-direction: column; gap: $space-5;
+  padding: $space-5;
+  background: $bg-surface; border: 1px solid $border-default; border-radius: $radius-md;
+}
+.builder__field { display: flex; flex-direction: column; gap: $space-2; }
+.builder__label { font-size: $font-size-sm; font-weight: $font-weight-semibold; color: $text-primary; }
+.builder__select {
+  padding: $space-3 $space-4; border: 1px solid $border-default; border-radius: $radius-md;
+  background: $bg-surface-alt; font-family: $font-family-secondary; font-size: $font-size-base; color: $text-primary;
+  &:focus { outline: none; border-color: $accent-primary; }
+}
+.builder__empty { font-size: $font-size-sm; color: $text-muted; }
+.builder__actions { display: flex; flex-direction: column; gap: $space-3; }
+.builder__note {
+  display: flex; align-items: flex-start; gap: $space-2;
+  font-size: $font-size-xs; color: $text-muted; line-height: $line-height-loose;
+  .mat-icon { font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; }
+}
+
+.seg {
+  display: inline-flex; align-self: flex-start;
+  border: 1px solid $border-default; border-radius: $radius-md; overflow: hidden;
+  &__btn {
+    padding: $space-2 $space-4; background: $bg-surface; border: none; cursor: pointer;
+    font-size: $font-size-sm; font-weight: $font-weight-semibold; color: $text-secondary;
+    transition: background 0.3s ease, color 0.3s ease;
+    & + & { border-left: 1px solid $border-default; }
+    &--active { background: $accent-primary; color: $white; }
+  }
+}
+
+.builder__stage {
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: $space-6;
+  background: repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 10px, #fafafa 10px, #fafafa 20px);
+  border: 1px solid $border-default; border-radius: $radius-md;
+  overflow: auto;
+}
+
+// ── Buttons (local) ─────────────────────────────────────────────────────────
+.btn {
+  display: inline-block; text-align: center;
+  padding: $space-3 $space-5; border-radius: $radius-md;
+  font-weight: $font-weight-semibold; font-size: $font-size-sm; cursor: pointer;
+  border: 1px solid transparent; text-decoration: none;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  &--primary { background: $accent-primary; color: $white; border-color: $accent-primary; &:hover { background: $accent-hover; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+  &--ghost { background: transparent; color: $text-secondary; border-color: $border-default; &:hover { color: $text-primary; } }
+}
+
+// ── The promo card ──────────────────────────────────────────────────────────
+.promo {
+  position: relative;
+  display: flex; flex-direction: column;
+  width: 460px; max-width: 100%;
+  background: $white;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-md;
+  font-family: $font-family-secondary;
+  color: $text-primary;
+
+  &--print  { aspect-ratio: 1 / 1.414; }
+  &--square { width: 460px; aspect-ratio: 1 / 1; }
+  &--story  { width: 380px; aspect-ratio: 9 / 16; }
+
+  &__media {
+    position: relative; flex: 1 1 46%; min-height: 0;
+    display: flex; align-items: flex-end;
+    overflow: hidden;
+    img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    &--creator { align-items: center; justify-content: center; flex: 0 0 22%; }
+  }
+  &__brand {
+    position: relative; z-index: 1;
+    margin: $space-4;
+    padding: $space-1 $space-3;
+    background: rgba($black, 0.55); color: $white;
+    font-size: $font-size-xs; font-weight: $font-weight-bold; letter-spacing: 0.12em;
+    border-radius: $radius-full;
+  }
+
+  // Ticket perforation between media and body.
+  &__perf {
+    flex: 0 0 auto; height: 0;
+    border-top: 2px dashed $border-strong;
+  }
+
+  &__body {
+    flex: 1 1 54%;
+    display: flex; align-items: center; gap: $space-4;
+    padding: $space-5;
+  }
+  &__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $space-2; }
+  &__title { font-family: $font-family-primary; font-size: $font-size-lg; font-weight: $font-weight-bold; line-height: $line-height-tight; }
+  &__meta { display: flex; align-items: baseline; gap: $space-2; flex-wrap: wrap; }
+  &__price { font-family: $font-family-primary; font-size: $font-size-md; font-weight: $font-weight-bold; color: $accent-primary; }
+  &__dim { font-size: $font-size-sm; color: $text-secondary; }
+  &__by { font-size: $font-size-sm; color: $text-secondary; }
+  &__cta {
+    margin-top: $space-1; font-size: $font-size-xs; font-weight: $font-weight-bold;
+    letter-spacing: 0.06em; text-transform: uppercase; color: $text-primary;
+  }
+  &__qr {
+    flex-shrink: 0; width: 104px; height: 104px;
+    background: $white; padding: 4px; border-radius: $radius-sm;
+    img { width: 100%; height: 100%; display: block; }
+  }
+  &__placeholder { margin: auto; padding: $space-8; color: $text-muted; font-size: $font-size-sm; text-align: center; }
+
+  // Creator layout.
+  &__body--creator { flex-direction: column; align-items: stretch; gap: $space-4; }
+  &__creator-head { display: flex; align-items: center; gap: $space-3; }
+  &__avatar {
+    width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    color: $white; font-family: $font-family-primary; font-size: $font-size-lg; font-weight: $font-weight-bold;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+  &__creator-id { min-width: 0; }
+  &__handle { font-size: $font-size-sm; color: $text-secondary; }
+  &__bio { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; }
+  &__tours { list-style: none; display: flex; flex-direction: column; gap: $space-3; }
+  &__tour-row { display: flex; align-items: center; gap: $space-3; font-size: $font-size-sm; }
+  &__tour-row--empty { color: $text-muted; }
+  &__dot { width: 6px; height: 6px; border-radius: 50%; background: $accent-primary; flex-shrink: 0; }
+  &__tour-name { flex: 1; min-width: 0; @include truncate; }
+  &__tour-price { color: $text-secondary; }
+  &__footer { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: $space-4; }
+}

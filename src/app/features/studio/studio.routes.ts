@@ -24,6 +24,10 @@ export const STUDIO_ROUTES: Routes = [
           .then(m => m.TranslationRequestNewComponent),
       },
       {
+        path: 'promote',
+        loadComponent: () => import('./pages/promote/promote.component').then(m => m.PromoteComponent),
+      },
+      {
         path: 'earnings',
         loadComponent: () => import('./pages/earnings/earnings.component').then(m => m.EarningsComponent),
       },

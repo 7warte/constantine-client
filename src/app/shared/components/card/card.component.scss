@@ -9,12 +9,9 @@
   border-radius: $radius-lg;
   overflow: hidden;
   cursor: pointer;
-  transition: transform $transition-normal, box-shadow $transition-normal,
-              border-color $transition-normal;
+  transition: border-color $transition-normal;   // lift + shadow handled by GSAP
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
     border-color: #cccccc;
   }
 

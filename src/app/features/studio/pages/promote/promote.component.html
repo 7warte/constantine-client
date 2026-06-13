@@ -1,0 +1,193 @@
+<section class="promote">
+  <header class="promote__header">
+    <h1 class="page-title">Promote your tours</h1>
+    <p class="promote__sub">
+      Turn a tour — or your whole showcase — into a shareable poster or social post.
+      Each one carries a QR code and link straight back to your page on Constantine.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <div class="promote__loading" role="status">Loading your tours…</div>
+  } @else {
+
+    <!-- ── Option chooser ─────────────────────────────────────────────── -->
+    <div class="promo-groups">
+      <div class="promo-group">
+        <h2 class="promo-group__title"><mat-icon>print</mat-icon> Printable</h2>
+        <div class="promo-group__cards">
+          @for (o of options; track o.title) {
+            @if (o.medium === 'print') {
+              <button type="button" class="promo-opt" [class.promo-opt--active]="isActive(o)" (click)="pick(o)">
+                <mat-icon class="promo-opt__icon">{{ o.icon }}</mat-icon>
+                <span class="promo-opt__title">{{ o.title }}</span>
+                <span class="promo-opt__desc">{{ o.desc }}</span>
+              </button>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="promo-group">
+        <h2 class="promo-group__title"><mat-icon>smartphone</mat-icon> Digital</h2>
+        <div class="promo-group__cards">
+          @for (o of options; track o.title) {
+            @if (o.medium === 'digital') {
+              <button type="button" class="promo-opt" [class.promo-opt--active]="isActive(o)" (click)="pick(o)">
+                <mat-icon class="promo-opt__icon">{{ o.icon }}</mat-icon>
+                <span class="promo-opt__title">{{ o.title }}</span>
+                <span class="promo-opt__desc">{{ o.desc }}</span>
+              </button>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Builder ────────────────────────────────────────────────────── -->
+    @if (chosen()) {
+      <div class="builder">
+        <div class="builder__controls">
+          @if (kind() === 'tour') {
+            <label class="builder__field">
+              <span class="builder__label">Tour</span>
+              @if (tours().length > 0) {
+                <select class="builder__select" [value]="selectedTourId()" (change)="onTourChange($any($event.target).value)">
+                  @for (t of tours(); track t.id) {
+                    <option [value]="t.id">{{ t.title }}</option>
+                  }
+                </select>
+              } @else {
+                <span class="builder__empty">Publish a tour first to promote it.</span>
+              }
+            </label>
+          }
+
+          @if (medium() === 'print') {
+            <div class="builder__field">
+              <span class="builder__label">Print size</span>
+              <div class="seg">
+                @for (s of printSizes; track s) {
+                  <button type="button" class="seg__btn" [class.seg__btn--active]="printSize() === s" (click)="printSize.set(s)">{{ s | uppercase }}</button>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="builder__field">
+              <span class="builder__label">Format</span>
+              <div class="seg">
+                <button type="button" class="seg__btn" [class.seg__btn--active]="digitalFormat() === 'square'" (click)="digitalFormat.set('square')">Square</button>
+                <button type="button" class="seg__btn" [class.seg__btn--active]="digitalFormat() === 'story'" (click)="digitalFormat.set('story')">Story</button>
+              </div>
+            </div>
+          }
+
+          <div class="builder__actions">
+            @if (medium() === 'print') {
+              <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="print()">
+                {{ busy() ? 'Preparing…' : 'Print / Save as PDF' }}
+              </button>
+            } @else {
+              <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="download()">
+                {{ busy() ? 'Rendering…' : 'Download image' }}
+              </button>
+            }
+            <button type="button" class="btn btn--ghost" (click)="copyLink()">
+              {{ copied() ? 'Link copied ✓' : 'Copy link' }}
+            </button>
+          </div>
+
+          <p class="builder__note">
+            <mat-icon>qr_code_2</mat-icon>
+            QR &amp; link point to
+            {{ kind() === 'tour' ? 'this tour’s booking page' : 'your creator showcase page' }}.
+          </p>
+        </div>
+
+        <!-- Preview stage -->
+        <div class="builder__stage">
+          <div #preview class="promo"
+            [class.promo--print]="medium() === 'print'"
+            [class.promo--square]="medium() === 'digital' && digitalFormat() === 'square'"
+            [class.promo--story]="medium() === 'digital' && digitalFormat() === 'story'">
+
+            @if (kind() === 'tour') {
+              @if (selectedTour(); as tour) {
+                <div class="promo__media" [ngClass]="tour.cover_image_url ? '' : 'cover-grad--' + gradient(tour)">
+                  @if (tour.cover_image_url) {
+                    <img [src]="tour.cover_image_url" crossorigin="anonymous" [alt]="tour.title" />
+                  }
+                  <span class="promo__brand">CONSTANTINE · AUDIO TOUR</span>
+                </div>
+                <div class="promo__perf"></div>
+                <div class="promo__body">
+                  <div class="promo__info">
+                    <h3 class="promo__title">{{ tour.title }}</h3>
+                    <div class="promo__meta">
+                      <span class="promo__price">{{ price(tour) }}</span>
+                      @if (tour.duration_minutes) { <span class="promo__dim">· {{ tour.duration_minutes }} min</span> }
+                      @if (tour.setting) { <span class="promo__dim">· {{ tour.setting }}</span> }
+                    </div>
+                    <p class="promo__by">A tour by {{ creator()?.display_name }}</p>
+                    <span class="promo__cta">Scan to listen &amp; book</span>
+                  </div>
+                  <div class="promo__qr">
+                    @if (qrDataUrl()) { <img [src]="qrDataUrl()!" alt="QR code" /> }
+                  </div>
+                </div>
+              } @else {
+                <div class="promo__placeholder">Select a tour to preview your promo.</div>
+              }
+            } @else {
+              <!-- Creator showcase -->
+              <div class="promo__media promo__media--creator cover-grad--g3">
+                <span class="promo__brand">CONSTANTINE · CREATOR</span>
+              </div>
+              <div class="promo__perf"></div>
+              <div class="promo__body promo__body--creator">
+                <div class="promo__creator-head">
+                  <div class="promo__avatar" [ngClass]="creator()?.avatar_url ? '' : 'cover-grad--g5'">
+                    @if (creator()?.avatar_url) {
+                      <img [src]="creator()!.avatar_url!" crossorigin="anonymous" alt="" />
+                    } @else {
+                      <span>{{ (creator()?.display_name || 'C')[0] | uppercase }}</span>
+                    }
+                  </div>
+                  <div class="promo__creator-id">
+                    <h3 class="promo__title">{{ creator()?.display_name }}</h3>
+                    <span class="promo__handle">&#64;{{ creator()?.username }}</span>
+                  </div>
+                </div>
+
+                @if (creator()?.bio) {
+                  <p class="promo__bio">{{ creator()?.bio }}</p>
+                }
+
+                <ul class="promo__tours">
+                  @for (t of featuredTours(); track t.id) {
+                    <li class="promo__tour-row">
+                      <span class="promo__dot"></span>
+                      <span class="promo__tour-name">{{ t.title }}</span>
+                      <span class="promo__tour-price">{{ price(t) }}</span>
+                    </li>
+                  } @empty {
+                    <li class="promo__tour-row promo__tour-row--empty">Your tours will appear here.</li>
+                  }
+                </ul>
+
+                <div class="promo__footer">
+                  <span class="promo__cta">Scan to explore all my tours</span>
+                  <div class="promo__qr">
+                    @if (qrDataUrl()) { <img [src]="qrDataUrl()!" alt="QR code" /> }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <p class="promote__hint">Pick one of the four options above to start building your promo.</p>
+    }
+  }
+</section>

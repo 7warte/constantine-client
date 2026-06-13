@@ -21,8 +21,15 @@
     }
 
     @include lg {
-      max-width: 880px;
+      max-width: $container-max-width;   // match the site/navbar content width
       margin: 0 auto;
+      // Desktop: map (≤ 50%) + details on the top row, itinerary full-width below.
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: $space-6;
+      row-gap: $space-5;
+      align-items: start;
+      padding-inline: $space-6;
     }
   }
 
@@ -35,6 +42,23 @@
     img {
       width: 100%;
       display: block;
+    }
+
+    @include lg {
+      grid-column: 1;
+      grid-row: 1;
+      border: 1px solid $border-default;
+      border-radius: $radius-md;
+      overflow: hidden;
+    }
+  }
+
+  &__welcome-itinerary {
+    padding-inline: $space-4;
+
+    @include lg {
+      grid-column: 1 / -1;     // full width, beneath the map + details
+      padding-inline: 0;
     }
   }
 
@@ -61,6 +85,13 @@
     display: flex;
     flex-direction: column;
     gap: $space-5;
+
+    @include lg {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      padding-inline: 0;
+    }
   }
 
   &__welcome-title {
@@ -70,6 +101,11 @@
     margin: 0;
     line-height: $line-height-tight;
     overflow-wrap: break-word;
+
+    @include lg {
+      text-align: left;
+      font-size: $font-size-2xl;
+    }
   }
 
   &__welcome-address {

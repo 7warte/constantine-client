@@ -11,6 +11,20 @@
   }
 
   &__header { margin-bottom: $space-4; }
+
+  // Every colour change in the editor eases over 0.4s (e.g. the save button
+  // muted → green, a venue taking its chosen colour, inputs turning green).
+  .btn, .btn-icon, .tabs__tab, .tabs__tab::after,
+  .venue-bar__save, .venue-bar__input, .venue-bar__lead,
+  .stop-add-bar__btn, .stop-add-bar__input,
+  .space-block--venue, .space-block__pin, .space-block__del,
+  .space-block__collapse, .space-block__colorize, .color-menu__item,
+  .map-theme-btn, .map-theme-picker__icon,
+  .form-field__input, .form-field__select, .form-field__textarea, .price-square__input {
+    transition-property: background-color, color, border-color;
+    transition-duration: 0.4s;
+    transition-timing-function: ease;
+  }
 }
 
 .page-title  {
@@ -22,57 +36,58 @@
 .back-link { font-size: $font-size-sm; color: $text-secondary; &:hover { color: $text-primary; } }
 
 // ── Tabs ────────────────────────────────────────────────────────────────────
+// Full-width segmented bar (items fill the navbar-content width) with a single
+// highlight pill that slides to the active step. Scrolls away with the page.
 .tabs {
+  position: relative;
   display: flex;
   align-items: stretch;
-  gap: $space-5;
+  gap: 0;
+  padding: 6px;
   margin-bottom: $space-6;
-  border-bottom: 1px solid $border-default;
-
-  // Sticky sub-bar — sits just under the 64px navbar while the form scrolls.
-  position: sticky;
-  top: 64px;
-  z-index: $z-raised;
   background: $accent-muted;
+  border-radius: $radius-md;
+  overflow: hidden;
 
   @media (max-width: #{$bp-md - 1px}) {
-    gap: $space-4;
     margin-bottom: $space-5;
-    padding-inline: $space-3;
+  }
+
+  // The sliding highlight. Four equal tabs → each is a quarter of the inner area.
+  &__indicator {
+    position: absolute;
+    top: 6px; bottom: 6px; left: 6px;
+    width: calc((100% - 12px) / 4);
+    background: $accent-primary;
+    border-radius: $radius-sm;
+    box-shadow: $shadow-sm;
+    z-index: 0;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   &__tab {
     position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     font-family: $font-family-secondary;
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
-    color: $text-muted;
+    color: $text-secondary;
     cursor: pointer;
-    padding: $space-3 0;
-    min-height: 44px;
-    transition: color $transition-fast;
+    padding: $space-3 $space-2;
+    min-height: 40px;
+    transition: color 0.3s ease;
 
-    // Active underline indicator.
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -1px;
-      height: 2px;
-      background: transparent;
-      transition: background $transition-fast;
-    }
+    &:hover:not(:disabled):not(.tabs__tab--active) { color: $text-primary; }
+    &:disabled { cursor: not-allowed; opacity: 0.4; }
 
-    &:hover:not(:disabled) { color: $text-primary; }
-    &:disabled { cursor: not-allowed; opacity: 0.45; }
-
-    &--active {
-      color: $text-primary;
-      &::after { background: $text-primary; }
-    }
+    &--active { color: $white; }
   }
 }
 
@@ -658,6 +673,57 @@
     border-color: #1a1a1a;
     color: #ffffff;
   }
+}
+
+.map-frame {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+// Shown over the (blank) map until a start point is chosen.
+.map-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-3;
+  padding: $space-6 $space-5;
+  text-align: center;
+  background: $bg-surface-alt;
+  border: 1px solid #eeeeee;
+  color: $text-secondary;
+
+  p { font-size: $font-size-sm; max-width: 320px; margin: 0; line-height: $line-height-loose; }
+
+  &__icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: $text-muted;
+  }
+}
+
+// Covers the map while the save-time square screenshot is captured.
+.map-capturing {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  background: $bg-surface-alt;
+  border: 1px solid #eeeeee;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+
+  &__icon { font-size: 28px; width: 28px; height: 28px; color: $text-muted; }
 }
 
 .map-container {
@@ -1681,10 +1747,12 @@
     background: $color-success;
     color: $white;
     cursor: pointer;
-    transition: opacity $transition-fast;
 
     .mat-icon { font-size: 22px; width: 22px; height: 22px; }
-    &:hover { opacity: 0.9; }
+    &:hover:not(:disabled) { opacity: 0.9; }
+
+    // Muted grey until a venue name is typed.
+    &:disabled { background: $border-strong; cursor: not-allowed; }
   }
 }
 
@@ -1966,6 +2034,46 @@
   }
 }
 
+// ── Confirm dialog (e.g. deleting a venue) ──────────────────────────────────
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  background: rgba($black, 0.5);
+}
+
+.confirm-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: $space-5;
+  background: $white;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+
+  &__title {
+    @include heading($font-size-lg);
+    margin-bottom: $space-3;
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+    margin-bottom: $space-5;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+  }
+}
+
 // ── Buttons ─────────────────────────────────────────────────────────────────
 .btn {
   display: inline-block;
@@ -1983,6 +2091,7 @@
   &--sm      { padding: $space-1 $space-3; font-size: $font-size-xs; }
   &--lg      { padding: $space-3 $space-6; font-size: $font-size-base; }
   &--publish { background: $color-success; color: $white; border-color: $color-success; &:hover { opacity: 0.9; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+  &--danger  { background: $color-error; color: $white; border-color: $color-error; &:hover { opacity: 0.9; } }
 
   &--icon-text {
     display: inline-flex;
@@ -2025,4 +2134,193 @@
   .space-empty { padding: $space-5 $space-3; }
 
   .transition-form-block__fields { flex-wrap: wrap; }
+}
+
+// ── Step 4: publish preview ─────────────────────────────────────────────────
+.preview {
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &__hero {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    align-items: flex-end;
+    isolation: isolate;
+  }
+  &__hero-img { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
+  &__hero-scrim {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(180deg, transparent 40%, rgba($black, 0.5) 100%);
+  }
+  &__title {
+    position: relative; z-index: 2;
+    margin: 0; padding: $space-5;
+    font-family: $font-family-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $white;
+    text-shadow: 0 1px 6px rgba($black, 0.35);
+  }
+
+  &__meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: $space-3;
+    padding: $space-4 $space-5;
+    border-bottom: 1px solid $border-light;
+  }
+  &__price {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg; font-weight: $font-weight-bold; color: $text-primary;
+  }
+  &__chip {
+    padding: $space-1 $space-3;
+    border: 1px solid $border-default; border-radius: $radius-full;
+    font-size: $font-size-xs; color: $text-secondary; text-transform: capitalize;
+  }
+
+  &__desc {
+    padding: $space-4 $space-5; margin: 0;
+    font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose;
+  }
+
+  &__tags { display: flex; flex-wrap: wrap; gap: $space-2; padding: 0 $space-5 $space-4; }
+  &__tag {
+    padding: $space-1 $space-3; background: $bg-surface-alt; border-radius: $radius-full;
+    font-size: $font-size-xs; color: $text-secondary;
+  }
+
+  &__audio {
+    padding: 0 $space-5 $space-4;
+    audio { width: 100%; margin-top: $space-2; }
+  }
+
+  &__section-label {
+    display: block;
+    font-size: $font-size-xs; font-weight: $font-weight-bold;
+    letter-spacing: 0.08em; text-transform: uppercase; color: $text-muted;
+  }
+
+  &__outline { padding: $space-4 $space-5 $space-5; border-top: 1px solid $border-light; }
+
+  &__venue { margin-top: $space-4; }
+  &__venue-name {
+    font-family: $font-family-primary; font-size: $font-size-md;
+    font-weight: $font-weight-semibold; color: $text-primary; margin-bottom: $space-2;
+  }
+  &__stop {
+    display: flex; align-items: flex-start; gap: $space-3;
+    padding: $space-3 0; font-size: $font-size-sm; color: $text-secondary;
+    border-top: 1px solid $border-light;
+    &:first-child { border-top: none; }
+  }
+  &__stop-num {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px;
+    border-radius: $radius-full; background: $text-primary; color: $white;
+    font-size: $font-size-xs; font-weight: $font-weight-bold;
+  }
+  &__stop-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $space-2; }
+  &__stop-title { color: $text-primary; font-weight: $font-weight-semibold; }
+  &__stop-desc { margin: 0; font-size: $font-size-xs; color: $text-secondary; line-height: $line-height-loose; }
+
+  &__media-list { display: flex; flex-direction: column; gap: $space-2; margin-top: $space-1; }
+  &__audio-el { width: 100%; max-width: 360px; height: 36px; }
+
+  &__img-link {
+    display: inline-flex; flex-direction: column; gap: $space-1;
+    width: max-content; max-width: 100%;
+    padding: 0; border: none; background: none; cursor: pointer; text-align: left;
+    img {
+      max-width: 220px; max-height: 150px; width: auto; object-fit: cover;
+      border: 1px solid $border-default; border-radius: $radius-sm;
+      transition: opacity 0.2s ease;
+    }
+    &:hover img { opacity: 0.9; }
+  }
+  &__img-caption { font-size: $font-size-xs; color: $text-muted; }
+
+  &__pdf {
+    display: inline-flex; align-items: center; gap: $space-2; align-self: flex-start;
+    font-size: $font-size-sm; font-weight: $font-weight-semibold; color: $accent-primary; text-decoration: none;
+    .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    &:hover { color: $accent-hover; }
+  }
+}
+
+// ── Preview image lightbox ──────────────────────────────────────────────────
+.img-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-6;
+  background: rgba($black, 0.9);
+
+  &__frame {
+    position: relative;
+    max-width: 92vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-3;
+  }
+
+  &__img {
+    max-width: 92vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: $radius-sm;
+  }
+
+  &__caption {
+    margin: 0;
+    max-width: 720px;
+    text-align: center;
+    font-size: $font-size-sm;
+    color: rgba($white, 0.85);
+  }
+
+  &__close {
+    position: fixed;
+    top: $space-4;
+    right: $space-5;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: $radius-full;
+    background: rgba($white, 0.12);
+    color: $white;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    &:hover { background: rgba($white, 0.25); }
+  }
+
+  &__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: $radius-full;
+    background: rgba($white, 0.12);
+    color: $white;
+    font-size: 22px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    &:hover { background: rgba($white, 0.25); }
+    &--prev { left: -$space-8; }
+    &--next { right: -$space-8; }
+  }
+
+  &__counter {
+    font-size: $font-size-xs;
+    color: rgba($white, 0.7);
+  }
 }

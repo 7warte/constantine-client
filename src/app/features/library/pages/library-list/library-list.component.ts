@@ -17,6 +17,7 @@ export class LibraryListComponent implements OnInit {
 
   readonly purchases = signal<any[]>([]);
   readonly loading   = signal(true);
+  readonly detailsFor = signal<any | null>(null);   // purchase shown in the details modal
 
   ngOnInit(): void {
     this.api.get<any[]>('/purchases').subscribe({

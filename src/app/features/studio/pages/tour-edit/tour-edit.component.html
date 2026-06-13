@@ -6,6 +6,7 @@
 
   <!-- ── Tabs ───────────────────────────────────────────────────────── -->
   <div class="tabs" role="tablist">
+    <span class="tabs__indicator" [style.transform]="'translateX(' + (step() - 1) * 100 + '%)'"></span>
     <button class="tabs__tab" [class.tabs__tab--active]="step() === 1" (click)="goToStep(1)" type="button" role="tab">
       Basics
     </button>
@@ -14,6 +15,9 @@
     </button>
     <button class="tabs__tab" [class.tabs__tab--active]="step() === 3" [disabled]="!step2Done()" (click)="goToStep(3)" type="button" role="tab">
       Stops
+    </button>
+    <button class="tabs__tab" [class.tabs__tab--active]="step() === 4" [disabled]="!step3Done()" (click)="goToStep(4)" type="button" role="tab">
+      Publish
     </button>
   </div>
 
@@ -158,9 +162,9 @@
           <div class="side-inputs">
             <div class="form-field">
               <label for="tour-duration" class="form-field__label">Avg. duration (minutes)</label>
+              <span class="form-field__hint square-field__spacer" aria-hidden="true">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
               <input id="tour-duration" type="number" formControlName="duration_minutes" class="form-field__input"
                 min="1" placeholder="e.g. 90" />
-              <span class="form-field__hint square-field__spacer" aria-hidden="true">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
             </div>
 
             <div class="form-field">
@@ -191,19 +195,43 @@
     @if (step() === 2) {
       <div class="edit-card">
         <h2 class="edit-card__title">Tour location</h2>
-        <p class="edit-card__desc">Set the start and end addresses of your tour.</p>
+        <p class="edit-card__desc">For each address, pick its town first — then the street search stays within that town.</p>
 
-        <div class="form-field address-field">
-          <label class="form-field__label">Start address</label>
-          <input type="text" class="form-field__input" placeholder="e.g. Colosseum, Rome"
-            [value]="startAddress()" (input)="onAddressInput('start', $event)" />
-          @if (startSuggestions().length > 0) {
-            <ul class="address-suggestions">
-              @for (s of startSuggestions(); track s.display_name) {
-                <li (mousedown)="selectSuggestion('start', s)">{{ s.display_name }}</li>
+        <div class="form-row">
+          <div class="form-field address-field">
+            <label class="form-field__label">Start — town / city</label>
+            <span class="form-field__hint">
+              @if (startTown()) {
+                Searching in <strong>{{ startTown() }}</strong>.
+              } @else {
+                Choose the town to scope the start address.
               }
-            </ul>
-          }
+            </span>
+            <input type="text" class="form-field__input" placeholder="e.g. Rome"
+              [value]="startTownInput()" (input)="onTownInput('start', $event)" />
+            @if (startTownSuggestions().length > 0) {
+              <ul class="address-suggestions">
+                @for (s of startTownSuggestions(); track s.display_name) {
+                  <li (mousedown)="selectTown('start', s)">{{ s.display_name }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <div class="form-field address-field">
+            <label class="form-field__label">Start address</label>
+            <span class="form-field__hint">Street, square or landmark.</span>
+            <input type="text" class="form-field__input"
+              [placeholder]="startTown() ? 'e.g. Via dei Fori Imperiali' : 'e.g. Colosseum, Rome'"
+              [value]="startAddress()" (input)="onAddressInput('start', $event)" />
+            @if (startSuggestions().length > 0) {
+              <ul class="address-suggestions">
+                @for (s of startSuggestions(); track s.display_name) {
+                  <li (mousedown)="selectSuggestion('start', s)">{{ s.display_name }}</li>
+                }
+              </ul>
+            }
+          </div>
         </div>
 
         <label class="same-address-check">
@@ -212,17 +240,41 @@
         </label>
 
         @if (!sameAddress()) {
-          <div class="form-field address-field">
-            <label class="form-field__label">End address</label>
-            <input type="text" class="form-field__input" placeholder="e.g. Vatican City"
-              [value]="endAddress()" (input)="onAddressInput('end', $event)" />
-            @if (endSuggestions().length > 0) {
-              <ul class="address-suggestions">
-                @for (s of endSuggestions(); track s.display_name) {
-                  <li (mousedown)="selectSuggestion('end', s)">{{ s.display_name }}</li>
+          <div class="form-row">
+            <div class="form-field address-field">
+              <label class="form-field__label">End — town / city</label>
+              <span class="form-field__hint">
+                @if (endTown()) {
+                  Searching in <strong>{{ endTown() }}</strong>.
+                } @else {
+                  Choose the town to scope the end address.
                 }
-              </ul>
-            }
+              </span>
+              <input type="text" class="form-field__input" placeholder="e.g. Florence"
+                [value]="endTownInput()" (input)="onTownInput('end', $event)" />
+              @if (endTownSuggestions().length > 0) {
+                <ul class="address-suggestions">
+                  @for (s of endTownSuggestions(); track s.display_name) {
+                    <li (mousedown)="selectTown('end', s)">{{ s.display_name }}</li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <div class="form-field address-field">
+              <label class="form-field__label">End address</label>
+              <span class="form-field__hint">Street, square or landmark.</span>
+              <input type="text" class="form-field__input"
+                [placeholder]="endTown() ? 'e.g. Piazza del Duomo' : 'e.g. Vatican City'"
+                [value]="endAddress()" (input)="onAddressInput('end', $event)" />
+              @if (endSuggestions().length > 0) {
+                <ul class="address-suggestions">
+                  @for (s of endSuggestions(); track s.display_name) {
+                    <li (mousedown)="selectSuggestion('end', s)">{{ s.display_name }}</li>
+                  }
+                </ul>
+              }
+            </div>
           </div>
         }
 
@@ -246,7 +298,21 @@
               </button>
             }
           </div>
-          <div class="map-container" id="tour-map"></div>
+          <div class="map-frame">
+            <div class="map-container" id="tour-map"></div>
+            @if (!startCoords()) {
+              <div class="map-placeholder">
+                <mat-icon class="map-placeholder__icon">where_to_vote</mat-icon>
+                <p>Write the address of the starting point and the ending point of the tour</p>
+              </div>
+            }
+            @if (capturingMap()) {
+              <div class="map-capturing">
+                <mat-icon class="map-capturing__icon">hourglass_top</mat-icon>
+                <span>Saving map…</span>
+              </div>
+            }
+          </div>
         </div>
 
         @if (showMapResetWarning()) {
@@ -288,9 +354,11 @@
             </p>
             <div class="venue-bar">
               <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
-              <input #firstVenue type="text" class="venue-bar__input" placeholder="New venue"
-                (keyup.enter)="addVenueQuick(firstVenue.value); firstVenue.value = ''" />
-              <button type="button" class="venue-bar__save" (click)="addVenueQuick(firstVenue.value); firstVenue.value = ''" aria-label="Create venue">
+              <input type="text" class="venue-bar__input" placeholder="New venue"
+                [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
+                (keyup.enter)="submitVenue()" />
+              <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
+                (click)="submitVenue()" aria-label="Create venue">
                 <mat-icon>save</mat-icon>
               </button>
             </div>
@@ -379,7 +447,7 @@
                     [attr.aria-label]="isCollapsed(space.id) ? 'Expand venue' : 'Collapse venue'">
                     <mat-icon>{{ isCollapsed(space.id) ? 'expand_more' : 'expand_less' }}</mat-icon>
                   </button>
-                  <button type="button" class="space-block__del" (click)="deleteSpace(space.id)" aria-label="Delete venue">
+                  <button type="button" class="space-block__del" (click)="requestDeleteVenue(space)" aria-label="Delete venue">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
@@ -608,12 +676,36 @@
           <!-- Add another venue -->
           <div class="venue-bar venue-bar--mt">
             <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
-            <input #anotherVenue type="text" class="venue-bar__input" placeholder="New venue"
-              (keyup.enter)="addVenueQuick(anotherVenue.value); anotherVenue.value = ''" />
-            <button type="button" class="venue-bar__save" (click)="addVenueQuick(anotherVenue.value); anotherVenue.value = ''" aria-label="Create venue">
+            <input type="text" class="venue-bar__input" placeholder="New venue"
+              [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
+              (keyup.enter)="submitVenue()" />
+            <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
+              (click)="submitVenue()" aria-label="Create venue">
               <mat-icon>save</mat-icon>
             </button>
           </div>
+
+          <!-- Delete venue confirmation -->
+          @if (venuePendingDelete(); as venue) {
+            <div class="confirm-backdrop" (click)="cancelDeleteVenue()">
+              <div class="confirm-modal" (click)="$event.stopPropagation()">
+                <h3 class="confirm-modal__title">Delete "{{ venue.name }}"?</h3>
+                <p class="confirm-modal__text">
+                  @if (getStopsForSpace(venue.id).length > 0) {
+                    This venue and its {{ getStopsForSpace(venue.id).length }} stop{{ getStopsForSpace(venue.id).length === 1 ? '' : 's' }}
+                    (with their audio, images and PDFs) will be permanently deleted.
+                  } @else {
+                    This venue will be permanently deleted.
+                  }
+                  This can't be undone.
+                </p>
+                <div class="confirm-modal__actions">
+                  <button type="button" class="btn btn--ghost" (click)="cancelDeleteVenue()">Cancel</button>
+                  <button type="button" class="btn btn--danger" (click)="confirmDeleteVenue()">Delete venue</button>
+                </div>
+              </div>
+            </div>
+          }
         }
 
         <!-- Venue GPS picker modal -->
@@ -627,7 +719,19 @@
 
               <div class="loc-picker__toolbar">
                 <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input" placeholder="Search an address…"
+                  <input type="text" class="form-field__input" placeholder="Town / city first…"
+                    [value]="venueTownInput()" (input)="onTownInput('venue', $event)" />
+                  @if (venueTownSuggestions().length > 0) {
+                    <ul class="address-suggestions">
+                      @for (s of venueTownSuggestions(); track s.display_name) {
+                        <li (mousedown)="selectTown('venue', s)">{{ s.display_name }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+                <div class="loc-picker__address address-field">
+                  <input type="text" class="form-field__input"
+                    [placeholder]="venueTown() ? 'Street / address in ' + venueTown() + '…' : 'Then the street / address…'"
                     [value]="venuePickerAddress()" (input)="onVenueAddressInput($event)" />
                   @if (venuePickerSuggestions().length > 0) {
                     <ul class="address-suggestions">
@@ -682,7 +786,19 @@
 
               <div class="loc-picker__toolbar">
                 <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input" placeholder="Search an address…"
+                  <input type="text" class="form-field__input" placeholder="Town / city first…"
+                    [value]="pickerTownInput()" (input)="onTownInput('picker', $event)" />
+                  @if (pickerTownSuggestions().length > 0) {
+                    <ul class="address-suggestions">
+                      @for (s of pickerTownSuggestions(); track s.display_name) {
+                        <li (mousedown)="selectTown('picker', s)">{{ s.display_name }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+                <div class="loc-picker__address address-field">
+                  <input type="text" class="form-field__input"
+                    [placeholder]="pickerTown() ? 'Street / address in ' + pickerTown() + '…' : 'Then the street / address…'"
                     [value]="pickerAddress()" (input)="onPickerAddressInput($event)" />
                   @if (pickerSuggestions().length > 0) {
                     <ul class="address-suggestions">
@@ -738,8 +854,97 @@
           <a [routerLink]="['/studio/tours']" class="btn btn--ghost">
             Save as draft
           </a>
+          <button type="button" class="btn btn--primary" [disabled]="!step3Done()" (click)="goToStep(4)">
+            Review &amp; publish →
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ═══════════════ STEP 4: PUBLISH ══════════════════════════════ -->
+    @if (step() === 4) {
+      <div class="edit-card">
+        <h2 class="edit-card__title">Review &amp; publish</h2>
+        <p class="edit-card__desc">This is how travellers will see your tour. Review it, then publish when you're happy.</p>
+
+        <div class="preview">
+          <div class="preview__hero" [ngClass]="'cover-grad--' + coverGradient()">
+            @if (heroImage()) {
+              <div class="preview__hero-img" [style.background-image]="'url(' + heroImage() + ')'"></div>
+            }
+            <div class="preview__hero-scrim"></div>
+            <h3 class="preview__title">{{ tour()?.title || 'Untitled tour' }}</h3>
+          </div>
+
+          <div class="preview__meta">
+            <span class="preview__price">{{ previewPrice() }}</span>
+            @if (tour()?.duration_minutes) { <span class="preview__chip">{{ tour()?.duration_minutes }} min</span> }
+            @if (tour()?.setting) { <span class="preview__chip">{{ tour()?.setting }}</span> }
+            <span class="preview__chip">{{ stops().length }} stop{{ stops().length === 1 ? '' : 's' }}</span>
+            <span class="preview__chip">{{ spaces().length }} venue{{ spaces().length === 1 ? '' : 's' }}</span>
+          </div>
+
+          @if (tour()?.description) {
+            <p class="preview__desc">{{ tour()?.description }}</p>
+          }
+
+          @if (tourTags().length > 0) {
+            <div class="preview__tags">
+              @for (t of tourTags(); track t) { <span class="preview__tag">{{ t }}</span> }
+            </div>
+          }
+
+          @if (presentationAudioUrl()) {
+            <div class="preview__audio">
+              <span class="preview__section-label">Presentation</span>
+              <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+            </div>
+          }
+
+          <div class="preview__outline">
+            <span class="preview__section-label">Itinerary</span>
+            @for (space of spaces(); track space.id; let si = $index) {
+              <div class="preview__venue">
+                <h4 class="preview__venue-name">{{ si + 1 }}. {{ space.name }}</h4>
+                @for (stop of getStopsForSpace(space.id); track stop.id; let i = $index) {
+                  <div class="preview__stop">
+                    <span class="preview__stop-num">{{ i + 1 }}</span>
+                    <div class="preview__stop-body">
+                      <span class="preview__stop-title">{{ stop.title }}</span>
+                      @if (stop.description) {
+                        <p class="preview__stop-desc">{{ stop.description }}</p>
+                      }
+                      @if (stop.media && stop.media.length > 0) {
+                        <div class="preview__media-list">
+                          @for (m of stop.media; track m.id) {
+                            @if (m.media_type === 'audio') {
+                              <audio class="preview__audio-el" [src]="m.url" controls controlsList="nodownload"></audio>
+                            } @else if (m.media_type === 'image') {
+                              <button type="button" class="preview__img-link" (click)="openPreviewImage(stopImages(stop), m)" [title]="m.caption || 'View image'">
+                                <img [src]="m.url" [alt]="m.caption || stop.title" />
+                                @if (m.caption) { <span class="preview__img-caption">{{ m.caption }}</span> }
+                              </button>
+                            } @else if (m.media_type === 'pdf') {
+                              <a class="preview__pdf" [href]="m.url" target="_blank" rel="noopener">
+                                <mat-icon>picture_as_pdf</mat-icon> View PDF
+                              </a>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="edit-form__actions edit-form__actions--mt">
+          <button type="button" class="btn btn--ghost" (click)="goToStep(3)">Back</button>
+          <a [routerLink]="['/studio/tours']" class="btn btn--ghost">Save as draft</a>
           @if (tour()?.status !== 'published') {
-            <button type="button" class="btn btn--publish" [disabled]="publishing()" (click)="publish()">
+            <button type="button" class="btn btn--publish btn--lg" [disabled]="publishing()" (click)="publish()">
               {{ publishing() ? 'Publishing…' : 'Publish tour' }}
             </button>
           } @else {
@@ -747,6 +952,42 @@
           }
         </div>
       </div>
+
+      <!-- Review-before-publish intro -->
+      @if (showPublishIntro()) {
+        <div class="confirm-backdrop" (click)="showPublishIntro.set(false)">
+          <div class="confirm-modal" (click)="$event.stopPropagation()">
+            <h3 class="confirm-modal__title">One last look</h3>
+            <p class="confirm-modal__text">
+              You're about to publish. This page shows your tour exactly as travellers will see it —
+              take a moment to review the cover, price and itinerary. When everything looks right, hit
+              <strong>Publish tour</strong>. You can still edit it afterwards.
+            </p>
+            <div class="confirm-modal__actions">
+              <button type="button" class="btn btn--primary" (click)="showPublishIntro.set(false)">Got it</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Image lightbox (as a buyer would see it) -->
+      @if (previewImages().length > 0) {
+        <div class="img-lightbox" (click)="closePreviewImage()">
+          <button type="button" class="img-lightbox__close" (click)="closePreviewImage()" aria-label="Close">&times;</button>
+          <div class="img-lightbox__frame" (click)="$event.stopPropagation()">
+            <img class="img-lightbox__img" [src]="previewImages()[previewImageIdx()].url"
+              [alt]="previewImages()[previewImageIdx()].caption || ''" />
+            @if (previewImages()[previewImageIdx()].caption; as cap) {
+              <p class="img-lightbox__caption">{{ cap }}</p>
+            }
+            @if (previewImages().length > 1) {
+              <button type="button" class="img-lightbox__nav img-lightbox__nav--prev" (click)="prevPreviewImage()" aria-label="Previous">&#8592;</button>
+              <button type="button" class="img-lightbox__nav img-lightbox__nav--next" (click)="nextPreviewImage()" aria-label="Next">&#8594;</button>
+              <div class="img-lightbox__counter">{{ previewImageIdx() + 1 }} / {{ previewImages().length }}</div>
+            }
+          </div>
+        </div>
+      }
     }
   }
 </section>

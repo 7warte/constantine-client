@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { gsap } from 'gsap';
 import { ApiService } from '../../../../core/services/api.service';
 
 @Component({
@@ -16,6 +17,27 @@ import { ApiService } from '../../../../core/services/api.service';
 export class TourPlayerComponent implements OnInit, OnDestroy {
   private readonly api   = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
+  private readonly host  = inject(ElementRef<HTMLElement>);
+  private readonly zone  = inject(NgZone);
+
+  // ── GSAP reveals ─────────────────────────────────────────────────
+  // Itinerary venues slide up in a stagger when the tour loads.
+  private animateItineraryIn(): void {
+    this.zone.runOutsideAngular(() => setTimeout(() => {
+      const panels = this.host.nativeElement.querySelectorAll('.player__venue-panel');
+      if (!panels.length) return;
+      gsap.from(panels, { y: 28, opacity: 0, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'transform,opacity' });
+    }, 60));
+  }
+
+  // A stop's contents (audio, text, photos…) stagger in when it opens.
+  private animateStopBody(): void {
+    this.zone.runOutsideAngular(() => setTimeout(() => {
+      const body = this.host.nativeElement.querySelector('.player__stop-panel.mat-expanded .player__stop-body');
+      if (!body || !body.children.length) return;
+      gsap.from(body.children, { y: 18, opacity: 0, duration: 0.45, stagger: 0.07, ease: 'power2.out', clearProps: 'transform,opacity' });
+    }, 120));
+  }
 
   readonly loading = signal(true);
   readonly variant = signal<any | null>(null);
@@ -29,21 +51,28 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   readonly groupedStops = computed(() => {
     const stops = this.stops();
-    const groups: { spaceId: string | null; spaceName: string | null; stops: any[] }[] = [];
+    const groups: { spaceId: string | null; spaceName: string | null; spaceColor: string | null; stops: any[] }[] = [];
     const map = new Map<string | null, any[]>();
     const nameMap = new Map<string | null, string | null>();
+    const colorMap = new Map<string | null, string | null>();
 
     for (const stop of stops) {
       const key = stop.space_id ?? null;
       if (!map.has(key)) {
         map.set(key, []);
         nameMap.set(key, stop.space_name ?? null);
+        colorMap.set(key, stop.space_color ?? null);
       }
       map.get(key)!.push(stop);
     }
 
     for (const [spaceId, spaceStops] of map) {
-      groups.push({ spaceId, spaceName: nameMap.get(spaceId) ?? null, stops: spaceStops });
+      groups.push({
+        spaceId,
+        spaceName: nameMap.get(spaceId) ?? null,
+        spaceColor: colorMap.get(spaceId) ?? null,
+        stops: spaceStops,
+      });
     }
     return groups;
   });
@@ -114,6 +143,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   onStopOpen(stopId: string): void {
     this.expandedStopId.set(stopId);
     this.resetAudioState();
+    this.animateStopBody();
   }
 
   onStopClose(stopId: string): void {
@@ -130,6 +160,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.expandedVenueIdx.set(0);
     const firstStop = groups[0].stops[0];
     if (firstStop) this.expandedStopId.set(firstStop.id);
+
+    this.animateStopBody();
 
     setTimeout(() => {
       const el = document.querySelector('.player__venue-panel');
@@ -206,7 +238,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
         this.variant.set(purchase);
         const { tour_id, tour_variant_id } = purchase;
         this.api.get<any[]>(`/tours/${tour_id}/variants/${tour_variant_id}/stops`).subscribe({
-          next: (stops) => { this.stops.set(stops); this.loading.set(false); },
+          next: (stops) => { this.stops.set(stops); this.loading.set(false); this.animateItineraryIn(); },
           error: ()      => this.loading.set(false),
         });
 

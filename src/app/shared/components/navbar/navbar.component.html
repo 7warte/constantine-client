@@ -45,18 +45,34 @@
 <!-- Mobile menu (outside header to avoid sticky stacking context) -->
 @if (menuOpen()) {
   <div class="navbar__mobile" (click)="closeMenu()">
-    <a routerLink="/explore" class="navbar__mobile-link">Explore</a>
-    @if (auth.isLoggedIn()) {
-      <a routerLink="/library" class="navbar__mobile-link">My Library</a>
-      <a routerLink="/studio"  class="navbar__mobile-link">Studio</a>
-      <!-- <a routerLink="/jobs"    class="navbar__mobile-link">Jobs</a> -->
-
-      <a routerLink="/about"           class="navbar__mobile-link">About</a>
-      <a routerLink="/account/profile" class="navbar__mobile-link">Account</a>
-      <button class="navbar__mobile-link" (click)="auth.logout()">Sign out</button>
-    } @else {
-      <a routerLink="/about"      class="navbar__mobile-link">About</a>
-      <a routerLink="/auth/login" class="navbar__mobile-link">Sign in</a>
-    }
+    <nav class="navbar__mobile-inner">
+      <a routerLink="/explore" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+        <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">Explore</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/library" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">My Library</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <a routerLink="/studio" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">Studio</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <a routerLink="/about" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">About</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <a routerLink="/account/profile" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">Account</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <button class="navbar__mobile-link" (click)="auth.logout()" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">Sign out</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </button>
+      } @else {
+        <a routerLink="/about" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">About</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+        <a routerLink="/auth/login" class="navbar__mobile-link" (mouseenter)="onLinkEnter($event)" (mouseleave)="onLinkLeave($event)">
+          <span class="navbar__mobile-fill"></span><span class="navbar__mobile-text">Sign in</span><span class="navbar__mobile-arrow" aria-hidden="true">&#8594;</span>
+        </a>
+      }
+    </nav>
   </div>
 }

@@ -1,14 +1,484 @@
 <!-- ── Hero ─────────────────────────────────────────────────────── -->
-<section class="hero" [class.hero--text-light]="activeTextColor() === 'light'">
-  @for (img of heroImages; track $index) {
-    <div
-      class="hero__slide"
-      [class.hero__slide--active]="activeSlide() === $index"
-      [style.backgroundImage]="'url(' + img.src + ')'"
-    ></div>
+<section class="hero" [class.hero--town]="townMode()">
+  @if (townMode()) {
+    <div class="hero__scene" [class.hero__scene--ready]="sceneReady()"
+      [class.hero__scene--city]="scene() === 'city'" [class.hero__scene--museum]="scene() === 'museum'"
+      [class.hero__scene--beach]="scene() === 'beach'" aria-hidden="true">
+      @if (sceneReady()) {
+      @switch (scene()) {
+      @case ('city') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- ground -->
+        <rect x="0" y="173" width="1600" height="7" fill="#cfcfcf"/>
+
+        <!-- Tree A -->
+        <g>
+          <rect x="56" y="120" width="8" height="60" fill="#6f6f6f"/>
+          <g class="tree-foliage">
+            <ellipse cx="60" cy="112" rx="26" ry="28" fill="#a9a9a9"/>
+            <ellipse cx="46" cy="120" rx="16" ry="17" fill="#bdbdbd"/>
+            <ellipse cx="74" cy="120" rx="16" ry="17" fill="#9c9c9c"/>
+          </g>
+        </g>
+
+        <!-- Fountain (next to the church) -->
+        <g>
+          <ellipse cx="150" cy="171" rx="40" ry="8" fill="#b4b4b4"/>
+          <ellipse cx="150" cy="170" rx="33" ry="5" fill="#dadada"/>
+          <rect x="145" y="146" width="10" height="24" fill="#a9a9a9"/>
+          <ellipse cx="150" cy="147" rx="17" ry="4" fill="#b4b4b4"/>
+          <ellipse cx="150" cy="146" rx="12" ry="2.5" fill="#dadada"/>
+          <rect x="147" y="132" width="6" height="15" fill="#a9a9a9"/>
+          <g class="fountain-water">
+            <rect x="148.5" y="120" width="3" height="14" rx="1.5" fill="#dadada"/>
+            <path d="M150,124 C142,128 136,140 134,150" stroke="#dadada" stroke-width="2" fill="none"/>
+            <path d="M150,124 C158,128 164,140 166,150" stroke="#dadada" stroke-width="2" fill="none"/>
+            <circle cx="134" cy="150" r="1.6" fill="#dadada"/>
+            <circle cx="166" cy="150" r="1.6" fill="#dadada"/>
+          </g>
+        </g>
+
+        <!-- Church (no cross) -->
+        <g>
+          <rect x="208" y="170" width="160" height="10" fill="#b4b4b4"/>
+          <rect x="210" y="70" width="110" height="102" fill="#d8c8a4"/>
+          <polygon points="208,70 322,70 265,44" fill="#b5755e"/>
+          <rect x="320" y="40" width="44" height="132" fill="#d0c0a0"/>
+          <polygon points="318,40 366,40 342,16" fill="#a86850"/>
+          <circle cx="265" cy="98" r="11" fill="#9e9e9e"/>
+          <circle cx="265" cy="98" r="11" fill="none" stroke="#8a8a8a" stroke-width="1"/>
+          <rect x="335" y="66" width="14" height="20" rx="7" fill="#8a8a8a"/>
+          <rect x="255" y="142" width="20" height="30" rx="9" fill="#8a8a8a"/>
+        </g>
+
+        <!-- House A -->
+        <g>
+          <rect x="378" y="100" width="64" height="72" fill="#bcc8cf"/>
+          <polygon points="372,100 448,100 410,80" fill="#8d9aa2"/>
+          <rect x="424" y="84" width="8" height="14" fill="#8f8f8f"/>
+          <rect x="386" y="112" width="14" height="14" fill="#9a9a9a"/>
+          <rect x="420" y="112" width="14" height="14" fill="#9a9a9a"/>
+          <rect x="402" y="148" width="16" height="24" fill="#8a8a8a"/>
+        </g>
+
+        <!-- House B -->
+        <g>
+          <rect x="452" y="108" width="58" height="64" fill="#d6c4a8"/>
+          <polygon points="447,108 515,108 481,88" fill="#b5755e"/>
+          <rect x="458" y="120" width="12" height="12" fill="#a4a4a4"/>
+          <rect x="492" y="120" width="12" height="12" fill="#a4a4a4"/>
+          <rect x="474" y="150" width="14" height="22" fill="#9e9e9e"/>
+        </g>
+
+        <!-- Statue 1 -->
+        <g>
+          <rect x="514" y="170" width="40" height="10" fill="#8f8f8f"/>
+          <rect x="522" y="132" width="24" height="40" fill="#9e9e9e"/>
+          <circle cx="534" cy="112" r="6" fill="#7d7d7d"/>
+          <polygon points="534,118 525,132 543,132" fill="#7d7d7d"/>
+        </g>
+
+        <!-- Tree B -->
+        <g>
+          <rect x="596" y="124" width="8" height="56" fill="#6f6f6f"/>
+          <g class="tree-foliage tree-foliage--b">
+            <ellipse cx="600" cy="116" rx="24" ry="26" fill="#b0b0b0"/>
+            <ellipse cx="586" cy="124" rx="14" ry="15" fill="#c4c4c4"/>
+            <ellipse cx="614" cy="124" rx="14" ry="15" fill="#9f9f9f"/>
+          </g>
+        </g>
+
+        <!-- Palace -->
+        <g>
+          <rect x="640" y="170" width="232" height="10" fill="#b4b4b4"/>
+          <rect x="650" y="48" width="212" height="124" fill="#c0c0c0"/>
+          <g fill="#d7d7d7">
+            <rect x="666" y="58" width="16" height="108"/>
+            <rect x="702" y="58" width="16" height="108"/>
+            <rect x="738" y="58" width="16" height="108"/>
+            <rect x="774" y="58" width="16" height="108"/>
+            <rect x="810" y="58" width="16" height="108"/>
+          </g>
+          <rect x="650" y="44" width="212" height="10" fill="#a9a9a9"/>
+          <polygon points="648,44 864,44 756,12" fill="#b2b2b2"/>
+          <rect x="746" y="138" width="20" height="32" fill="#9e9e9e"/>
+          <rect x="740" y="62" width="32" height="6" fill="#9e9e9e"/>
+        </g>
+
+        <!-- Street-food kiosk -->
+        <g>
+          <polygon points="906,138 966,138 962,147 910,147" fill="#9e9e9e"/>
+          <rect x="908" y="147" width="56" height="4" fill="#b0b0b0"/>
+          <rect x="912" y="150" width="48" height="22" fill="#9a9a9a"/>
+          <rect x="918" y="156" width="10" height="12" fill="#7a7a7a"/>
+          <circle cx="922" cy="174" r="4" fill="#5f5f5f"/>
+          <circle cx="950" cy="174" r="4" fill="#5f5f5f"/>
+          <rect x="934" y="124" width="3" height="14" fill="#7a7a7a"/>
+          <rect x="927" y="116" width="18" height="11" rx="1" fill="#dadada"/>
+        </g>
+
+        <!-- Museum -->
+        <g>
+          <rect x="1006" y="170" width="172" height="10" fill="#b4b4b4"/>
+          <rect x="1016" y="74" width="152" height="98" fill="#c0c0c0"/>
+          <g fill="#cfcfcf">
+            <rect x="1030" y="84" width="13" height="84"/>
+            <rect x="1062" y="84" width="13" height="84"/>
+            <rect x="1094" y="84" width="13" height="84"/>
+            <rect x="1126" y="84" width="13" height="84"/>
+          </g>
+          <rect x="1016" y="70" width="152" height="8" fill="#a9a9a9"/>
+          <polygon points="1014,70 1170,70 1092,44" fill="#b2b2b2"/>
+          <rect x="1080" y="150" width="28" height="6" fill="#9e9e9e"/>
+        </g>
+
+        <!-- Bench 2 -->
+        <g fill="#808080">
+          <rect x="1208" y="148" width="44" height="3"/>
+          <rect x="1208" y="158" width="44" height="4"/>
+          <rect x="1210" y="148" width="3" height="14"/>
+          <rect x="1247" y="148" width="3" height="14"/>
+          <rect x="1212" y="162" width="3" height="9" fill="#6f6f6f"/>
+          <rect x="1244" y="162" width="3" height="9" fill="#6f6f6f"/>
+        </g>
+
+        <!-- Plaque with 2 plants -->
+        <g>
+          <rect x="1280" y="158" width="12" height="14" fill="#8a8a8a"/>
+          <ellipse cx="1286" cy="152" rx="10" ry="11" fill="#9e9e9e"/>
+          <rect x="1313" y="150" width="6" height="30" fill="#7a7a7a"/>
+          <rect x="1298" y="130" width="36" height="22" rx="2" fill="#dadada" stroke="#9e9e9e" stroke-width="1.5"/>
+          <line x1="1304" y1="138" x2="1328" y2="138" stroke="#9a9a9a" stroke-width="1.5"/>
+          <line x1="1304" y1="144" x2="1324" y2="144" stroke="#9a9a9a" stroke-width="1.5"/>
+          <rect x="1340" y="158" width="12" height="14" fill="#8a8a8a"/>
+          <ellipse cx="1346" cy="152" rx="10" ry="11" fill="#9e9e9e"/>
+        </g>
+
+        <!-- Obelisk (sand) with a gold ball on top -->
+        <g>
+          <rect x="1400" y="166" width="36" height="14" fill="#bca87e"/>
+          <rect x="1404" y="160" width="28" height="8" fill="#cdb98f"/>
+          <rect x="1411" y="22" width="14" height="138" fill="#d8c8a4"/>
+          <rect x="1407" y="16" width="22" height="8" fill="#cdb98f"/>
+          <circle cx="1418" cy="9" r="7" fill="#d8b46a"/>
+        </g>
+
+        <!-- Ice cream cart -->
+        <g>
+          <path d="M1444,118 Q1474,98 1504,118 Z" fill="#9e9e9e"/>
+          <path d="M1454,114 Q1474,103 1494,114" stroke="#ededed" stroke-width="2" fill="none"/>
+          <rect x="1472" y="116" width="3" height="30" fill="#8a8a8a"/>
+          <rect x="1448" y="143" width="52" height="4" fill="#b8b8b8"/>
+          <rect x="1452" y="147" width="44" height="23" fill="#cfcfcf"/>
+          <circle cx="1462" cy="150" r="3" fill="#9e9e9e"/>
+          <circle cx="1473" cy="150" r="3" fill="#b0b0b0"/>
+          <circle cx="1484" cy="150" r="3" fill="#9e9e9e"/>
+          <circle cx="1461" cy="172" r="4" fill="#5f5f5f"/>
+          <circle cx="1487" cy="172" r="4" fill="#5f5f5f"/>
+        </g>
+
+        <!-- Tree C -->
+        <g>
+          <rect x="1541" y="122" width="8" height="58" fill="#6f6f6f"/>
+          <g class="tree-foliage">
+            <ellipse cx="1545" cy="114" rx="25" ry="27" fill="#a4a4a4"/>
+            <ellipse cx="1531" cy="122" rx="15" ry="16" fill="#bdbdbd"/>
+            <ellipse cx="1559" cy="122" rx="15" ry="16" fill="#979797"/>
+          </g>
+        </g>
+
+        <!-- Extra tree (Tree D) -->
+        <g>
+          <rect x="982" y="132" width="7" height="48" fill="#6f6f6f"/>
+          <g class="tree-foliage tree-foliage--b">
+            <ellipse cx="985" cy="126" rx="19" ry="21" fill="#aeaeae"/>
+            <ellipse cx="974" cy="132" rx="12" ry="13" fill="#c2c2c2"/>
+            <ellipse cx="996" cy="132" rx="12" ry="13" fill="#9c9c9c"/>
+          </g>
+        </g>
+
+        <!-- Bushes & flower beds (foreground greenery) -->
+        <g class="scene-bush">
+          <ellipse cx="96" cy="171" rx="11" ry="9" fill="#9c9c9c"/>
+          <ellipse cx="92" cy="166" rx="7" ry="7" fill="#aeaeae"/>
+
+          <ellipse cx="888" cy="171" rx="12" ry="9" fill="#9c9c9c"/>
+          <ellipse cx="884" cy="166" rx="7" ry="7" fill="#b0b0b0"/>
+          <ellipse cx="894" cy="167" rx="6" ry="6" fill="#a2a2a2"/>
+
+          <ellipse cx="1190" cy="171" rx="11" ry="9" fill="#9c9c9c"/>
+          <ellipse cx="1186" cy="166" rx="7" ry="7" fill="#aeaeae"/>
+        </g>
+
+        <!-- Flower bed left of the fountain -->
+        <g class="scene-flowers">
+          <rect x="700" y="161" width="2" height="11" fill="#7a7a7a"/>
+          <circle cx="701" cy="160" r="3" fill="#c4c4c4"/>
+          <rect x="706" y="159" width="2" height="13" fill="#7a7a7a"/>
+          <circle cx="707" cy="158" r="3" fill="#a9a9a9"/>
+          <rect x="712" y="162" width="2" height="10" fill="#7a7a7a"/>
+          <circle cx="713" cy="161" r="3" fill="#bdbdbd"/>
+        </g>
+
+        <!-- Flower bed right of the fountain -->
+        <g class="scene-flowers">
+          <rect x="800" y="162" width="2" height="10" fill="#7a7a7a"/>
+          <circle cx="801" cy="161" r="3" fill="#bdbdbd"/>
+          <rect x="806" y="159" width="2" height="13" fill="#7a7a7a"/>
+          <circle cx="807" cy="158" r="3" fill="#a9a9a9"/>
+          <rect x="812" y="161" width="2" height="11" fill="#7a7a7a"/>
+          <circle cx="813" cy="160" r="3" fill="#c4c4c4"/>
+        </g>
+
+        <!-- Flower bed near the plaque -->
+        <g class="scene-flowers">
+          <rect x="1366" y="161" width="2" height="11" fill="#7a7a7a"/>
+          <circle cx="1367" cy="160" r="3" fill="#bdbdbd"/>
+          <rect x="1372" y="159" width="2" height="13" fill="#7a7a7a"/>
+          <circle cx="1373" cy="158" r="3" fill="#a9a9a9"/>
+          <rect x="1378" y="162" width="2" height="10" fill="#7a7a7a"/>
+          <circle cx="1379" cy="161" r="3" fill="#c4c4c4"/>
+        </g>
+
+        <!-- Birds coming and going from the trees and roofs -->
+        <g class="bird bird--1"><path d="M246,40 q5,-4 9,-1 q4,-3 9,1" stroke="#6b767b" stroke-width="1.4" fill="none"/></g>
+        <g class="bird bird--2"><path d="M548,28 q5,-4 9,-1 q4,-3 9,1" stroke="#5f6b70" stroke-width="1.4" fill="none"/></g>
+        <g class="bird bird--3"><path d="M1064,34 q5,-4 9,-1 q4,-3 9,1" stroke="#6b767b" stroke-width="1.4" fill="none"/></g>
+        <g class="bird bird--2"><path d="M1486,44 q5,-4 9,-1 q4,-3 9,1" stroke="#5f6b70" stroke-width="1.4" fill="none"/></g>
+        <!-- perched on a roof / tree -->
+        <path d="M268,44 q4,-3 7,0" stroke="#5f6b70" stroke-width="1.3" fill="none"/>
+        <circle cx="60" cy="88" r="2" fill="#5f6b70"/>
+      </svg>
+      }
+      @case ('museum') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- floor (luxe red) -->
+        <rect x="0" y="160" width="1600" height="20" fill="#8e2c34"/>
+        <rect x="0" y="160" width="1600" height="2" fill="#b25a60"/>
+        <rect x="0" y="172" width="1600" height="2" fill="#6f2027"/>
+
+        <!-- Tall windows + a shaft of light diffusing into the room -->
+        <g>
+          <rect x="384" y="12" width="62" height="130" fill="#f6f3ec"/>
+          <rect x="384" y="12" width="62" height="130" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+          <line x1="415" y1="12" x2="415" y2="142" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="384" y1="48" x2="446" y2="48" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="384" y1="84" x2="446" y2="84" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="384" y1="116" x2="446" y2="116" stroke="#c8c8c8" stroke-width="1.5"/>
+          <polygon points="388,16 442,16 520,160 336,160" fill="#ffffff" opacity="0.32"/>
+          <polygon points="398,18 432,18 476,160 366,160" fill="#ffffff" opacity="0.22"/>
+
+          <rect x="1224" y="12" width="62" height="130" fill="#f6f3ec"/>
+          <rect x="1224" y="12" width="62" height="130" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+          <line x1="1255" y1="12" x2="1255" y2="142" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="1224" y1="48" x2="1286" y2="48" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="1224" y1="84" x2="1286" y2="84" stroke="#c8c8c8" stroke-width="1.5"/>
+          <line x1="1224" y1="116" x2="1286" y2="116" stroke="#c8c8c8" stroke-width="1.5"/>
+          <polygon points="1228,16 1282,16 1250,160 1110,160" fill="#ffffff" opacity="0.20"/>
+        </g>
+
+        <!-- Columns -->
+        <g fill="#d2d2d2">
+          <g>
+            <rect x="92" y="26" width="22" height="134"/>
+            <rect x="86" y="22" width="34" height="8" fill="#c0c0c0"/>
+            <rect x="86" y="154" width="34" height="8" fill="#c0c0c0"/>
+          </g>
+          <g>
+            <rect x="784" y="26" width="22" height="134"/>
+            <rect x="778" y="22" width="34" height="8" fill="#c0c0c0"/>
+            <rect x="778" y="154" width="34" height="8" fill="#c0c0c0"/>
+          </g>
+          <g>
+            <rect x="1486" y="26" width="22" height="134"/>
+            <rect x="1480" y="22" width="34" height="8" fill="#c0c0c0"/>
+            <rect x="1480" y="154" width="34" height="8" fill="#c0c0c0"/>
+          </g>
+        </g>
+
+        <!-- Exhibition banner (luxe red) -->
+        <g>
+          <rect x="700" y="8" width="200" height="18" fill="#8e2c34"/>
+          <polygon points="700,26 712,26 706,34" fill="#6f2027"/>
+          <polygon points="888,26 900,26 894,34" fill="#6f2027"/>
+          <rect x="716" y="14" width="80" height="2.5" fill="#d8b46a"/>
+          <rect x="716" y="19" width="120" height="2.5" fill="#d8b46a"/>
+        </g>
+
+        <!-- Paintings (gilded frames, coloured art) -->
+        <g>
+          <rect x="210" y="44" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="216" y="50" width="72" height="46" fill="#bcd4e0"/>
+          <path d="M222,92 L240,70 L256,84 L282,58 L282,92 Z" fill="#7d9b76"/>
+
+          <rect x="650" y="44" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="656" y="50" width="72" height="46" fill="#e3d2b4"/>
+          <circle cx="692" cy="73" r="13" fill="#c48f5a"/>
+
+          <rect x="1098" y="44" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="1104" y="50" width="72" height="46" fill="#d8c6d2"/>
+          <rect x="1116" y="62" width="48" height="24" fill="#9c7e9e"/>
+
+          <!-- 4th painting: a luxe-red canvas with a gold medallion -->
+          <rect x="916" y="44" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="922" y="50" width="72" height="46" fill="#8e2c34"/>
+          <circle cx="958" cy="73" r="12" fill="#d8b46a"/>
+          <circle cx="958" cy="73" r="6" fill="#b25a60"/>
+        </g>
+
+        <!-- Bust on pedestal -->
+        <g>
+          <rect x="328" y="168" width="36" height="6" fill="#a9a9a9"/>
+          <rect x="334" y="124" width="24" height="44" fill="#bcbcbc"/>
+          <rect x="338" y="112" width="16" height="14" rx="3" fill="#8f8f8f"/>
+          <circle cx="346" cy="106" r="7" fill="#8f8f8f"/>
+        </g>
+
+        <!-- Glass display case -->
+        <g>
+          <rect x="452" y="168" width="56" height="6" fill="#a9a9a9"/>
+          <rect x="458" y="104" width="44" height="64" fill="#eaecee" fill-opacity="0.5" stroke="#b4b4b4" stroke-width="1.5"/>
+          <rect x="474" y="138" width="12" height="26" fill="#9a9a9a"/>
+          <circle cx="480" cy="134" r="6" fill="#9a9a9a"/>
+        </g>
+
+        <!-- Central exhibit: a classical urn + rope barrier -->
+        <g>
+          <rect x="760" y="168" width="80" height="6" fill="#9e9e9e"/>
+          <rect x="772" y="140" width="56" height="28" fill="#b4b4b4"/>
+          <!-- urn (terracotta) -->
+          <rect x="796" y="136" width="8" height="6" fill="#9c6a4f"/>
+          <ellipse cx="800" cy="116" rx="16" ry="19" fill="#bf8b6e"/>
+          <path d="M786,98 Q780,108 786,120" stroke="#9c6a4f" stroke-width="3" fill="none"/>
+          <path d="M814,98 Q820,108 814,120" stroke="#9c6a4f" stroke-width="3" fill="none"/>
+          <rect x="794" y="88" width="12" height="12" fill="#bf8b6e"/>
+          <ellipse cx="800" cy="88" rx="11" ry="3.5" fill="#9c6a4f"/>
+          <!-- red velvet rope barrier -->
+          <rect x="762" y="156" width="3" height="16" fill="#7a7a7a"/>
+          <rect x="836" y="156" width="3" height="16" fill="#7a7a7a"/>
+          <circle cx="763.5" cy="155" r="2.6" fill="#caa15e"/>
+          <circle cx="837.5" cy="155" r="2.6" fill="#caa15e"/>
+          <path d="M763,158 Q800,170 838,158" stroke="#9b2d39" stroke-width="2.6" fill="none"/>
+        </g>
+
+        <!-- Benches -->
+        <g fill="#9a9a9a">
+          <rect x="596" y="160" width="56" height="5"/>
+          <rect x="600" y="165" width="3" height="8" fill="#7a7a7a"/>
+          <rect x="645" y="165" width="3" height="8" fill="#7a7a7a"/>
+        </g>
+        <g fill="#9a9a9a">
+          <rect x="956" y="160" width="56" height="5"/>
+          <rect x="960" y="165" width="3" height="8" fill="#7a7a7a"/>
+          <rect x="1005" y="165" width="3" height="8" fill="#7a7a7a"/>
+        </g>
+
+        <!-- Vase on pedestal (blue glaze) -->
+        <g>
+          <rect x="1186" y="168" width="36" height="6" fill="#a9a9a9"/>
+          <rect x="1192" y="128" width="24" height="40" fill="#bcbcbc"/>
+          <ellipse cx="1204" cy="110" rx="13" ry="17" fill="#8aa3b0"/>
+          <rect x="1200" y="90" width="8" height="12" fill="#8aa3b0"/>
+          <ellipse cx="1204" cy="90" rx="7" ry="3" fill="#6f8895"/>
+          <path d="M1191,104 q-7,4 0,12" stroke="#6f8895" stroke-width="2" fill="none"/>
+          <path d="M1217,104 q7,4 0,12" stroke="#6f8895" stroke-width="2" fill="none"/>
+        </g>
+
+        <!-- Big statue (David), on the right so the hero copy doesn't cover it -->
+        <g>
+          <!-- rectangular base -->
+          <rect x="1388" y="150" width="48" height="24" fill="#a9a9a9"/>
+          <rect x="1386" y="148" width="52" height="4" fill="#bcbcbc"/>
+          <!-- marble figure, contrapposto -->
+          <g fill="#cdcdcd">
+            <path d="M1403,50 Q1402,42 1410,41 Q1418,42 1418,50 Q1421,52 1419,57 Q1417,53 1415,55 Q1413,59 1410,59 Q1407,59 1406,55 Q1404,53 1402,56 Q1400,52 1403,50 Z"/>
+            <rect x="1407.5" y="58" width="5" height="6"/>
+            <path d="M1401,66 C1396,75 1398,86 1401,95 C1402,101 1400,104 1402,109 C1404,112 1408,112 1410,112 C1413,112 1417,111 1419,108 C1421,103 1419,101 1420,95 C1423,86 1425,75 1420,66 C1414,63 1407,63 1401,66 Z"/>
+            <path d="M1401,69 C1394,77 1392,90 1393,101 C1393,107 1396,111 1399,110 C1401,108 1400,104 1399,99 C1398,89 1401,79 1405,72 Z"/>
+            <path d="M1419,68 C1428,70 1434,77 1434,86 C1434,91 1430,92 1428,88 C1425,82 1419,85 1415,81 C1413,78 1415,73 1420,71 Z"/>
+            <path d="M1403,110 C1401,126 1402,140 1404,150 L1411,150 C1411,135 1411,123 1411,111 Z"/>
+            <path d="M1412,111 C1414,122 1418,130 1421,138 C1423,143 1422,148 1420,150 L1427,150 C1428,142 1426,133 1422,125 C1419,118 1419,114 1419,110 Z"/>
+          </g>
+        </g>
+      </svg>
+      }
+      @case ('beach') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- sea -->
+        <rect x="0" y="116" width="1600" height="38" fill="#86b6c8"/>
+        <g class="sea-wave">
+          <path d="M-200,128 q50,-5 100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0" stroke="#a6cdd9" stroke-width="1.6" fill="none"/>
+          <path d="M-200,139 q50,4 100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0" stroke="#9ac3d1" stroke-width="1.6" fill="none"/>
+        </g>
+        <!-- sand -->
+        <rect x="0" y="150" width="1600" height="30" fill="#e3d6b2"/>
+        <path class="sea-wave" d="M-200,151 q50,-3 100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0 t100,0" stroke="#f2f4ee" stroke-width="2.5" fill="none"/>
+
+        <!-- Albatrosses (flying) -->
+        <g class="bird bird--1"><path d="M338,58 q6,-5 11,-1 q5,-4 11,1" stroke="#5f6b70" stroke-width="1.6" fill="none"/></g>
+        <g class="bird bird--2"><path d="M560,44 q5,-4 10,-1 q4,-3 10,1" stroke="#6b767b" stroke-width="1.4" fill="none"/></g>
+        <g class="bird bird--3"><path d="M772,64 q6,-5 11,-1 q5,-4 11,1" stroke="#5f6b70" stroke-width="1.5" fill="none"/></g>
+
+        <!-- Ice cream kiosk (left) -->
+        <g>
+          <path d="M70,138 Q120,114 170,138 Z" fill="#e08a8a"/>
+          <path d="M86,129 Q120,118 154,129" stroke="#fbeaea" stroke-width="2" fill="none"/>
+          <rect x="118" y="138" width="3" height="30" fill="#8a8a8a"/>
+          <rect x="92" y="147" width="56" height="4" fill="#bcbcbc"/>
+          <rect x="96" y="150" width="48" height="22" fill="#d2d2d2"/>
+          <circle cx="106" cy="174" r="4" fill="#5f5f5f"/>
+          <circle cx="134" cy="174" r="4" fill="#5f5f5f"/>
+          <circle cx="108" cy="153" r="3" fill="#d98fa0"/>
+          <circle cx="120" cy="153" r="3" fill="#e6c266"/>
+          <circle cx="132" cy="153" r="3" fill="#8fb0b5"/>
+        </g>
+
+        <!-- Castle (right) — big, many towers -->
+        <g>
+          <rect x="1264" y="92" width="292" height="82" fill="#b4b4b4"/>
+          <rect x="1244" y="54" width="42" height="120" fill="#c0c0c0"/>
+          <rect x="1314" y="38" width="44" height="136" fill="#bcbcbc"/>
+          <rect x="1380" y="20" width="52" height="154" fill="#c6c6c6"/>
+          <rect x="1454" y="38" width="44" height="136" fill="#bcbcbc"/>
+          <rect x="1524" y="54" width="42" height="120" fill="#c0c0c0"/>
+          <g fill="#a8a8a8">
+            <rect x="1244" y="48" width="8" height="8"/><rect x="1261" y="48" width="8" height="8"/><rect x="1278" y="48" width="8" height="8"/>
+            <rect x="1314" y="32" width="8" height="8"/><rect x="1331" y="32" width="8" height="8"/><rect x="1350" y="32" width="8" height="8"/>
+            <rect x="1380" y="14" width="9" height="8"/><rect x="1397" y="14" width="9" height="8"/><rect x="1414" y="14" width="9" height="8"/><rect x="1423" y="14" width="9" height="8"/>
+            <rect x="1454" y="32" width="8" height="8"/><rect x="1471" y="32" width="8" height="8"/><rect x="1490" y="32" width="8" height="8"/>
+            <rect x="1524" y="48" width="8" height="8"/><rect x="1541" y="48" width="8" height="8"/><rect x="1558" y="48" width="8" height="8"/>
+            <rect x="1290" y="86" width="9" height="8"/><rect x="1308" y="86" width="9" height="8"/><rect x="1440" y="86" width="9" height="8"/><rect x="1458" y="86" width="9" height="8"/><rect x="1502" y="86" width="9" height="8"/><rect x="1520" y="86" width="9" height="8"/>
+          </g>
+          <path d="M1388,174 L1388,146 Q1388,128 1406,128 Q1424,128 1424,146 L1424,174 Z" fill="#5f5f5f"/>
+          <rect x="1260" y="78" width="10" height="14" fill="#7a7a7a"/>
+          <rect x="1402" y="44" width="8" height="18" fill="#7a7a7a"/>
+          <rect x="1262" y="108" width="6" height="14" fill="#7a7a7a"/>
+          <rect x="1402" y="80" width="8" height="16" fill="#7a7a7a"/>
+          <rect x="1542" y="78" width="6" height="14" fill="#7a7a7a"/>
+          <!-- big flag on the keep -->
+          <rect x="1405" y="2" width="2.5" height="20" fill="#7a7a7a"/>
+          <polygon points="1407,4 1407,19 1437,11" fill="#cf5f5f"/>
+          <!-- albatrosses perched -->
+          <path d="M1252,46 q4,-3 8,0" stroke="#5f6b70" stroke-width="1.4" fill="none"/>
+          <path d="M1532,46 q4,-3 8,0" stroke="#5f6b70" stroke-width="1.4" fill="none"/>
+          <path d="M1388,12 q4,-3 8,0" stroke="#5f6b70" stroke-width="1.4" fill="none"/>
+        </g>
+
+        <!-- Little crowd grouped at the castle -->
+        <g>
+          <g fill="#c98a8c"><circle cx="1268" cy="161" r="3.2"/><rect x="1265" y="164" width="6" height="10" rx="2"/></g>
+          <g fill="#8fb0b5"><circle cx="1280" cy="162" r="3"/><rect x="1277.5" y="165" width="5" height="9" rx="2"/></g>
+          <g fill="#caa15e"><circle cx="1292" cy="161" r="3.2"/><rect x="1289" y="164" width="6" height="10" rx="2"/></g>
+        </g>
+      </svg>
+      }
+      }
+      }
+    </div>
   }
+
   <div class="hero__content container">
-    <h1 class="hero__title">Discover the world<br>through its stories</h1>
+    <h1 class="hero__title" (click)="nextScene()">Discover the world<br>through its stories</h1>
     <p class="hero__sub">
       Audio-guided tours created by people who truly know the places.<br>
       Explore museums, landmarks, cities — on your terms.
@@ -22,6 +492,21 @@
       </app-button>
     </div>
   </div>
+  <div class="hero__edge" aria-hidden="true"></div>
+
+  <!-- Tiny tourists strolling the town (click the title to swap for the photos) -->
+  @if (townMode()) {
+    <div class="hero__figures" aria-hidden="true">
+      @for (f of figures; track f) {
+        <div class="figure" [style.color]="figureColors[f % figureColors.length]">
+          <span class="figure__flash"></span>
+          <span class="figure__cam"></span>
+          <span class="figure__bubble">!</span>
+          <span class="figure__face"><span class="figure__person"></span></span>
+        </div>
+      }
+    </div>
+  }
 </section>
 
 <!-- ── Mobile only: Indoor / Outdoor / Most rated tour rows ────── -->
@@ -80,9 +565,9 @@
 </section>
 
 <!-- ── Three features ──────────────────────────────────────────── -->
-<section class="features" appReveal>
+<section class="features">
   <div class="container">
-    <h2 class="features__title" appTypewriter>Learn and explore at your own pace</h2>
+    <h2 class="features__title">Learn and explore at your own pace</h2>
     <div class="features__grid">
       <article class="feature">
         <div class="feature__head">
@@ -110,7 +595,7 @@
 </section>
 
 <!-- ── How it works (flat: list left, illustration right) ──────── -->
-<section class="how" appReveal>
+<section class="how">
   <div class="container how__wrap">
     <div class="how__col">
       <p class="eyebrow" appTypewriter>How does it work?</p>
