@@ -1,5 +1,5 @@
 <!-- ── Hero ─────────────────────────────────────────────────────── -->
-<section class="hero" [class.hero--town]="townMode()" [class.hero--night]="scene() === 'metro'">
+<section class="hero" [class.hero--town]="townMode()" [class.hero--night]="scene() === 'metro' || scene() === 'museum'">
   @if (townMode()) {
     <div class="hero__scene" [class.hero__scene--ready]="sceneReady()"
       [class.hero__scene--city]="scene() === 'city'" [class.hero__scene--museum]="scene() === 'museum'"
@@ -266,8 +266,8 @@
           <line x1="384" y1="48" x2="446" y2="48" stroke="#c8c8c8" stroke-width="1.5"/>
           <line x1="384" y1="84" x2="446" y2="84" stroke="#c8c8c8" stroke-width="1.5"/>
           <line x1="384" y1="116" x2="446" y2="116" stroke="#c8c8c8" stroke-width="1.5"/>
-          <polygon points="388,16 442,16 520,160 336,160" fill="#ffffff" opacity="0.32"/>
-          <polygon points="398,18 432,18 476,160 366,160" fill="#ffffff" opacity="0.22"/>
+          <polygon points="388,16 442,16 520,160 336,160" fill="#fff4d6" opacity="0.42"/>
+          <polygon points="398,18 432,18 476,160 366,160" fill="#fff4d6" opacity="0.3"/>
 
           <rect x="1224" y="12" width="62" height="130" fill="#f6f3ec"/>
           <rect x="1224" y="12" width="62" height="130" fill="none" stroke="#c4c4c4" stroke-width="2"/>
@@ -275,7 +275,8 @@
           <line x1="1224" y1="48" x2="1286" y2="48" stroke="#c8c8c8" stroke-width="1.5"/>
           <line x1="1224" y1="84" x2="1286" y2="84" stroke="#c8c8c8" stroke-width="1.5"/>
           <line x1="1224" y1="116" x2="1286" y2="116" stroke="#c8c8c8" stroke-width="1.5"/>
-          <polygon points="1228,16 1282,16 1250,160 1110,160" fill="#ffffff" opacity="0.20"/>
+          <polygon points="1228,16 1282,16 1250,160 1110,160" fill="#fff4d6" opacity="0.38"/>
+          <polygon points="1238,18 1272,18 1244,160 1148,160" fill="#fff4d6" opacity="0.26"/>
         </g>
 
         <!-- Columns -->
@@ -306,81 +307,42 @@
           <rect x="716" y="19" width="120" height="2.5" fill="#d8b46a"/>
         </g>
 
-        <!-- Paintings (gilded frames, coloured art) -->
+        <!-- Paintings: one per wall bay, evenly spaced, same frame, each subject unique -->
         <g>
-          <rect x="210" y="44" width="84" height="58" fill="#9e8a5e"/>
-          <rect x="216" y="50" width="72" height="46" fill="#bcd4e0"/>
-          <path d="M222,92 L240,70 L256,84 L282,58 L282,92 Z" fill="#7d9b76"/>
+          <!-- Bay 1 — fields with a low sun -->
+          <rect x="210" y="46" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="216" y="52" width="72" height="46" fill="#bcd4e0"/>
+          <rect x="216" y="84" width="72" height="14" fill="#d8c06a"/>
+          <path d="M216,84 q18,-4 36,0 t36,0" stroke="#c2a84e" stroke-width="1.5" fill="none"/>
+          <circle cx="268" cy="66" r="7" fill="#f0d98a"/>
 
-          <rect x="650" y="44" width="84" height="58" fill="#9e8a5e"/>
-          <rect x="656" y="50" width="72" height="46" fill="#e3d2b4"/>
-          <circle cx="692" cy="73" r="13" fill="#c48f5a"/>
+          <!-- Bay 2 — rolling hills with a tree -->
+          <rect x="573" y="46" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="579" y="52" width="72" height="46" fill="#cfe0ea"/>
+          <path d="M579,84 q18,-10 36,-3 q18,6 36,-2 v16 h-72 z" fill="#8caa72"/>
+          <path d="M579,90 q20,-5 38,0 q18,4 34,-1 v9 h-72 z" fill="#6f9160"/>
+          <rect x="600" y="74" width="3" height="14" fill="#6b5440"/>
+          <circle cx="601.5" cy="70" r="7" fill="#6f9160"/>
 
-          <rect x="1098" y="44" width="84" height="58" fill="#9e8a5e"/>
-          <rect x="1104" y="50" width="72" height="46" fill="#d8c6d2"/>
-          <rect x="1116" y="62" width="48" height="24" fill="#9c7e9e"/>
+          <!-- Bay 3 — flowers in a vase -->
+          <rect x="973" y="46" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="979" y="52" width="72" height="46" fill="#efe7d6"/>
+          <path d="M1015,98 l-6,-16 h22 l-6,16 z" fill="#9c7e9e"/>
+          <rect x="1014" y="64" width="2" height="18" fill="#7d9b66"/>
+          <rect x="1007" y="68" width="2" height="14" fill="#7d9b66"/>
+          <rect x="1022" y="68" width="2" height="14" fill="#7d9b66"/>
+          <circle cx="1015" cy="60" r="4.5" fill="#c0392b"/>
+          <circle cx="1008" cy="66" r="4" fill="#e0c14e"/>
+          <circle cx="1023" cy="66" r="4" fill="#b98ec2"/>
 
-          <!-- 4th painting: a luxe-red canvas with a gold medallion -->
-          <rect x="916" y="44" width="84" height="58" fill="#9e8a5e"/>
-          <rect x="922" y="50" width="72" height="46" fill="#8e2c34"/>
-          <circle cx="958" cy="73" r="12" fill="#d8b46a"/>
-          <circle cx="958" cy="73" r="6" fill="#b25a60"/>
-        </g>
-
-        <!-- Salon hang (right wall): 5 paintings, all different sizes, cascading down
-             4 well-spaced rows — the bottom (4th) row holds a single painting. -->
-        <g>
-          <!-- Row 1a — Fields at sunset (large) -->
-          <rect x="948" y="6" width="84" height="32" fill="#9e8a5e"/>
-          <rect x="952" y="10" width="76" height="24" fill="#cfe0ea"/>
-          <rect x="952" y="27" width="76" height="7" fill="#d8c06a"/>
-          <path d="M952,27 q19,-3 38,0 t38,0" stroke="#c2a84e" stroke-width="1.2" fill="none"/>
-          <circle cx="1006" cy="18" r="4.5" fill="#f0d98a"/>
-
-          <!-- Row 1b — Bird on a branch (small, far right) -->
-          <rect x="1300" y="8" width="52" height="26" fill="#caa15e"/>
-          <rect x="1304" y="12" width="44" height="18" fill="#dfeaf0"/>
-          <path d="M1304,26 q14,2 28,-2 q8,-1.6 14,-1" stroke="#6b5440" stroke-width="1.4" fill="none"/>
-          <ellipse cx="1322" cy="21" rx="4.2" ry="2.6" fill="#c98a5c"/>
-          <circle cx="1326.6" cy="18.8" r="1.8" fill="#c98a5c"/>
-          <polygon points="1329,18.4 1332,17.6 1329,19.6" fill="#e0c14e"/>
-          <path d="M1319,21 q3,2 5.2,0" stroke="#a86b45" stroke-width="1" fill="none"/>
-          <circle cx="1312" cy="16" r="1.3" fill="#7d9b66"/>
-          <circle cx="1342" cy="15.5" r="1.3" fill="#7d9b66"/>
-
-          <!-- Row 2 — Horse in a meadow (medium, tucked in the central gap) -->
-          <rect x="1012" y="44" width="66" height="34" fill="#b89a52"/>
-          <rect x="1016" y="48" width="58" height="26" fill="#d8e0c4"/>
-          <rect x="1016" y="66" width="58" height="8" fill="#8caa72"/>
-          <g fill="#5e4a36">
-            <ellipse cx="1042" cy="62" rx="11" ry="4.4"/>
-            <rect x="1034" y="62" width="1.8" height="6"/>
-            <rect x="1039" y="62" width="1.8" height="6"/>
-            <rect x="1047" y="62" width="1.8" height="6"/>
-            <rect x="1051" y="62" width="1.8" height="6"/>
-            <path d="M1052,61 q5,-1 6,-7 l2.2,0.7 q-1,6.5 -6,8.6 z"/>
-            <path d="M1032,60 q-3.5,1 -4.6,4 l1.6,0.7 q1.6,-2.4 4,-3.2 z"/>
-          </g>
-
-          <!-- Row 3 — Sailboat (small, far right, below the bird) -->
-          <rect x="1306" y="88" width="50" height="30" fill="#5e4a36"/>
-          <rect x="1310" y="92" width="42" height="22" fill="#bcd4e0"/>
-          <rect x="1310" y="107" width="42" height="7" fill="#8aa3b5"/>
-          <polygon points="1330,96 1330,107 1340,107" fill="#f2f4ee"/>
-          <polygon points="1329,96 1329,107 1321,107" fill="#dfe6ea"/>
-          <rect x="1329.4" y="96" width="1.2" height="11" fill="#5e4a36"/>
-          <path d="M1323,109 h16 l-3,3.6 h-10 z" fill="#7d5f3a"/>
-
-          <!-- Row 4 — single painting: flowers in a vase (lower-left of the cluster) -->
-          <rect x="958" y="124" width="44" height="28" fill="#b4b4b4"/>
-          <rect x="962" y="128" width="36" height="20" fill="#efe7d6"/>
-          <path d="M980,148 l-3.2,-9 h12.4 l-3.2,9 z" fill="#9c7e9e"/>
-          <rect x="979.4" y="132" width="1.2" height="7" fill="#7d9b66"/>
-          <rect x="975.4" y="134" width="1.2" height="5" fill="#7d9b66"/>
-          <rect x="983.4" y="134" width="1.2" height="5" fill="#7d9b66"/>
-          <circle cx="980" cy="131" r="2.4" fill="#c0392b"/>
-          <circle cx="976" cy="134" r="2" fill="#e0c14e"/>
-          <circle cx="984" cy="134" r="2" fill="#b98ec2"/>
+          <!-- Bay 4 — sailboat at sea -->
+          <rect x="1294" y="46" width="84" height="58" fill="#9e8a5e"/>
+          <rect x="1300" y="52" width="72" height="46" fill="#bcd4e0"/>
+          <rect x="1300" y="80" width="72" height="18" fill="#8aa3b5"/>
+          <polygon points="1338,60 1338,80 1356,80" fill="#f2f4ee"/>
+          <polygon points="1336,60 1336,80 1322,80" fill="#dfe6ea"/>
+          <rect x="1336.6" y="60" width="1.6" height="20" fill="#5e4a36"/>
+          <path d="M1324,82 h28 l-5,7 h-18 z" fill="#7d5f3a"/>
         </g>
 
         <!-- Bust on pedestal -->
@@ -910,8 +872,8 @@
         <!-- Townhouse A (brick, blue door) -->
         <g>
           <rect x="40" y="104" width="96" height="64" fill="#a4674f"/>
-          <polygon points="34,104 142,104 88,80" fill="#7d4f3c"/>
-          <polygon points="40,103 136,103 88,84" fill="#eef3f6"/>
+          <polygon points="34,104 142,104 88,46" fill="#7d4f3c"/>
+          <polygon points="40,103 136,103 88,50" fill="#eef3f6"/>
           <rect x="56" y="116" width="16" height="18" fill="#bcc8d2"/>
           <rect x="104" y="116" width="16" height="18" fill="#bcc8d2"/>
           <rect x="54" y="133" width="20" height="2.5" fill="#f1f4f7"/>
@@ -923,8 +885,8 @@
         <!-- Townhouse B (stone, timber, red door) -->
         <g>
           <rect x="150" y="98" width="92" height="70" fill="#a9a39a"/>
-          <polygon points="144,98 248,98 196,76" fill="#8a857c"/>
-          <polygon points="150,97 242,97 196,80" fill="#eef3f6"/>
+          <polygon points="144,98 248,98 196,40" fill="#8a857c"/>
+          <polygon points="150,97 242,97 196,44" fill="#eef3f6"/>
           <g stroke="#6f5a44" stroke-width="2"><line x1="150" y1="124" x2="242" y2="124"/><line x1="196" y1="98" x2="196" y2="168"/></g>
           <rect x="162" y="106" width="14" height="14" fill="#bcc8d2"/>
           <rect x="216" y="106" width="14" height="14" fill="#bcc8d2"/>
@@ -934,8 +896,8 @@
         <!-- Townhouse C (wood, yellow door) -->
         <g>
           <rect x="256" y="108" width="84" height="60" fill="#8a6f52"/>
-          <polygon points="250,108 346,108 298,86" fill="#6b5440"/>
-          <polygon points="256,107 340,107 298,90" fill="#eef3f6"/>
+          <polygon points="250,108 346,108 298,50" fill="#6b5440"/>
+          <polygon points="256,107 340,107 298,54" fill="#eef3f6"/>
           <g stroke="#5e4a38" stroke-width="2"><line x1="256" y1="130" x2="340" y2="130"/><line x1="298" y1="108" x2="298" y2="168"/></g>
           <rect x="264" y="116" width="12" height="12" fill="#bcc8d2"/>
           <rect x="322" y="116" width="12" height="12" fill="#bcc8d2"/>
@@ -987,23 +949,49 @@
           <rect x="778" y="143.5" width="18" height="2.2" fill="#f1f4f7"/>
         </g>
 
-        <!-- Townhouse D (brick, green door) -->
+        <!-- Bakery (replaces a townhouse): steep snowy roof, smoking chimney,
+             warm-lit shopfront and a hanging bread-loaf sign. -->
         <g>
-          <rect x="816" y="104" width="92" height="64" fill="#9e6a55"/>
-          <polygon points="810,104 914,104 862,80" fill="#79503e"/>
-          <polygon points="816,103 908,103 862,84" fill="#eef3f6"/>
-          <rect x="832" y="116" width="15" height="18" fill="#bcc8d2"/>
-          <rect x="877" y="116" width="15" height="18" fill="#bcc8d2"/>
-          <rect x="830" y="133" width="19" height="2.5" fill="#f1f4f7"/>
-          <rect x="875" y="133" width="19" height="2.5" fill="#f1f4f7"/>
-          <rect x="853" y="140" width="18" height="28" fill="#2f7d57"/>
-          <path d="M853,140 a9,6 0 0 1 18,0 z" fill="#cfd9e2"/>
+          <rect x="816" y="100" width="92" height="68" fill="#b58a6a"/>
+          <!-- steep snowy roof -->
+          <polygon points="810,100 914,100 862,42" fill="#79503e"/>
+          <polygon points="816,99 908,99 862,46" fill="#eef3f6"/>
+          <!-- chimney with snow cap + rising smoke -->
+          <rect x="884" y="46" width="12" height="36" fill="#8a6f5a"/>
+          <rect x="882" y="42" width="16" height="5" fill="#6b5440"/>
+          <rect x="882" y="39" width="16" height="3" fill="#eef3f6"/>
+          <circle class="bakery-smoke" cx="890" cy="34" r="3"   fill="#dfe6ec" opacity="0.8"/>
+          <circle class="bakery-smoke" cx="893" cy="28" r="3.5" fill="#dfe6ec" opacity="0.6"/>
+          <circle class="bakery-smoke" cx="889" cy="22" r="4"   fill="#dfe6ec" opacity="0.45"/>
+          <!-- striped awning over the shopfront -->
+          <rect x="820" y="116" width="44" height="6" fill="#a64a46"/>
+          <g fill="#ecdcc2"><rect x="826" y="116" width="6" height="6"/><rect x="838" y="116" width="6" height="6"/><rect x="850" y="116" width="6" height="6"/></g>
+          <!-- warm shop window (lit, with a snowy sill) -->
+          <rect x="824" y="122" width="34" height="28" fill="#f4cd77"/>
+          <rect x="824" y="122" width="34" height="28" fill="none" stroke="#8a6f5a" stroke-width="2"/>
+          <line x1="841" y1="122" x2="841" y2="150" stroke="#8a6f5a" stroke-width="1.3"/>
+          <line x1="824" y1="136" x2="858" y2="136" stroke="#8a6f5a" stroke-width="1.3"/>
+          <rect x="822" y="150" width="38" height="3" fill="#f1f4f7"/>
+          <!-- door -->
+          <rect x="872" y="134" width="20" height="34" fill="#7a4f3a"/>
+          <rect x="872" y="134" width="20" height="34" fill="none" stroke="#5e4a36" stroke-width="1.3"/>
+          <circle cx="888" cy="151" r="1.3" fill="#d8b46a"/>
+          <!-- hanging round sign with a bread-loaf logo -->
+          <rect x="808" y="110" width="10" height="2" fill="#5e4a36"/>
+          <rect x="810" y="112" width="2" height="3" fill="#5e4a36"/>
+          <circle cx="806" cy="124" r="11" fill="#caa15e"/>
+          <circle cx="806" cy="124" r="11" fill="none" stroke="#8a6f5a" stroke-width="1.2"/>
+          <ellipse cx="806" cy="126" rx="7" ry="4" fill="#a9743f"/>
+          <path d="M799,126 q7,-6 14,0 z" fill="#c08a4f"/>
+          <line x1="803" y1="123" x2="804.5" y2="126" stroke="#7a512c" stroke-width="0.9"/>
+          <line x1="806" y1="122" x2="807.5" y2="125" stroke="#7a512c" stroke-width="0.9"/>
+          <line x1="809" y1="123" x2="810.5" y2="126" stroke="#7a512c" stroke-width="0.9"/>
         </g>
         <!-- Townhouse E (stone, red door) -->
         <g>
           <rect x="924" y="100" width="88" height="68" fill="#aaa49b"/>
-          <polygon points="918,100 1018,100 968,78" fill="#8a857c"/>
-          <polygon points="924,99 1012,99 968,82" fill="#eef3f6"/>
+          <polygon points="918,100 1018,100 968,42" fill="#8a857c"/>
+          <polygon points="924,99 1012,99 968,46" fill="#eef3f6"/>
           <rect x="938" y="110" width="14" height="16" fill="#bcc8d2"/>
           <rect x="984" y="110" width="14" height="16" fill="#bcc8d2"/>
           <rect x="958" y="140" width="20" height="28" fill="#b0413a"/>
@@ -1012,8 +1000,8 @@
         <!-- Townhouse F (wood, blue door) -->
         <g>
           <rect x="1028" y="106" width="84" height="62" fill="#8a6f52"/>
-          <polygon points="1022,106 1118,106 1070,84" fill="#6b5440"/>
-          <polygon points="1028,105 1112,105 1070,88" fill="#eef3f6"/>
+          <polygon points="1022,106 1118,106 1070,48" fill="#6b5440"/>
+          <polygon points="1028,105 1112,105 1070,52" fill="#eef3f6"/>
           <g stroke="#5e4a38" stroke-width="2"><line x1="1028" y1="128" x2="1112" y2="128"/><line x1="1070" y1="106" x2="1070" y2="168"/></g>
           <rect x="1036" y="114" width="12" height="12" fill="#bcc8d2"/>
           <rect x="1094" y="114" width="12" height="12" fill="#bcc8d2"/>
@@ -1046,25 +1034,109 @@
           <g fill="#eef3f6"><circle cx="1338" cy="114" r="2.5"/><circle cx="1382" cy="106" r="2.5"/><circle cx="1346" cy="98" r="2.2"/><circle cx="1376" cy="102" r="2.2"/></g>
         </g>
 
-        <!-- Townhouse G (brick, red door) -->
+        <!-- (two right-side townhouses removed to make room for the park) -->
+
+        <!-- Snow-covered fir grove (right side) with a commemorative boulder in the middle -->
+        <!-- ~12 firs of varied sizes, several taller ones, the stone at its centre -->
         <g>
-          <rect x="1420" y="104" width="84" height="64" fill="#a4674f"/>
-          <polygon points="1414,104 1510,104 1462,82" fill="#7d4f3c"/>
-          <polygon points="1420,103 1504,103 1462,86" fill="#eef3f6"/>
-          <rect x="1434" y="116" width="14" height="16" fill="#bcc8d2"/>
-          <rect x="1476" y="116" width="14" height="16" fill="#bcc8d2"/>
-          <rect x="1453" y="142" width="18" height="26" fill="#b0413a"/>
-          <path d="M1453,142 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
-        </g>
-        <!-- Townhouse H (stone, blue door) -->
-        <g>
-          <rect x="1512" y="108" width="80" height="60" fill="#aaa49b"/>
-          <polygon points="1506,108 1598,108 1552,88" fill="#8a857c"/>
-          <polygon points="1512,107 1592,107 1552,91" fill="#eef3f6"/>
-          <rect x="1524" y="118" width="13" height="14" fill="#bcc8d2"/>
-          <rect x="1567" y="118" width="13" height="14" fill="#bcc8d2"/>
-          <rect x="1543" y="144" width="18" height="24" fill="#3f6fa3"/>
-          <path d="M1543,144 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
+          <!-- Back row: 6 tall firs (3 tiers) -->
+          <!-- T1 -->
+          <rect x="1390" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1373,148 1411,148 1392,128" fill="#3f6b4a"/>
+          <polygon points="1384,136 1400,136 1392,128" fill="#eef3f6"/>
+          <polygon points="1378,132 1406,132 1392,110" fill="#4a7a55"/>
+          <polygon points="1386,119 1398,119 1392,110" fill="#eef3f6"/>
+          <polygon points="1382.5,116 1401.5,116 1392,90" fill="#3f6b4a"/>
+          <polygon points="1388,101 1396,101 1392,90" fill="#eef3f6"/>
+          <!-- T2 (extra tall) -->
+          <rect x="1430" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1413,148 1451,148 1432,128" fill="#3f6b4a"/>
+          <polygon points="1424,136 1440,136 1432,128" fill="#eef3f6"/>
+          <polygon points="1418,132 1446,132 1432,110" fill="#4a7a55"/>
+          <polygon points="1426,119 1438,119 1432,110" fill="#eef3f6"/>
+          <polygon points="1422.5,116 1441.5,116 1432,82" fill="#3f6b4a"/>
+          <polygon points="1428,96 1436,96 1432,82" fill="#eef3f6"/>
+          <!-- T3 (behind boulder) -->
+          <rect x="1468" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1451,148 1489,148 1470,128" fill="#3f6b4a"/>
+          <polygon points="1462,136 1478,136 1470,128" fill="#eef3f6"/>
+          <polygon points="1456,132 1484,132 1470,110" fill="#4a7a55"/>
+          <polygon points="1464,119 1476,119 1470,110" fill="#eef3f6"/>
+          <polygon points="1460.5,116 1479.5,116 1470,94" fill="#3f6b4a"/>
+          <polygon points="1466,103 1474,103 1470,94" fill="#eef3f6"/>
+          <!-- T4 (extra tall, behind boulder) -->
+          <rect x="1504" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1487,148 1525,148 1506,128" fill="#3f6b4a"/>
+          <polygon points="1498,136 1514,136 1506,128" fill="#eef3f6"/>
+          <polygon points="1492,132 1520,132 1506,110" fill="#4a7a55"/>
+          <polygon points="1500,119 1512,119 1506,110" fill="#eef3f6"/>
+          <polygon points="1496.5,116 1515.5,116 1506,84" fill="#3f6b4a"/>
+          <polygon points="1502,97 1510,97 1506,84" fill="#eef3f6"/>
+          <!-- T5 -->
+          <rect x="1543" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1526,148 1564,148 1545,128" fill="#3f6b4a"/>
+          <polygon points="1537,136 1553,136 1545,128" fill="#eef3f6"/>
+          <polygon points="1531,132 1559,132 1545,110" fill="#4a7a55"/>
+          <polygon points="1539,119 1551,119 1545,110" fill="#eef3f6"/>
+          <polygon points="1535.5,116 1554.5,116 1545,92" fill="#3f6b4a"/>
+          <polygon points="1541,102 1549,102 1545,92" fill="#eef3f6"/>
+          <!-- T6 -->
+          <rect x="1580" y="146" width="4" height="12" fill="#6b5440"/>
+          <polygon points="1563,148 1601,148 1582,128" fill="#3f6b4a"/>
+          <polygon points="1574,136 1590,136 1582,128" fill="#eef3f6"/>
+          <polygon points="1568,132 1596,132 1582,110" fill="#4a7a55"/>
+          <polygon points="1576,119 1588,119 1582,110" fill="#eef3f6"/>
+          <polygon points="1572.5,116 1591.5,116 1582,98" fill="#3f6b4a"/>
+          <polygon points="1578,106 1586,106 1582,98" fill="#eef3f6"/>
+
+          <!-- Big commemorative boulder (centre of the grove) -->
+          <path d="M1456,160 Q1452,141 1476,135 Q1504,130 1518,143 Q1526,152 1520,160 Z" fill="#9aa1a8"/>
+          <path d="M1476,135 Q1504,130 1518,143 Q1505,140 1488,141 Q1478,142 1476,135 Z" fill="#a8aeb4"/>
+          <path d="M1456,160 Q1452,141 1476,135 Q1504,130 1518,143 Q1526,152 1520,160 Z" fill="none" stroke="#838b93" stroke-width="1"/>
+          <path d="M1462,143 Q1488,131 1516,143 Q1503,137 1484,138 Q1471,138 1462,143 Z" fill="#eef3f6"/>
+          <rect x="1467" y="147" width="38" height="13" rx="1.5" fill="#6f7d74"/>
+          <rect x="1467" y="147" width="38" height="13" rx="1.5" fill="none" stroke="#566159" stroke-width="0.8"/>
+          <line x1="1471" y1="151" x2="1501" y2="151" stroke="#b4beb6" stroke-width="0.9"/>
+          <line x1="1471" y1="154" x2="1497" y2="154" stroke="#b4beb6" stroke-width="0.9"/>
+          <line x1="1471" y1="157" x2="1499" y2="157" stroke="#b4beb6" stroke-width="0.9"/>
+
+          <!-- Front row: 6 small firs (2 tiers), flanking the stone -->
+          <!-- F1 -->
+          <rect x="1380" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1369,150 1395,150 1382,132" fill="#3f6b4a"/>
+          <polygon points="1376.5,140 1387.5,140 1382,132" fill="#eef3f6"/>
+          <polygon points="1373.5,138 1390.5,138 1382,120" fill="#4a7a55"/>
+          <polygon points="1378.4,128 1385.6,128 1382,120" fill="#eef3f6"/>
+          <!-- F2 -->
+          <rect x="1408" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1397,150 1423,150 1410,132" fill="#3f6b4a"/>
+          <polygon points="1404.5,140 1415.5,140 1410,132" fill="#eef3f6"/>
+          <polygon points="1401.5,138 1418.5,138 1410,126" fill="#4a7a55"/>
+          <polygon points="1406.4,131 1413.6,131 1410,126" fill="#eef3f6"/>
+          <!-- F3 -->
+          <rect x="1436" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1425,150 1451,150 1438,132" fill="#3f6b4a"/>
+          <polygon points="1432.5,140 1443.5,140 1438,132" fill="#eef3f6"/>
+          <polygon points="1429.5,138 1446.5,138 1438,118" fill="#4a7a55"/>
+          <polygon points="1434.4,126 1441.6,126 1438,118" fill="#eef3f6"/>
+          <!-- F4 -->
+          <rect x="1534" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1523,150 1549,150 1536,132" fill="#3f6b4a"/>
+          <polygon points="1530.5,140 1541.5,140 1536,132" fill="#eef3f6"/>
+          <polygon points="1527.5,138 1544.5,138 1536,124" fill="#4a7a55"/>
+          <polygon points="1532.4,130 1539.6,130 1536,124" fill="#eef3f6"/>
+          <!-- F5 -->
+          <rect x="1560" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1549,150 1575,150 1562,132" fill="#3f6b4a"/>
+          <polygon points="1556.5,140 1567.5,140 1562,132" fill="#eef3f6"/>
+          <polygon points="1553.5,138 1570.5,138 1562,116" fill="#4a7a55"/>
+          <polygon points="1558.4,125 1565.6,125 1562,116" fill="#eef3f6"/>
+          <!-- F6 -->
+          <rect x="1586" y="148" width="4" height="10" fill="#6b5440"/>
+          <polygon points="1575,150 1601,150 1588,132" fill="#3f6b4a"/>
+          <polygon points="1582.5,140 1593.5,140 1588,132" fill="#eef3f6"/>
+          <polygon points="1579.5,138 1596.5,138 1588,122" fill="#4a7a55"/>
+          <polygon points="1584.4,129 1591.6,129 1588,122" fill="#eef3f6"/>
         </g>
 
         <!-- Falling snow (overlay) -->

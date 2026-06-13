@@ -863,7 +863,8 @@
     background: linear-gradient(180deg, #cfe6f2 0%, #eaf4f9 100%);   // light blue sky
   }
   &--ready.hero__scene--museum {
-    background: #eceae6;        // soft warm gallery light
+    // Dim, warm gallery so the window light shafts read as glowing beams.
+    background: linear-gradient(180deg, #46403a 0%, #38332e 55%, #2c2825 100%);
   }
   &--ready.hero__scene--metro {
     background: linear-gradient(180deg, #0f1320 0%, #1a2034 55%, #28304a 100%);   // night sky
@@ -1061,13 +1062,27 @@
   .snow-flake:nth-child(5n)   { animation-delay: -8s; }
   .snow-flake:nth-child(2n)   { opacity: 0.85; }
 
+  // Bakery chimney smoke — puffs drift up and fade.
+  .bakery-smoke {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: smoke-rise 4s ease-in-out infinite;
+  }
+  .bakery-smoke:nth-of-type(2) { animation-duration: 4.8s; animation-delay: -1.6s; }
+  .bakery-smoke:nth-of-type(3) { animation-duration: 5.6s; animation-delay: -3.2s; }
+
   @media (prefers-reduced-motion: reduce) {
-    .snow-flake { animation: none; }
+    .snow-flake, .bakery-smoke { animation: none; }
   }
 }
 @keyframes snow-fall {
   0%   { transform: translateY(-14px) translateX(0); }
   100% { transform: translateY(196px) translateX(12px); }
+}
+@keyframes smoke-rise {
+  0%   { transform: translate(0, 0) scale(0.8); opacity: 0.55; }
+  50%  { transform: translate(-3px, -7px) scale(1.1); opacity: 0.3; }
+  100% { transform: translate(2px, -14px) scale(1.4); opacity: 0; }
 }
 
 // On the light town, force dark copy regardless of the (now hidden) photo.
