@@ -320,95 +320,45 @@
     }
   }
 
-  // ── Audio hero player ───────────────────────────────────────────────────────
-  &__audio-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $space-4;
-    padding: $space-5;
-    background: linear-gradient(135deg, $bg-dark-alt 0%, $dusty-rose 50%, $wheat 100%);
+  // ── Audio player (Plyr) ─────────────────────────────────────────────────────
+  // A sober, professional player: seekable bar with buffered range, playback-speed
+  // menu and a loading state. Plyr builds its own markup at runtime, so we theme it
+  // through CSS custom properties set on this wrapper — they cascade into `.plyr`.
+  &__audio {
+    background: $bg-surface;
+    border: 1px solid $border-default;
     border-radius: $radius-md;
-
-    audio { display: none; }
-
-    @include md {
-      flex-direction: row;
-      gap: $space-5;
-    }
-  }
-
-  &__audio-controls {
-    display: flex;
-    align-items: center;
-    gap: $space-4;
-    flex-shrink: 0;
-  }
-
-  &__skip-btn {
-    background: rgba(#ffffff, 0.2);
-    color: #1a1a1a;
-    border: none;
-    border-radius: $radius-full;
     padding: $space-2 $space-4;
-    font-family: $font-family-primary;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-bold;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background $transition-fast;
 
-    &:hover { background: rgba(#ffffff, 0.35); }
-  }
+    --plyr-color-main: #1a1a1a;
+    --plyr-font-family: #{$font-family-primary};
+    --plyr-font-size-base: 14px;
+    --plyr-font-size-small: 12px;
+    --plyr-font-size-time: 13px;
 
-  &__play-btn {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: $accent-primary;
-    color: #ffffff;
-    border: none;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background $transition-fast, transform $transition-fast;
+    --plyr-audio-controls-background: transparent;
+    --plyr-audio-control-color: #5a5a5a;
+    --plyr-audio-control-color-hover: #ffffff;
+    --plyr-audio-control-background-hover: #1a1a1a;
 
-    svg { width: 28px; height: 28px; }
-    &:hover { background: $accent-hover; transform: scale(1.05); }
-  }
+    --plyr-range-track-height: 5px;
+    --plyr-range-thumb-height: 13px;
+    --plyr-range-fill-background: #1a1a1a;
+    --plyr-audio-range-track-background: #{rgba(#1a1a1a, 0.12)};
+    --plyr-audio-progress-buffered-background: #{rgba(#1a1a1a, 0.22)};
+    --plyr-range-thumb-background: #1a1a1a;
+    --plyr-range-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 
-  &__audio-track {
-    width: 100%;
-    min-width: 0;
+    --plyr-control-radius: 6px;
+    --plyr-control-spacing: 8px;
+    --plyr-tooltip-background: #1a1a1a;
+    --plyr-tooltip-color: #ffffff;
+    --plyr-menu-background: #ffffff;
+    --plyr-menu-color: #1a1a1a;
 
-    @include md { flex: 1; width: auto; }
-  }
-
-  &__audio-bar {
-    height: 6px;
-    background: rgba(#ffffff, 0.15);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: $space-2;
-  }
-
-  &__audio-progress {
-    height: 100%;
-    background: $accent-primary;
-    border-radius: 3px;
-  }
-
-  &__audio-times {
-    display: flex;
-    justify-content: center;
-    font-family: $font-family-primary;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: #1a1a1a;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    // Native fallback before Plyr enhances the element (and under no-JS / SSR).
+    .player__audio-el { width: 100%; }
+    .plyr { width: 100%; }
   }
 
   // ── Attachments ────────────────────────────────────────────────────────────

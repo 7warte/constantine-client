@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, PLATFORM_ID, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { gsap } from 'gsap';
@@ -19,6 +19,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly host  = inject(ElementRef<HTMLElement>);
   private readonly zone  = inject(NgZone);
+  private readonly platformId = inject(PLATFORM_ID);
 
   // ── GSAP reveals ─────────────────────────────────────────────────
   // Itinerary venues slide up in a stagger when the tour loads.
@@ -89,42 +90,43 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     return this.groupedStops()[idx]?.spaceId ?? null;
   });
 
-  // ── Audio state (one expanded stop at a time) ────────────────────
-  readonly isPlaying     = signal(false);
-  readonly audioProgress = signal(0);
-  readonly audioCurrent  = signal(0);
-  readonly audioDuration = signal(0);
+  // ── Audio (Plyr — one expanded stop at a time) ───────────────────
+  // Plyr enhances the lazily-rendered <audio> of the open stop into a
+  // professional player: seekable bar with buffered range, playback-speed
+  // menu, and a loading state. Browser-only (skipped during SSR).
+  private player: any = null;
 
-  togglePlay(audio: HTMLAudioElement): void {
-    if (audio.paused) audio.play().catch(() => {});
-    else audio.pause();
+  private initAudioPlayer(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.zone.runOutsideAngular(() => setTimeout(() => {
+      const el = this.host.nativeElement.querySelector(
+        '.player__stop-panel.mat-expanded .player__audio-el',
+      ) as HTMLAudioElement | null;
+      this.destroyAudioPlayer();
+      if (!el) return;
+      import('plyr').then((mod) => {
+        const Plyr = (mod as any).default ?? mod;
+        this.player = new Plyr(el, {
+          controls: ['play', 'rewind', 'progress', 'current-time', 'duration', 'fast-forward', 'settings'],
+          settings: ['speed'],
+          speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 1.75, 2] },
+          seekTime: 10,
+          keyboard: { focused: true, global: false },
+          tooltips: { controls: false, seek: true },
+        });
+      }).catch(() => {});
+    }, 130));
   }
 
-  skip(audio: HTMLAudioElement, seconds: number): void {
-    audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
-  }
-
-  onTimeUpdate(audio: HTMLAudioElement): void {
-    this.audioCurrent.set(audio.currentTime);
-    this.audioDuration.set(audio.duration || 0);
-    this.audioProgress.set(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
-  }
-
-  onAudioEnded(): void {
-    this.isPlaying.set(false);
-  }
-
-  formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  private destroyAudioPlayer(): void {
+    if (this.player) {
+      try { this.player.destroy(); } catch { /* already gone */ }
+      this.player = null;
+    }
   }
 
   private resetAudioState(): void {
-    this.isPlaying.set(false);
-    this.audioProgress.set(0);
-    this.audioCurrent.set(0);
-    this.audioDuration.set(0);
+    this.destroyAudioPlayer();
   }
 
   // ── Accordion state handlers ─────────────────────────────────────
@@ -144,6 +146,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.expandedStopId.set(stopId);
     this.resetAudioState();
     this.animateStopBody();
+    this.initAudioPlayer();
   }
 
   onStopClose(stopId: string): void {
@@ -162,6 +165,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     if (firstStop) this.expandedStopId.set(firstStop.id);
 
     this.animateStopBody();
+    this.initAudioPlayer();
 
     setTimeout(() => {
       const el = document.querySelector('.player__venue-panel');
@@ -471,6 +475,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeCompass();
+    this.destroyAudioPlayer();
   }
 }
 
