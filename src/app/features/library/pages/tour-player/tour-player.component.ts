@@ -113,6 +113,9 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
           seekTime: 10,
           keyboard: { focused: true, global: false },
           tooltips: { controls: false, seek: true },
+          // Serve the icon sprite locally so the player works offline / on the LAN
+          // (Plyr otherwise fetches it from cdn.plyr.io).
+          iconUrl: 'assets/plyr/plyr.svg',
         });
       }).catch(() => {});
     }, 130));

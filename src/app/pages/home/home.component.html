@@ -1,9 +1,10 @@
 <!-- ── Hero ─────────────────────────────────────────────────────── -->
-<section class="hero" [class.hero--town]="townMode()">
+<section class="hero" [class.hero--town]="townMode()" [class.hero--night]="scene() === 'metro'">
   @if (townMode()) {
     <div class="hero__scene" [class.hero__scene--ready]="sceneReady()"
       [class.hero__scene--city]="scene() === 'city'" [class.hero__scene--museum]="scene() === 'museum'"
-      [class.hero__scene--beach]="scene() === 'beach'" aria-hidden="true">
+      [class.hero__scene--beach]="scene() === 'beach'" [class.hero__scene--metro]="scene() === 'metro'"
+      [class.hero__scene--desert]="scene() === 'desert'" [class.hero__scene--nordic]="scene() === 'nordic'" aria-hidden="true">
       @if (sceneReady()) {
       @switch (scene()) {
       @case ('city') {
@@ -326,6 +327,62 @@
           <circle cx="958" cy="73" r="6" fill="#b25a60"/>
         </g>
 
+        <!-- Salon hang (right wall): 5 paintings, all different sizes, cascading down
+             4 well-spaced rows — the bottom (4th) row holds a single painting. -->
+        <g>
+          <!-- Row 1a — Fields at sunset (large) -->
+          <rect x="948" y="6" width="84" height="32" fill="#9e8a5e"/>
+          <rect x="952" y="10" width="76" height="24" fill="#cfe0ea"/>
+          <rect x="952" y="27" width="76" height="7" fill="#d8c06a"/>
+          <path d="M952,27 q19,-3 38,0 t38,0" stroke="#c2a84e" stroke-width="1.2" fill="none"/>
+          <circle cx="1006" cy="18" r="4.5" fill="#f0d98a"/>
+
+          <!-- Row 1b — Bird on a branch (small, far right) -->
+          <rect x="1300" y="8" width="52" height="26" fill="#caa15e"/>
+          <rect x="1304" y="12" width="44" height="18" fill="#dfeaf0"/>
+          <path d="M1304,26 q14,2 28,-2 q8,-1.6 14,-1" stroke="#6b5440" stroke-width="1.4" fill="none"/>
+          <ellipse cx="1322" cy="21" rx="4.2" ry="2.6" fill="#c98a5c"/>
+          <circle cx="1326.6" cy="18.8" r="1.8" fill="#c98a5c"/>
+          <polygon points="1329,18.4 1332,17.6 1329,19.6" fill="#e0c14e"/>
+          <path d="M1319,21 q3,2 5.2,0" stroke="#a86b45" stroke-width="1" fill="none"/>
+          <circle cx="1312" cy="16" r="1.3" fill="#7d9b66"/>
+          <circle cx="1342" cy="15.5" r="1.3" fill="#7d9b66"/>
+
+          <!-- Row 2 — Horse in a meadow (medium, tucked in the central gap) -->
+          <rect x="1012" y="44" width="66" height="34" fill="#b89a52"/>
+          <rect x="1016" y="48" width="58" height="26" fill="#d8e0c4"/>
+          <rect x="1016" y="66" width="58" height="8" fill="#8caa72"/>
+          <g fill="#5e4a36">
+            <ellipse cx="1042" cy="62" rx="11" ry="4.4"/>
+            <rect x="1034" y="62" width="1.8" height="6"/>
+            <rect x="1039" y="62" width="1.8" height="6"/>
+            <rect x="1047" y="62" width="1.8" height="6"/>
+            <rect x="1051" y="62" width="1.8" height="6"/>
+            <path d="M1052,61 q5,-1 6,-7 l2.2,0.7 q-1,6.5 -6,8.6 z"/>
+            <path d="M1032,60 q-3.5,1 -4.6,4 l1.6,0.7 q1.6,-2.4 4,-3.2 z"/>
+          </g>
+
+          <!-- Row 3 — Sailboat (small, far right, below the bird) -->
+          <rect x="1306" y="88" width="50" height="30" fill="#5e4a36"/>
+          <rect x="1310" y="92" width="42" height="22" fill="#bcd4e0"/>
+          <rect x="1310" y="107" width="42" height="7" fill="#8aa3b5"/>
+          <polygon points="1330,96 1330,107 1340,107" fill="#f2f4ee"/>
+          <polygon points="1329,96 1329,107 1321,107" fill="#dfe6ea"/>
+          <rect x="1329.4" y="96" width="1.2" height="11" fill="#5e4a36"/>
+          <path d="M1323,109 h16 l-3,3.6 h-10 z" fill="#7d5f3a"/>
+
+          <!-- Row 4 — single painting: flowers in a vase (lower-left of the cluster) -->
+          <rect x="958" y="124" width="44" height="28" fill="#b4b4b4"/>
+          <rect x="962" y="128" width="36" height="20" fill="#efe7d6"/>
+          <path d="M980,148 l-3.2,-9 h12.4 l-3.2,9 z" fill="#9c7e9e"/>
+          <rect x="979.4" y="132" width="1.2" height="7" fill="#7d9b66"/>
+          <rect x="975.4" y="134" width="1.2" height="5" fill="#7d9b66"/>
+          <rect x="983.4" y="134" width="1.2" height="5" fill="#7d9b66"/>
+          <circle cx="980" cy="131" r="2.4" fill="#c0392b"/>
+          <circle cx="976" cy="134" r="2" fill="#e0c14e"/>
+          <circle cx="984" cy="134" r="2" fill="#b98ec2"/>
+        </g>
+
         <!-- Bust on pedestal -->
         <g>
           <rect x="328" y="168" width="36" height="6" fill="#a9a9a9"/>
@@ -472,6 +529,587 @@
         </g>
       </svg>
       }
+      @case ('metro') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- Lit-window tiles for the skyscrapers (warm electric light, a few cooler offices) -->
+        <defs>
+          <pattern id="metro-win" width="48" height="56" patternUnits="userSpaceOnUse">
+            <rect width="48" height="56" fill="#232a40"/>
+            <rect x="6"  y="8"  width="13" height="16" fill="#f4cd77"/>
+            <rect x="29" y="8"  width="13" height="16" fill="#3a4258"/>
+            <rect x="6"  y="34" width="13" height="16" fill="#3a4258"/>
+            <rect x="29" y="34" width="13" height="16" fill="#f4cd77"/>
+          </pattern>
+          <pattern id="metro-win-b" width="48" height="56" patternUnits="userSpaceOnUse">
+            <rect width="48" height="56" fill="#2a3350"/>
+            <rect x="6"  y="8"  width="13" height="16" fill="#3a4258"/>
+            <rect x="29" y="8"  width="13" height="16" fill="#f7d98a"/>
+            <rect x="6"  y="34" width="13" height="16" fill="#9fb4d8"/>
+            <rect x="29" y="34" width="13" height="16" fill="#3a4258"/>
+          </pattern>
+        </defs>
+
+        <!-- Stars + moon (sky itself is the SCSS night gradient) -->
+        <g class="metro-stars">
+          <circle cx="120" cy="22" r="1.3" fill="#e3eaf6"/>
+          <circle cx="300" cy="14" r="1"   fill="#cdd6e6"/>
+          <circle cx="520" cy="26" r="1.2" fill="#e3eaf6"/>
+          <circle cx="760" cy="12" r="1"   fill="#cdd6e6"/>
+          <circle cx="900" cy="34" r="1"   fill="#cdd6e6"/>
+          <circle cx="1015" cy="20" r="1.3" fill="#e3eaf6"/>
+          <circle cx="1260" cy="16" r="1"   fill="#cdd6e6"/>
+          <circle cx="1470" cy="24" r="1.2" fill="#e3eaf6"/>
+          <circle cx="640" cy="30" r="1"   fill="#cdd6e6"/>
+        </g>
+        <g class="metro-moon">
+          <circle cx="1108" cy="40" r="17" fill="#f2ead0"/>
+          <circle cx="1101" cy="35" r="4" fill="#e1dabf" opacity="0.55"/>
+          <circle cx="1114" cy="47" r="3" fill="#e1dabf" opacity="0.5"/>
+        </g>
+
+        <!-- Skyscrapers (back) — single rect each, filled with a lit-window pattern -->
+        <g class="metro-towers">
+          <rect x="10"   y="40" width="86" height="128" fill="url(#metro-win)"/>
+          <rect x="104"  y="72" width="70" height="96"  fill="url(#metro-win-b)"/>
+          <rect x="182"  y="22" width="78" height="146" fill="url(#metro-win)"/>
+          <rect x="300"  y="88" width="54" height="80"  fill="url(#metro-win-b)"/>
+          <rect x="900"  y="34" width="72" height="134" fill="url(#metro-win)"/>
+          <rect x="978"  y="64" width="64" height="104" fill="url(#metro-win-b)"/>
+          <rect x="1180" y="26" width="80" height="142" fill="url(#metro-win)"/>
+          <rect x="1264" y="58" width="70" height="110" fill="url(#metro-win-b)"/>
+          <rect x="1418" y="14" width="92" height="154" fill="url(#metro-win)"/>
+          <!-- landmark tower (right) — tallest in the skyline, with a stepped crown -->
+          <rect x="1500" y="34" width="66" height="134" fill="url(#metro-win-b)"/>
+          <rect x="1512" y="14" width="42" height="22"  fill="url(#metro-win)"/>
+          <polygon points="1514,14 1552,14 1533,4" fill="#2a3350"/>
+          <!-- rooftop antennae with blinking beacons -->
+          <rect x="220" y="10" width="2" height="12" fill="#2b3142"/>
+          <circle cx="221" cy="9" r="2" fill="#e0524f" class="metro-beacon"/>
+          <rect x="1532" y="0" width="2" height="14" fill="#2b3142"/>
+          <circle cx="1533" cy="1" r="2" fill="#e0524f" class="metro-beacon metro-beacon--b"/>
+        </g>
+
+        <!-- Street -->
+        <rect x="0" y="166" width="1600" height="14" fill="#171b27"/>
+        <rect x="0" y="166" width="1600" height="3"  fill="#2b3142"/>
+        <g fill="#454f6a" opacity="0.55">
+          <rect x="40"  y="176" width="26" height="2"/>
+          <rect x="180" y="176" width="26" height="2"/>
+          <rect x="320" y="176" width="26" height="2"/>
+          <rect x="600" y="176" width="26" height="2"/>
+          <rect x="880" y="176" width="26" height="2"/>
+          <rect x="1160" y="176" width="26" height="2"/>
+          <rect x="1380" y="176" width="26" height="2"/>
+        </g>
+
+        <!-- Warm light pools spilling onto the street (electric-yellow, museum-shaft style) -->
+        <polygon points="694,160 718,160 742,180 670,180" fill="#ffe6ad" opacity="0.07"/>
+
+        <!-- City Hall (centre) -->
+        <g>
+          <rect x="556" y="160" width="300" height="10" fill="#3a4258"/>
+          <rect x="566" y="156" width="280" height="5"  fill="#454f6a"/>
+          <rect x="582" y="92"  width="248" height="68" fill="#3c445c"/>
+          <!-- lit interior behind the colonnade -->
+          <g fill="#f4cd77">
+            <rect x="600" y="104" width="12" height="34"/>
+            <rect x="636" y="104" width="12" height="34"/>
+            <rect x="672" y="104" width="12" height="34"/>
+            <rect x="728" y="104" width="12" height="34"/>
+            <rect x="764" y="104" width="12" height="34"/>
+            <rect x="800" y="104" width="12" height="34"/>
+          </g>
+          <rect x="694" y="120" width="24" height="40" fill="#f7d98a"/>
+          <g fill="#525b78">
+            <rect x="592" y="96" width="12" height="64"/>
+            <rect x="628" y="96" width="12" height="64"/>
+            <rect x="664" y="96" width="12" height="64"/>
+            <rect x="736" y="96" width="12" height="64"/>
+            <rect x="772" y="96" width="12" height="64"/>
+            <rect x="808" y="96" width="12" height="64"/>
+          </g>
+          <rect x="576" y="84" width="260" height="10" fill="#474f68"/>
+          <polygon points="576,84 836,84 706,54" fill="#3f4760"/>
+          <!-- clock tower -->
+          <rect x="690" y="22" width="32" height="36" fill="#3c445c"/>
+          <polygon points="686,22 726,22 706,7" fill="#474f68"/>
+          <circle cx="706" cy="40" r="10" fill="#f7d98a"/>
+          <line x1="706" y1="40" x2="706" y2="33" stroke="#2a3040" stroke-width="1.4"/>
+          <line x1="706" y1="40" x2="711" y2="42" stroke="#2a3040" stroke-width="1.4"/>
+          <rect x="705" y="2" width="2" height="6" fill="#6a7290"/>
+          <polygon points="707,2 707,9 728,5" fill="#b5544f"/>
+        </g>
+
+        <!-- Pizzeria (left of centre) -->
+        <g>
+          <rect x="356" y="112" width="116" height="56" fill="#2f2c44"/>
+          <g fill="#f4cd77">
+            <rect x="366" y="120" width="14" height="14"/>
+            <rect x="392" y="120" width="14" height="14"/>
+            <rect x="418" y="120" width="14" height="14"/>
+            <rect x="444" y="120" width="14" height="14"/>
+          </g>
+          <!-- shopfront glow + door -->
+          <rect x="362" y="150" width="104" height="18" fill="#f7d98a"/>
+          <rect x="406" y="152" width="16" height="16" fill="#c99a4e"/>
+          <!-- red/cream awning with scalloped edge -->
+          <rect x="352" y="140" width="124" height="12" fill="#b5544f"/>
+          <g fill="#ecdcc2">
+            <rect x="364" y="140" width="12" height="12"/>
+            <rect x="388" y="140" width="12" height="12"/>
+            <rect x="412" y="140" width="12" height="12"/>
+            <rect x="436" y="140" width="12" height="12"/>
+            <rect x="460" y="140" width="12" height="12"/>
+          </g>
+          <path d="M352,152 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q3,4 4,0" fill="#a64a46"/>
+          <!-- hanging pizza sign -->
+          <g class="metro-sign">
+            <rect x="485" y="116" width="2" height="9" fill="#6a7290"/>
+            <circle cx="486" cy="136" r="12" fill="#e6c266" stroke="#c98a4e" stroke-width="2.5"/>
+            <circle cx="482" cy="132" r="2"   fill="#b5544f"/>
+            <circle cx="490" cy="134" r="2"   fill="#b5544f"/>
+            <circle cx="485" cy="141" r="2"   fill="#b5544f"/>
+          </g>
+        </g>
+
+        <!-- Burger place (right of centre) -->
+        <g>
+          <rect x="1016" y="116" width="132" height="52" fill="#2f2c44"/>
+          <rect x="1016" y="116" width="132" height="10" fill="#e3b94e"/>
+          <g fill="#f4cd77">
+            <rect x="1026" y="130" width="14" height="12"/>
+            <rect x="1052" y="130" width="14" height="12"/>
+            <rect x="1100" y="130" width="14" height="12"/>
+            <rect x="1126" y="130" width="14" height="12"/>
+          </g>
+          <rect x="1024" y="146" width="116" height="22" fill="#f7d98a"/>
+          <rect x="1074" y="150" width="16" height="18" fill="#c99a4e"/>
+          <!-- hanging burger sign -->
+          <g class="metro-sign metro-sign--b">
+            <rect x="1157" y="118" width="2" height="9" fill="#6a7290"/>
+            <path d="M1146,132 a12,9 0 0 1 24,0 z" fill="#d7a35a"/>
+            <rect x="1146" y="132" width="24" height="3" fill="#7d9b76"/>
+            <rect x="1146" y="135" width="24" height="4" fill="#6b4a32"/>
+            <path d="M1146,139 h24 a3,3 0 0 1 -3,3 h-18 a3,3 0 0 1 -3,-3 z" fill="#d7a35a"/>
+          </g>
+        </g>
+
+        <!-- Street lamps with warm glow (electric light) -->
+        <g class="metro-lamp">
+          <ellipse cx="320" cy="170" rx="34" ry="7" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <polygon points="332,124 336,124 352,168 300,168" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <rect x="318" y="120" width="3" height="50" fill="#2b3142"/>
+          <rect x="318" y="120" width="17" height="3" fill="#2b3142"/>
+          <circle cx="335" cy="124" r="4" fill="#ffe1a3"/>
+        </g>
+        <g class="metro-lamp">
+          <ellipse cx="880" cy="170" rx="34" ry="7" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <polygon points="892,124 896,124 912,168 860,168" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <rect x="878" y="120" width="3" height="50" fill="#2b3142"/>
+          <rect x="878" y="120" width="17" height="3" fill="#2b3142"/>
+          <circle cx="895" cy="124" r="4" fill="#ffe1a3"/>
+        </g>
+        <g class="metro-lamp">
+          <ellipse cx="1240" cy="170" rx="34" ry="7" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <polygon points="1252,124 1256,124 1272,168 1220,168" fill="#ffe6ad" opacity="0.6" class="lamp-glow"/>
+          <rect x="1238" y="120" width="3" height="50" fill="#2b3142"/>
+          <rect x="1238" y="120" width="17" height="3" fill="#2b3142"/>
+          <circle cx="1255" cy="124" r="4" fill="#ffe1a3"/>
+        </g>
+
+        <!-- Taxis: each pulls up to a stand, waits, then drives off again -->
+        <g transform="translate(430,0)"><g class="metro-taxi metro-taxi--a">
+          <rect x="0" y="150" width="78" height="16" rx="4" fill="#e3b94e"/>
+          <path d="M16,150 l9,-12 h28 l9,12 z" fill="#edc874"/>
+          <rect x="26" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="41" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="32" y="131" width="14" height="6" fill="#fff3d2"/>
+          <g fill="#2a3040"><rect x="4" y="158" width="6" height="4"/><rect x="16" y="158" width="6" height="4"/><rect x="28" y="158" width="6" height="4"/></g>
+          <circle cx="20" cy="166" r="6" fill="#1a1f2b"/><circle cx="58" cy="166" r="6" fill="#1a1f2b"/>
+          <circle cx="20" cy="166" r="2.4" fill="#4a516a"/><circle cx="58" cy="166" r="2.4" fill="#4a516a"/>
+          <circle cx="76" cy="157" r="2.6" fill="#fff0c2"/>
+        </g></g>
+        <g transform="translate(940,0)"><g class="metro-taxi metro-taxi--b">
+          <rect x="0" y="150" width="78" height="16" rx="4" fill="#e3b94e"/>
+          <path d="M16,150 l9,-12 h28 l9,12 z" fill="#edc874"/>
+          <rect x="26" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="41" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="32" y="131" width="14" height="6" fill="#fff3d2"/>
+          <g fill="#2a3040"><rect x="4" y="158" width="6" height="4"/><rect x="16" y="158" width="6" height="4"/><rect x="28" y="158" width="6" height="4"/></g>
+          <circle cx="20" cy="166" r="6" fill="#1a1f2b"/><circle cx="58" cy="166" r="6" fill="#1a1f2b"/>
+          <circle cx="20" cy="166" r="2.4" fill="#4a516a"/><circle cx="58" cy="166" r="2.4" fill="#4a516a"/>
+          <circle cx="76" cy="157" r="2.6" fill="#fff0c2"/>
+        </g></g>
+        <g transform="translate(150,0)"><g class="metro-taxi metro-taxi--c">
+          <rect x="0" y="150" width="78" height="16" rx="4" fill="#e3b94e"/>
+          <path d="M16,150 l9,-12 h28 l9,12 z" fill="#edc874"/>
+          <rect x="26" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="41" y="140" width="13" height="9" fill="#26304a"/>
+          <rect x="32" y="131" width="14" height="6" fill="#fff3d2"/>
+          <g fill="#2a3040"><rect x="4" y="158" width="6" height="4"/><rect x="16" y="158" width="6" height="4"/><rect x="28" y="158" width="6" height="4"/></g>
+          <circle cx="20" cy="166" r="6" fill="#1a1f2b"/><circle cx="58" cy="166" r="6" fill="#1a1f2b"/>
+          <circle cx="20" cy="166" r="2.4" fill="#4a516a"/><circle cx="58" cy="166" r="2.4" fill="#4a516a"/>
+          <circle cx="76" cy="157" r="2.6" fill="#fff0c2"/>
+        </g></g>
+      </svg>
+      }
+      @case ('desert') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- Rising dawn sun with a soft halo (behind the dunes) -->
+        <g class="desert-sun">
+          <circle cx="560" cy="152" r="82" fill="#fbe6bc" opacity="0.30" class="sun-glow"/>
+          <circle cx="560" cy="152" r="56" fill="#fdeecb" opacity="0.5"  class="sun-glow"/>
+          <circle cx="560" cy="152" r="38" fill="#fde7b8"/>
+        </g>
+
+        <!-- A few birds in the dawn sky -->
+        <g class="bird bird--1"><path d="M360,42 q6,-5 11,-1 q5,-4 11,1" stroke="#b08a63" stroke-width="1.5" fill="none"/></g>
+        <g class="bird bird--2"><path d="M470,30 q5,-4 10,-1 q4,-3 10,1" stroke="#a9805a" stroke-width="1.3" fill="none"/></g>
+        <g class="bird bird--3"><path d="M980,40 q6,-5 11,-1 q5,-4 11,1" stroke="#b08a63" stroke-width="1.4" fill="none"/></g>
+
+        <!-- Distant dune silhouette -->
+        <path d="M0,150 Q260,134 560,146 Q900,158 1240,140 Q1430,131 1600,146 L1600,180 L0,180 Z" fill="#ecd4a4"/>
+        <!-- Sand ground -->
+        <rect x="0" y="160" width="1600" height="20" fill="#e4c389"/>
+        <path d="M0,161 Q400,152 800,159 T1600,161" stroke="#f1dcab" stroke-width="2.5" fill="none"/>
+
+        <!-- Arabic palace (right) -->
+        <g>
+          <!-- minaret -->
+          <rect x="1176" y="56" width="22" height="112" fill="#e3c992"/>
+          <g fill="#cdaf78"><rect x="1182" y="84" width="10" height="14"/><rect x="1182" y="112" width="10" height="14"/></g>
+          <rect x="1173" y="52" width="28" height="6" fill="#d4b986"/>
+          <path d="M1176,52 Q1187,30 1198,52 Z" fill="#d9b97a"/>
+          <rect x="1186" y="20" width="2" height="10" fill="#b9905a"/>
+          <circle cx="1187" cy="17" r="3" fill="#d8b46a"/>
+
+          <!-- platform + hall -->
+          <rect x="1200" y="164" width="360" height="8" fill="#d8bf8a"/>
+          <rect x="1206" y="96" width="300" height="72" fill="#e6cd9b"/>
+          <rect x="1206" y="96" width="300" height="5" fill="#d4b075"/>
+
+          <!-- domes (two small flanking, one large central with crescent) -->
+          <path d="M1250,96 Q1244,74 1258,64 Q1272,74 1266,96 Z" fill="#cdb083"/>
+          <path d="M1438,96 Q1432,74 1446,64 Q1460,74 1454,96 Z" fill="#cdb083"/>
+          <rect x="1338" y="92" width="40" height="6" fill="#c9a86f"/>
+          <path d="M1340,92 Q1330,52 1358,36 Q1386,52 1376,92 Z" fill="#d9b97a"/>
+          <rect x="1357" y="22" width="2" height="14" fill="#b9905a"/>
+          <circle cx="1358" cy="18" r="3.5" fill="#d8b46a"/>
+
+          <!-- horseshoe-arch windows -->
+          <g fill="#bf9a63">
+            <path d="M1226,150 L1226,120 Q1226,106 1240,106 Q1254,106 1254,120 L1254,150 Z"/>
+            <path d="M1286,150 L1286,120 Q1286,106 1300,106 Q1314,106 1314,120 L1314,150 Z"/>
+            <path d="M1404,150 L1404,120 Q1404,106 1418,106 Q1432,106 1432,120 L1432,150 Z"/>
+            <path d="M1464,150 L1464,120 Q1464,106 1478,106 Q1492,106 1492,120 L1492,150 Z"/>
+          </g>
+          <!-- grand entrance -->
+          <path d="M1338,168 L1338,128 Q1338,108 1358,108 Q1378,108 1378,128 L1378,168 Z" fill="#a9844f"/>
+          <path d="M1346,168 L1346,132 Q1346,118 1358,118 Q1370,118 1370,132 L1370,168 Z" fill="#7d5f3a"/>
+        </g>
+
+        <!-- Palms (gentle sway) -->
+        <g transform="translate(150,0)"><g class="desert-palm">
+          <path d="M0,168 C-3,142 3,118 1,98" stroke="#9b7b4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g stroke-width="4" fill="none" stroke-linecap="round">
+            <path d="M1,98 q-28,-4 -46,10" stroke="#6f8f5a"/>
+            <path d="M1,98 q-20,-16 -34,-28" stroke="#7d9b66"/>
+            <path d="M1,98 q-6,-22 -2,-42" stroke="#6f8f5a"/>
+            <path d="M1,98 q10,-21 6,-40" stroke="#7d9b66"/>
+            <path d="M1,98 q22,-15 36,-26" stroke="#6f8f5a"/>
+            <path d="M1,98 q28,-4 46,12" stroke="#7d9b66"/>
+          </g>
+          <circle cx="1" cy="99" r="3" fill="#8a6f4a"/>
+        </g></g>
+        <g transform="translate(330,0)"><g class="desert-palm">
+          <path d="M0,168 C-2,142 4,118 2,96" stroke="#9b7b4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g stroke-width="4" fill="none" stroke-linecap="round">
+            <path d="M2,96 q-26,-4 -44,12" stroke="#7d9b66"/>
+            <path d="M2,96 q-18,-16 -30,-30" stroke="#6f8f5a"/>
+            <path d="M2,96 q-4,-22 0,-42" stroke="#7d9b66"/>
+            <path d="M2,96 q12,-20 8,-40" stroke="#6f8f5a"/>
+            <path d="M2,96 q24,-14 38,-24" stroke="#7d9b66"/>
+            <path d="M2,96 q28,-3 46,14" stroke="#6f8f5a"/>
+          </g>
+          <circle cx="2" cy="97" r="3" fill="#8a6f4a"/>
+        </g></g>
+        <g transform="translate(700,0)"><g class="desert-palm">
+          <path d="M0,168 C-3,140 3,116 1,94" stroke="#9b7b4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g stroke-width="4" fill="none" stroke-linecap="round">
+            <path d="M1,94 q-28,-4 -48,10" stroke="#6f8f5a"/>
+            <path d="M1,94 q-20,-16 -34,-30" stroke="#7d9b66"/>
+            <path d="M1,94 q-6,-22 -2,-44" stroke="#6f8f5a"/>
+            <path d="M1,94 q10,-22 6,-42" stroke="#7d9b66"/>
+            <path d="M1,94 q22,-15 36,-28" stroke="#6f8f5a"/>
+            <path d="M1,94 q28,-4 48,12" stroke="#7d9b66"/>
+          </g>
+          <circle cx="1" cy="95" r="3" fill="#8a6f4a"/>
+        </g></g>
+        <g transform="translate(1060,0)"><g class="desert-palm">
+          <path d="M0,168 C-2,142 4,120 2,100" stroke="#9b7b4f" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g stroke-width="4" fill="none" stroke-linecap="round">
+            <path d="M2,100 q-26,-4 -44,10" stroke="#7d9b66"/>
+            <path d="M2,100 q-18,-16 -30,-28" stroke="#6f8f5a"/>
+            <path d="M2,100 q-4,-22 0,-42" stroke="#7d9b66"/>
+            <path d="M2,100 q12,-20 8,-40" stroke="#6f8f5a"/>
+            <path d="M2,100 q24,-14 38,-24" stroke="#7d9b66"/>
+            <path d="M2,100 q28,-3 46,14" stroke="#6f8f5a"/>
+          </g>
+          <circle cx="2" cy="101" r="3" fill="#8a6f4a"/>
+        </g></g>
+
+        <!-- Market stall 1 + fruit piles -->
+        <g>
+          <rect x="410" y="150" width="100" height="6" fill="#a9854f"/>
+          <rect x="412" y="118" width="3" height="38" fill="#8a6f4a"/>
+          <rect x="505" y="118" width="3" height="38" fill="#8a6f4a"/>
+          <rect x="406" y="112" width="108" height="10" fill="#b5544f"/>
+          <g fill="#ecdcc2"><rect x="418" y="112" width="11" height="10"/><rect x="442" y="112" width="11" height="10"/><rect x="466" y="112" width="11" height="10"/><rect x="490" y="112" width="11" height="10"/></g>
+          <path d="M406,122 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q4,5 4,0" fill="#a64a46"/>
+          <g fill="#e08a3c"><circle cx="424" cy="148" r="3"/><circle cx="430" cy="148" r="3"/><circle cx="436" cy="148" r="3"/><circle cx="427" cy="144" r="3"/><circle cx="433" cy="144" r="3"/><circle cx="430" cy="140" r="3"/></g>
+          <g fill="#c0392b"><circle cx="452" cy="148" r="3"/><circle cx="458" cy="148" r="3"/><circle cx="464" cy="148" r="3"/><circle cx="455" cy="144" r="3"/><circle cx="461" cy="144" r="3"/></g>
+          <g fill="#7d9b4f"><circle cx="480" cy="148" r="3"/><circle cx="486" cy="148" r="3"/><circle cx="492" cy="148" r="3"/><circle cx="483" cy="144" r="3"/><circle cx="489" cy="144" r="3"/></g>
+        </g>
+        <!-- Market stall 2 + fruit piles -->
+        <g>
+          <rect x="560" y="150" width="100" height="6" fill="#a9854f"/>
+          <rect x="562" y="118" width="3" height="38" fill="#8a6f4a"/>
+          <rect x="655" y="118" width="3" height="38" fill="#8a6f4a"/>
+          <rect x="556" y="112" width="108" height="10" fill="#6f8f5a"/>
+          <g fill="#ecdcc2"><rect x="568" y="112" width="11" height="10"/><rect x="592" y="112" width="11" height="10"/><rect x="616" y="112" width="11" height="10"/><rect x="640" y="112" width="11" height="10"/></g>
+          <path d="M556,122 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q6,7 12,0 q4,5 4,0" fill="#5e7d4c"/>
+          <g fill="#e0c14e"><circle cx="574" cy="148" r="3"/><circle cx="580" cy="148" r="3"/><circle cx="586" cy="148" r="3"/><circle cx="577" cy="144" r="3"/><circle cx="583" cy="144" r="3"/><circle cx="580" cy="140" r="3"/></g>
+          <g fill="#8a5a8c"><circle cx="602" cy="148" r="2.6"/><circle cx="607" cy="148" r="2.6"/><circle cx="612" cy="148" r="2.6"/><circle cx="604.5" cy="144" r="2.6"/><circle cx="609.5" cy="144" r="2.6"/></g>
+          <g fill="#d2603a"><circle cx="630" cy="148" r="3"/><circle cx="636" cy="148" r="3"/><circle cx="642" cy="148" r="3"/><circle cx="633" cy="144" r="3"/><circle cx="639" cy="144" r="3"/></g>
+        </g>
+        <!-- Foreground fruit baskets -->
+        <g>
+          <path d="M528,160 h22 l-3,12 h-16 z" fill="#a9804a"/>
+          <g fill="#e0c14e"><circle cx="533" cy="160" r="2.6"/><circle cx="539" cy="159" r="2.6"/><circle cx="545" cy="160" r="2.6"/></g>
+        </g>
+        <g>
+          <path d="M690,160 h22 l-3,12 h-16 z" fill="#a9804a"/>
+          <g fill="#c0392b"><circle cx="695" cy="160" r="2.6"/><circle cx="701" cy="159" r="2.6"/><circle cx="707" cy="160" r="2.6"/></g>
+        </g>
+      </svg>
+      }
+      @case ('nordic') {
+      <svg class="hero__scene-svg" viewBox="0 0 1600 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- Snow-covered ground -->
+        <rect x="0" y="158" width="1600" height="22" fill="#f1f4f7"/>
+        <path d="M0,159 Q400,153 800,158 T1600,159" stroke="#dfe6ec" stroke-width="2" fill="none"/>
+
+        <!-- Faint distant rooftops -->
+        <g fill="#cdd5dd" opacity="0.55">
+          <polygon points="360,128 420,128 390,106"/>
+          <polygon points="430,130 494,130 462,106"/>
+          <polygon points="690,128 754,128 722,104"/>
+          <polygon points="1300,130 1360,130 1330,108"/>
+        </g>
+
+        <!-- Townhouse A (brick, blue door) -->
+        <g>
+          <rect x="40" y="104" width="96" height="64" fill="#a4674f"/>
+          <polygon points="34,104 142,104 88,80" fill="#7d4f3c"/>
+          <polygon points="40,103 136,103 88,84" fill="#eef3f6"/>
+          <rect x="56" y="116" width="16" height="18" fill="#bcc8d2"/>
+          <rect x="104" y="116" width="16" height="18" fill="#bcc8d2"/>
+          <rect x="54" y="133" width="20" height="2.5" fill="#f1f4f7"/>
+          <rect x="102" y="133" width="20" height="2.5" fill="#f1f4f7"/>
+          <rect x="79" y="140" width="18" height="28" fill="#3f6fa3"/>
+          <path d="M79,140 a9,6 0 0 1 18,0 z" fill="#cfd9e2"/>
+          <circle cx="93" cy="154" r="1.2" fill="#d8b46a"/>
+        </g>
+        <!-- Townhouse B (stone, timber, red door) -->
+        <g>
+          <rect x="150" y="98" width="92" height="70" fill="#a9a39a"/>
+          <polygon points="144,98 248,98 196,76" fill="#8a857c"/>
+          <polygon points="150,97 242,97 196,80" fill="#eef3f6"/>
+          <g stroke="#6f5a44" stroke-width="2"><line x1="150" y1="124" x2="242" y2="124"/><line x1="196" y1="98" x2="196" y2="168"/></g>
+          <rect x="162" y="106" width="14" height="14" fill="#bcc8d2"/>
+          <rect x="216" y="106" width="14" height="14" fill="#bcc8d2"/>
+          <rect x="186" y="140" width="20" height="28" fill="#b0413a"/>
+          <path d="M186,140 a10,6 0 0 1 20,0 z" fill="#cfd9e2"/>
+        </g>
+        <!-- Townhouse C (wood, yellow door) -->
+        <g>
+          <rect x="256" y="108" width="84" height="60" fill="#8a6f52"/>
+          <polygon points="250,108 346,108 298,86" fill="#6b5440"/>
+          <polygon points="256,107 340,107 298,90" fill="#eef3f6"/>
+          <g stroke="#5e4a38" stroke-width="2"><line x1="256" y1="130" x2="340" y2="130"/><line x1="298" y1="108" x2="298" y2="168"/></g>
+          <rect x="264" y="116" width="12" height="12" fill="#bcc8d2"/>
+          <rect x="322" y="116" width="12" height="12" fill="#bcc8d2"/>
+          <rect x="289" y="142" width="18" height="26" fill="#d8a93f"/>
+          <path d="M289,142 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
+        </g>
+
+        <!-- Cathedral (centre) -->
+        <g>
+          <rect x="470" y="84" width="150" height="84" fill="#bdb7ab"/>
+          <polygon points="466,84 624,84 545,58" fill="#a09a8f"/>
+          <polygon points="470,83 620,83 545,62" fill="#eef3f6"/>
+          <!-- bell tower + spire -->
+          <rect x="436" y="56" width="42" height="112" fill="#b3ada1"/>
+          <polygon points="432,50 482,50 457,14" fill="#8f887d"/>
+          <polygon points="447,32 457,14 467,32" fill="#eef3f6"/>
+          <rect x="456.4" y="6" width="1.4" height="8" fill="#6f6a62"/>
+          <circle cx="457.1" cy="5" r="1.8" fill="#6f6a62"/>
+          <!-- pointed-arch windows -->
+          <g fill="#6f6a62">
+            <path d="M492,150 L492,112 Q492,98 506,98 Q520,98 520,112 L520,150 Z"/>
+            <path d="M576,150 L576,112 Q576,98 590,98 Q604,98 604,112 L604,150 Z"/>
+          </g>
+          <!-- rose window -->
+          <circle cx="545" cy="104" r="11" fill="#7a7468"/>
+          <g stroke="#cfd6dd" stroke-width="1.1"><line x1="545" y1="93" x2="545" y2="115"/><line x1="534" y1="104" x2="556" y2="104"/><line x1="538" y1="97" x2="552" y2="111"/><line x1="552" y1="97" x2="538" y2="111"/></g>
+          <circle cx="545" cy="104" r="11" fill="none" stroke="#cfd6dd" stroke-width="1.4"/>
+          <!-- great pointed door -->
+          <path d="M528,168 L528,138 Q528,120 545,120 Q562,120 562,138 L562,168 Z" fill="#5e4a36"/>
+          <path d="M534,168 L534,142 Q534,128 545,128 Q556,128 556,142 L556,168 Z" fill="#4a3a2a"/>
+          <rect x="468" y="82" width="154" height="3" fill="#f1f4f7"/>
+        </g>
+
+        <!-- Molly Malone-style statue + cart -->
+        <g>
+          <rect x="744" y="150" width="44" height="18" fill="#8f9aa0"/>
+          <rect x="739" y="146" width="54" height="5" fill="#a4b0b6"/>
+          <rect x="739" y="143.5" width="54" height="2.5" fill="#f1f4f7"/>
+          <g fill="#6f7d74">
+            <circle cx="764" cy="124" r="5.5"/>
+            <path d="M758,130 Q764,127 770,130 L774,150 L754,150 Z"/>
+            <rect x="770" y="134" width="10" height="3"/>
+          </g>
+          <g fill="#7a5f44">
+            <rect x="778" y="146" width="18" height="6"/>
+            <circle cx="782" cy="154" r="3"/><circle cx="792" cy="154" r="3"/>
+          </g>
+          <g fill="#c0392b"><circle cx="783" cy="145" r="1.8"/><circle cx="788" cy="145" r="1.8"/><circle cx="793" cy="145" r="1.8"/></g>
+          <rect x="778" y="143.5" width="18" height="2.2" fill="#f1f4f7"/>
+        </g>
+
+        <!-- Townhouse D (brick, green door) -->
+        <g>
+          <rect x="816" y="104" width="92" height="64" fill="#9e6a55"/>
+          <polygon points="810,104 914,104 862,80" fill="#79503e"/>
+          <polygon points="816,103 908,103 862,84" fill="#eef3f6"/>
+          <rect x="832" y="116" width="15" height="18" fill="#bcc8d2"/>
+          <rect x="877" y="116" width="15" height="18" fill="#bcc8d2"/>
+          <rect x="830" y="133" width="19" height="2.5" fill="#f1f4f7"/>
+          <rect x="875" y="133" width="19" height="2.5" fill="#f1f4f7"/>
+          <rect x="853" y="140" width="18" height="28" fill="#2f7d57"/>
+          <path d="M853,140 a9,6 0 0 1 18,0 z" fill="#cfd9e2"/>
+        </g>
+        <!-- Townhouse E (stone, red door) -->
+        <g>
+          <rect x="924" y="100" width="88" height="68" fill="#aaa49b"/>
+          <polygon points="918,100 1018,100 968,78" fill="#8a857c"/>
+          <polygon points="924,99 1012,99 968,82" fill="#eef3f6"/>
+          <rect x="938" y="110" width="14" height="16" fill="#bcc8d2"/>
+          <rect x="984" y="110" width="14" height="16" fill="#bcc8d2"/>
+          <rect x="958" y="140" width="20" height="28" fill="#b0413a"/>
+          <path d="M958,140 a10,6 0 0 1 20,0 z" fill="#cfd9e2"/>
+        </g>
+        <!-- Townhouse F (wood, blue door) -->
+        <g>
+          <rect x="1028" y="106" width="84" height="62" fill="#8a6f52"/>
+          <polygon points="1022,106 1118,106 1070,84" fill="#6b5440"/>
+          <polygon points="1028,105 1112,105 1070,88" fill="#eef3f6"/>
+          <g stroke="#5e4a38" stroke-width="2"><line x1="1028" y1="128" x2="1112" y2="128"/><line x1="1070" y1="106" x2="1070" y2="168"/></g>
+          <rect x="1036" y="114" width="12" height="12" fill="#bcc8d2"/>
+          <rect x="1094" y="114" width="12" height="12" fill="#bcc8d2"/>
+          <rect x="1061" y="142" width="18" height="26" fill="#3f6fa3"/>
+          <path d="M1061,142 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
+        </g>
+
+        <!-- Castle tower with conical turret -->
+        <g>
+          <rect x="1184" y="80" width="76" height="88" fill="#a7a097"/>
+          <g fill="#a7a097"><rect x="1184" y="74" width="10" height="8"/><rect x="1200" y="74" width="10" height="8"/><rect x="1216" y="74" width="10" height="8"/><rect x="1232" y="74" width="10" height="8"/><rect x="1248" y="74" width="10" height="8"/></g>
+          <g fill="#f1f4f7"><rect x="1184" y="71.5" width="10" height="2.5"/><rect x="1200" y="71.5" width="10" height="2.5"/><rect x="1216" y="71.5" width="10" height="2.5"/><rect x="1232" y="71.5" width="10" height="2.5"/><rect x="1248" y="71.5" width="10" height="2.5"/></g>
+          <rect x="1252" y="60" width="22" height="108" fill="#b0a99f"/>
+          <polygon points="1248,60 1278,60 1263,32" fill="#7d6f8a"/>
+          <polygon points="1256,46 1263,32 1270,46" fill="#eef3f6"/>
+          <rect x="1262.2" y="24" width="1.6" height="8" fill="#6f6a62"/>
+          <g fill="#6f6a62"><path d="M1200,150 L1200,120 Q1200,108 1212,108 Q1224,108 1224,120 L1224,150 Z"/></g>
+          <path d="M1228,168 L1228,142 Q1228,128 1242,128 Q1256,128 1256,142 L1256,168 Z" fill="#5e4a36"/>
+        </g>
+
+        <!-- Bare snowy tree -->
+        <g>
+          <path d="M1360,168 L1360,120" stroke="#6b5a44" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g stroke="#6b5a44" stroke-width="3" fill="none" stroke-linecap="round">
+            <path d="M1360,134 q-14,-8 -22,-20"/>
+            <path d="M1360,128 q14,-8 22,-22"/>
+            <path d="M1360,122 q-10,-12 -14,-24"/>
+            <path d="M1360,124 q10,-10 16,-22"/>
+          </g>
+          <g fill="#eef3f6"><circle cx="1338" cy="114" r="2.5"/><circle cx="1382" cy="106" r="2.5"/><circle cx="1346" cy="98" r="2.2"/><circle cx="1376" cy="102" r="2.2"/></g>
+        </g>
+
+        <!-- Townhouse G (brick, red door) -->
+        <g>
+          <rect x="1420" y="104" width="84" height="64" fill="#a4674f"/>
+          <polygon points="1414,104 1510,104 1462,82" fill="#7d4f3c"/>
+          <polygon points="1420,103 1504,103 1462,86" fill="#eef3f6"/>
+          <rect x="1434" y="116" width="14" height="16" fill="#bcc8d2"/>
+          <rect x="1476" y="116" width="14" height="16" fill="#bcc8d2"/>
+          <rect x="1453" y="142" width="18" height="26" fill="#b0413a"/>
+          <path d="M1453,142 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
+        </g>
+        <!-- Townhouse H (stone, blue door) -->
+        <g>
+          <rect x="1512" y="108" width="80" height="60" fill="#aaa49b"/>
+          <polygon points="1506,108 1598,108 1552,88" fill="#8a857c"/>
+          <polygon points="1512,107 1592,107 1552,91" fill="#eef3f6"/>
+          <rect x="1524" y="118" width="13" height="14" fill="#bcc8d2"/>
+          <rect x="1567" y="118" width="13" height="14" fill="#bcc8d2"/>
+          <rect x="1543" y="144" width="18" height="24" fill="#3f6fa3"/>
+          <path d="M1543,144 a9,5 0 0 1 18,0 z" fill="#cfd9e2"/>
+        </g>
+
+        <!-- Falling snow (overlay) -->
+        <g class="nordic-snow" fill="#ffffff">
+          <circle class="snow-flake" cx="60"   cy="18"  r="2"/>
+          <circle class="snow-flake" cx="170"  cy="64"  r="1.6"/>
+          <circle class="snow-flake" cx="240"  cy="30"  r="2.2"/>
+          <circle class="snow-flake" cx="360"  cy="96"  r="1.5"/>
+          <circle class="snow-flake" cx="450"  cy="40"  r="2"/>
+          <circle class="snow-flake" cx="560"  cy="110" r="1.8"/>
+          <circle class="snow-flake" cx="650"  cy="24"  r="2.3"/>
+          <circle class="snow-flake" cx="740"  cy="80"  r="1.5"/>
+          <circle class="snow-flake" cx="840"  cy="48"  r="2"/>
+          <circle class="snow-flake" cx="930"  cy="120" r="1.7"/>
+          <circle class="snow-flake" cx="1020" cy="34"  r="2.1"/>
+          <circle class="snow-flake" cx="1110" cy="92"  r="1.6"/>
+          <circle class="snow-flake" cx="1200" cy="20"  r="2"/>
+          <circle class="snow-flake" cx="1290" cy="70"  r="1.8"/>
+          <circle class="snow-flake" cx="1380" cy="44"  r="2.2"/>
+          <circle class="snow-flake" cx="1470" cy="104" r="1.5"/>
+          <circle class="snow-flake" cx="1540" cy="28"  r="2"/>
+          <circle class="snow-flake" cx="110"  cy="130" r="1.7"/>
+          <circle class="snow-flake" cx="500"  cy="138" r="1.6"/>
+          <circle class="snow-flake" cx="980"  cy="150" r="1.7"/>
+          <circle class="snow-flake" cx="1330" cy="134" r="1.6"/>
+          <circle class="snow-flake" cx="1560" cy="146" r="1.6"/>
+          <circle class="snow-flake" cx="30"   cy="58"  r="2.1"/>
+          <circle class="snow-flake" cx="130"  cy="96"  r="1.8"/>
+          <circle class="snow-flake" cx="300"  cy="66"  r="2"/>
+          <circle class="snow-flake" cx="410"  cy="118" r="1.7"/>
+          <circle class="snow-flake" cx="600"  cy="56"  r="2.2"/>
+          <circle class="snow-flake" cx="700"  cy="112" r="1.6"/>
+          <circle class="snow-flake" cx="790"  cy="36"  r="2"/>
+          <circle class="snow-flake" cx="880"  cy="98"  r="1.8"/>
+          <circle class="snow-flake" cx="1060" cy="62"  r="2.1"/>
+          <circle class="snow-flake" cx="1160" cy="120" r="1.6"/>
+          <circle class="snow-flake" cx="1250" cy="44"  r="2"/>
+          <circle class="snow-flake" cx="1420" cy="86"  r="1.8"/>
+          <circle class="snow-flake" cx="1500" cy="58"  r="2.1"/>
+          <circle class="snow-flake" cx="240"  cy="150" r="1.7"/>
+          <circle class="snow-flake" cx="760"  cy="156" r="1.6"/>
+          <circle class="snow-flake" cx="1200" cy="150" r="1.7"/>
+        </g>
+      </svg>
+      }
       }
       }
     </div>
@@ -484,7 +1122,7 @@
       Explore museums, landmarks, cities — on your terms.
     </p>
     <div class="hero__actions">
-      <app-button routerLink="/explore" variant="primary" size="lg">
+      <app-button routerLink="/explore" variant="primary" size="lg" class="hero__explore">
         Explore tours
       </app-button>
       <app-button routerLink="/studio" variant="outline" size="lg" class="hero__creator">

@@ -327,38 +327,44 @@
   &__audio {
     background: $bg-surface;
     border: 1px solid $border-default;
-    border-radius: $radius-md;
-    padding: $space-2 $space-4;
+    border-radius: $radius-full;
+    padding: $space-1 $space-3;
 
     --plyr-color-main: #1a1a1a;
     --plyr-font-family: #{$font-family-primary};
-    --plyr-font-size-base: 14px;
+    --plyr-font-size-base: 13px;
     --plyr-font-size-small: 12px;
-    --plyr-font-size-time: 13px;
+    --plyr-font-size-time: 12px;
+    --plyr-font-size-menu: 13px;
+
+    // Compact, quiet controls — small icons, generous hit area via padding.
+    --plyr-control-icon-size: 15px;
+    --plyr-control-spacing: 6px;
+    --plyr-control-radius: 50%;
+    --plyr-control-padding: 8px;
 
     --plyr-audio-controls-background: transparent;
-    --plyr-audio-control-color: #5a5a5a;
+    --plyr-audio-control-color: #6b6b6b;
     --plyr-audio-control-color-hover: #ffffff;
     --plyr-audio-control-background-hover: #1a1a1a;
 
-    --plyr-range-track-height: 5px;
-    --plyr-range-thumb-height: 13px;
+    --plyr-range-track-height: 4px;
+    --plyr-range-thumb-height: 11px;
     --plyr-range-fill-background: #1a1a1a;
-    --plyr-audio-range-track-background: #{rgba(#1a1a1a, 0.12)};
-    --plyr-audio-progress-buffered-background: #{rgba(#1a1a1a, 0.22)};
+    --plyr-audio-range-track-background: #{rgba(#1a1a1a, 0.1)};
+    --plyr-audio-progress-buffered-background: #{rgba(#1a1a1a, 0.18)};
     --plyr-range-thumb-background: #1a1a1a;
-    --plyr-range-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --plyr-range-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 
-    --plyr-control-radius: 6px;
-    --plyr-control-spacing: 8px;
     --plyr-tooltip-background: #1a1a1a;
     --plyr-tooltip-color: #ffffff;
+    --plyr-tooltip-radius: #{$radius-sm};
     --plyr-menu-background: #ffffff;
     --plyr-menu-color: #1a1a1a;
+    --plyr-menu-radius: #{$radius-md};
 
     // Native fallback before Plyr enhances the element (and under no-JS / SSR).
     .player__audio-el { width: 100%; }
-    .plyr { width: 100%; }
   }
 
   // ── Attachments ────────────────────────────────────────────────────────────

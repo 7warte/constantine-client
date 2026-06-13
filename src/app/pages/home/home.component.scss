@@ -74,7 +74,7 @@
     overflow: hidden;
     cursor: pointer;        // click to bring on the next scene
     font-family: $font-family-primary;
-    font-size: $font-size-xl;          // mobile default
+    font-size: $font-size-lg;          // mobile default — kept small so the scene shows
     font-weight: $font-weight-bold;
     color: $text-primary;
     line-height: $line-height-tight;
@@ -89,8 +89,8 @@
 
     @include md { font-size: $font-size-2xl; }
     @include lg { font-size: $font-size-3xl; }
-    @media (max-width: #{$bp-sm - 1px}) { font-size: $font-size-lg; }
-    @media (max-width: #{$bp-md - 1px}) { padding: $space-3 $space-4; }
+    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-base; padding: $space-3 $space-4; }
+    @media (max-width: #{$bp-sm - 1px}) { font-size: 1.18rem; padding: $space-2 $space-4; margin-bottom: $space-3; }
 
     // A slow light "shine" sweeping across the glass.
     &::before {
@@ -127,7 +127,8 @@
     border-radius: $radius-md;
 
     @include md { font-size: $font-size-base; }
-    @media (max-width: #{$bp-md - 1px}) { padding: $space-3 $space-4; }
+    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xs; padding: $space-3 $space-4; }
+    @media (max-width: #{$bp-sm - 1px}) { margin-bottom: $space-4; }
   }
 
   // Light text mode (for dark/dim photos) — keep the clear glass, just flip text.
@@ -144,17 +145,32 @@
     gap: $space-4;
   }
 
-  // Keep the blur effect on the "Become a Creator" button
-  ::ng-deep .hero__creator .btn {
-    background: rgba($white, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: $text-primary;
-    border: 1px solid rgba($white, 0.5);
+  // Two complementary palette CTAs: "Explore" warm dusty-rose, "Creator" cool mist.
+  ::ng-deep .hero__explore .btn {
+    background: $dusty-rose !important;
+    color: $white !important;
+    border: 1px solid rgba($black, 0.10) !important;
+    box-shadow: 0 6px 18px rgba($dusty-rose, 0.32) !important;
+    transition: background 300ms ease, box-shadow 300ms ease, transform 300ms ease;
 
     &:hover:not(:disabled) {
-      background: rgba($white, 0.4);
-      border-color: $white;
+      background: darken($dusty-rose, 6%) !important;
+      box-shadow: 0 10px 24px rgba($dusty-rose, 0.42) !important;
+      transform: translateY(-2px);
+    }
+  }
+
+  ::ng-deep .hero__creator .btn {
+    background: $mist;
+    color: $text-primary;
+    border: 1px solid rgba($black, 0.12);
+    box-shadow: 0 6px 18px rgba($mist, 0.5);
+    transition: background 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+
+    &:hover:not(:disabled) {
+      background: darken($mist, 7%);
+      box-shadow: 0 10px 24px rgba($mist, 0.6);
+      transform: translateY(-2px);
     }
   }
 }
@@ -710,6 +726,14 @@
   z-index: $z-raised;
   pointer-events: none;
   overflow: hidden;
+
+  // Match the scene's mobile zoom so the tourists keep landing on the landmarks
+  // (figures are positioned as a fraction of this container's width at runtime).
+  @media (max-width: #{$bp-md - 1px}) {
+    left: auto;
+    right: 0;
+    width: 166.667%;
+  }
 }
 
 .figure {
@@ -841,6 +865,15 @@
   &--ready.hero__scene--museum {
     background: #eceae6;        // soft warm gallery light
   }
+  &--ready.hero__scene--metro {
+    background: linear-gradient(180deg, #0f1320 0%, #1a2034 55%, #28304a 100%);   // night sky
+  }
+  &--ready.hero__scene--desert {
+    background: linear-gradient(180deg, #aacbe6 0%, #cfe4f2 55%, #eaf4fa 100%);   // clear light-blue sky
+  }
+  &--ready.hero__scene--nordic {
+    background: linear-gradient(180deg, #9aa3ad 0%, #b7bfc8 55%, #ccd3da 100%);   // grey overcast snow sky
+  }
 }
 
 // City greenery — mixed greens (CSS fill overrides the inline grays).
@@ -867,6 +900,15 @@
   width: 100%;            // span the whole hero width; viewBox maps 1:1 to width
   height: auto;
   animation: scene-fade 500ms ease both;   // each scene swap fades in
+
+  // On phones the full 1600-wide scene renders tiny — zoom into the right 60%
+  // (where each scene's main landmark sits) by widening to 1/0.6 and anchoring
+  // right; the overflowing left 40% is clipped by .hero__scene's overflow.
+  @media (max-width: #{$bp-md - 1px}) {
+    width: 166.667%;
+    left: auto;
+    right: 0;
+  }
 
   .tree-foliage {
     transform-box: fill-box;
@@ -916,10 +958,131 @@
   50%      { transform: translate(26px, -7px); }
 }
 
+// Night metropolis: taxis pulling up & leaving, twinkling stars, glowing lamps.
+.hero__scene-svg {
+  .metro-taxi--a { animation: metro-taxi-a 13s ease-in-out infinite; }
+  .metro-taxi--b { animation: metro-taxi-b 16s ease-in-out -5s infinite; }
+  .metro-taxi--c { animation: metro-taxi-c 11s ease-in-out -8s infinite; }
+
+  .lamp-glow { animation: lamp-pulse 3.4s ease-in-out infinite; }
+  .metro-stars circle { animation: star-twinkle 3s ease-in-out infinite; }
+  .metro-stars circle:nth-child(2n) { animation-duration: 4.2s; animation-delay: -1.5s; }
+  .metro-beacon   { animation: beacon-blink 1.6s steps(1, end) infinite; }
+  .metro-beacon--b { animation-delay: -0.8s; }
+
+  .metro-sign {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: sign-sway 3.6s ease-in-out infinite;
+  }
+  .metro-sign--b { animation-duration: 4.4s; animation-delay: -1.2s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metro-taxi--a, .metro-taxi--b, .metro-taxi--c,
+    .lamp-glow, .metro-stars circle, .metro-beacon, .metro-sign { animation: none; }
+  }
+}
+
+// Taxi cycles: off-screen → pull up to the stand (translateX 0) → wait → drive off.
+@keyframes metro-taxi-a {
+  0%   { transform: translateX(-760px); }
+  16%  { transform: translateX(0); }
+  40%  { transform: translateX(0); }
+  62%  { transform: translateX(1240px); }
+  100% { transform: translateX(1240px); }
+}
+@keyframes metro-taxi-b {
+  0%   { transform: translateX(-1320px); }
+  20%  { transform: translateX(0); }
+  46%  { transform: translateX(0); }
+  68%  { transform: translateX(760px); }
+  100% { transform: translateX(760px); }
+}
+@keyframes metro-taxi-c {
+  0%   { transform: translateX(-420px); }
+  14%  { transform: translateX(0); }
+  38%  { transform: translateX(0); }
+  60%  { transform: translateX(1520px); }
+  100% { transform: translateX(1520px); }
+}
+@keyframes lamp-pulse {
+  0%, 100% { opacity: 0.78; }
+  50%      { opacity: 0.42; }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+@keyframes beacon-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+@keyframes sign-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+// Dawn desert: swaying palms + softly breathing sun halo.
+.hero__scene-svg {
+  .desert-palm {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: palm-sway 4.6s ease-in-out infinite;
+  }
+  .desert-palm:nth-of-type(2n) { animation-duration: 5.8s; animation-delay: -1.4s; }
+  .desert-palm:nth-of-type(3n) { animation-duration: 6.4s; animation-delay: -2.6s; }
+
+  .sun-glow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: sun-breathe 5.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .desert-palm, .sun-glow { animation: none; }
+  }
+}
+@keyframes palm-sway {
+  0%, 100% { transform: rotate(-1.8deg); }
+  50%      { transform: rotate(1.8deg); }
+}
+@keyframes sun-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+// Snowy nordic town: snowflakes drifting down on staggered cadences.
+.hero__scene-svg {
+  .snow-flake { animation: snow-fall 9s linear infinite; }
+  .snow-flake:nth-child(3n)   { animation-duration: 7s; }
+  .snow-flake:nth-child(3n+1) { animation-duration: 11s; }
+  .snow-flake:nth-child(4n)   { animation-delay: -3s; }
+  .snow-flake:nth-child(4n+2) { animation-delay: -6s; }
+  .snow-flake:nth-child(5n)   { animation-delay: -8s; }
+  .snow-flake:nth-child(2n)   { opacity: 0.85; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snow-flake { animation: none; }
+  }
+}
+@keyframes snow-fall {
+  0%   { transform: translateY(-14px) translateX(0); }
+  100% { transform: translateY(196px) translateX(12px); }
+}
+
 // On the light town, force dark copy regardless of the (now hidden) photo.
 .hero--town .hero__title,
 .hero--town .hero__sub {
   color: $text-primary;
+}
+
+// Night metropolis: dark sky needs light copy on a darker glass (transitions in).
+.hero--town.hero--night {
+  .hero__title,
+  .hero__sub {
+    color: $white;
+    background: rgba($black, 0.24);
+  }
 }
 
 @keyframes tree-sway {

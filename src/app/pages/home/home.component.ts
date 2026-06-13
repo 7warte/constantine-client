@@ -10,7 +10,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { RevealOnViewDirective } from '../../shared/directives/reveal-on-view.directive';
 import { TypewriterOnViewDirective } from '../../shared/directives/typewriter-on-view.directive';
 
-type SceneName = 'city' | 'museum' | 'beach';
+type SceneName = 'city' | 'museum' | 'beach' | 'metro' | 'desert' | 'nordic';
 
 interface Faq {
   id: string;
@@ -127,9 +127,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     city:   [0.18, 0.33, 0.33, 0.47, 0.47, 0.58, 0.68, 0.82, 0.89, 0.92],
     museum: [0.16, 0.22, 0.30, 0.43, 0.50, 0.50, 0.71, 0.88, 0.88],
     beach:  [0.08, 0.30, 0.50, 0.66, 0.84, 0.84, 0.90],
+    // night metropolis: pizzeria (~0.26), city hall (~0.44), burger (~0.67)
+    metro:  [0.12, 0.26, 0.26, 0.44, 0.44, 0.50, 0.67, 0.67, 0.80, 0.90],
+    // dawn desert: market stalls (~0.30–0.52) and the palace (~0.82) on the right
+    desert: [0.10, 0.30, 0.34, 0.40, 0.46, 0.52, 0.66, 0.82, 0.82, 0.88],
+    // snowy nordic town: townhouses, a statue (~0.50) and the cathedral (~0.72)
+    nordic: [0.14, 0.26, 0.34, 0.46, 0.50, 0.50, 0.62, 0.72, 0.84, 0.90],
   };
 
-  private readonly sceneList: SceneName[] = ['city', 'museum', 'beach'];
+  private readonly sceneList: SceneName[] = ['city', 'museum', 'beach', 'metro', 'desert', 'nordic'];
   private sceneTimer: ReturnType<typeof setInterval> | null = null;
 
   // Click the hero title to jump to the next scene; otherwise it rotates every 6s.
