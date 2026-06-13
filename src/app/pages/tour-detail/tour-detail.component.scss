@@ -88,6 +88,35 @@
     color: rgba($white, 0.8);
   }
 
+  // ── Tour details + map, sharing one row 50/50 on desktop ────────────────────
+  &__info-map {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+    padding-block: $space-8;
+    border-top: 1px solid $border-default;
+
+    @include lg {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: $space-8;
+    }
+
+    // Each half shares the row equally; drop their own top border / padding.
+    > .detail__info,
+    > .detail__map {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-block: 0;
+      border-top: none;
+    }
+
+    // The info grid lives in a half-width column now — keep it to 2 columns.
+    @include lg {
+      .detail__info-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  }
+
   // ── Tour info ────────────────────────────────────────────────────────────────
   &__info {
     padding-block: $space-8;

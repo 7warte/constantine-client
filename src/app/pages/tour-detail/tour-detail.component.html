@@ -61,8 +61,10 @@
         </section>
       }
 
-      <!-- Tour details -->
-      <section class="detail__info container">
+      <!-- Tour details + map — 50/50 on desktop, stacked on mobile -->
+      <div class="detail__info-map container">
+        <!-- Tour details -->
+        <section class="detail__info">
         <h2>Tour details</h2>
         @if (v.tour_description) {
           <p class="detail__description">{{ v.tour_description }}</p>
@@ -124,9 +126,9 @@
         </div>
       </section>
 
-      <!-- Tour map -->
-      @if (v.map_image_url && v.spaces?.length > 0) {
-        <section class="detail__map container">
+        <!-- Tour map -->
+        @if (v.map_image_url && v.spaces?.length > 0) {
+        <section class="detail__map">
           <h2>Tour map</h2>
           <div class="tour-map">
             <img [src]="v.map_image_url" alt="Tour map" class="tour-map__img" />
@@ -141,7 +143,8 @@
             }
           </div>
         </section>
-      }
+        }
+      </div>
 
       <!-- About the author -->
       <section class="detail__author container">
