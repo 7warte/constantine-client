@@ -1,0 +1,44 @@
+<section class="badges-page">
+  <header class="badges-page__hero">
+    <h1 class="badges-page__title">Badges</h1>
+    <p class="badges-page__sub">
+      Earn badges as you explore, create and share tours. Every milestone unlocks a new
+      name from history.
+    </p>
+
+    @if (auth.isLoggedIn()) {
+      <p class="badges-page__count">
+        You've earned <strong>{{ badges.earnedCount() }}</strong> of {{ badges.totalCount }} badges.
+      </p>
+    } @else {
+      <p class="badges-page__count">
+        <a routerLink="/auth/login">Log in</a> to track the badges you've earned.
+      </p>
+    }
+  </header>
+
+  @for (group of groups(); track group.category) {
+    <div class="badges-page__group">
+      <h2 class="badges-page__group-title">{{ group.label }}</h2>
+      <div class="badges-grid">
+        @for (b of group.badges; track b.def.id) {
+          <article class="badge-card" [id]="b.def.id" [class.badge-card--earned]="b.earned">
+            <app-badge-icon [icon]="b.def.icon" [label]="b.def.label" [earned]="b.earned"
+              [alt]="b.def.name" [size]="96"
+              [gradId]="b.def.id" [from]="b.def.gradient[0]" [to]="b.def.gradient[1]" />
+            <h3 class="badge-card__name">{{ b.def.name }}</h3>
+            <p class="badge-card__hint">{{ b.def.hint }}</p>
+
+            @if (auth.isLoggedIn() && !b.earned && b.progress > 0) {
+              <div class="badge-card__progress" [attr.aria-label]="'Progress'">
+                <span class="badge-card__progress-bar" [style.width.%]="b.progress * 100"></span>
+              </div>
+            } @else if (b.earned) {
+              <span class="badge-card__earned-tag">Earned</span>
+            }
+          </article>
+        }
+      </div>
+    </div>
+  }
+</section>

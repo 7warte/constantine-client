@@ -1,18 +1,22 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { BadgeService } from '../../../../core/badges/badge.service';
+import { BadgeDef } from '../../../../core/badges/badge-catalog';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { BadgeIconComponent } from '../../../../shared/components/badge-icon/badge-icon.component';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, BadgeIconComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
@@ -21,6 +25,9 @@ export class ProfileComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly fb   = inject(FormBuilder);
+  readonly badges = inject(BadgeService);
+
+  shareBadge(def: BadgeDef): void { this.badges.share(def); }
 
   readonly saving         = signal(false);
   readonly success        = signal(false);
@@ -50,6 +57,9 @@ export class ProfileComponent implements OnInit {
       this.api.get<any[]>('/studio/tours', { status: 'published' }).subscribe(tours => {
         this.tourCount.set(tours.length);
       });
+
+      // Load earned badges
+      this.badges.load();
     }
   }
 

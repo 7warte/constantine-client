@@ -863,8 +863,8 @@
     background: linear-gradient(180deg, #cfe6f2 0%, #eaf4f9 100%);   // light blue sky
   }
   &--ready.hero__scene--museum {
-    // Dim, warm gallery so the window light shafts read as glowing beams.
-    background: linear-gradient(180deg, #46403a 0%, #38332e 55%, #2c2825 100%);
+    // Bright Vatican-style gallery: warm cream walls, daylight from the windows.
+    background: linear-gradient(180deg, #efe7d6 0%, #e7ddc8 55%, #ddd1b6 100%);
   }
   &--ready.hero__scene--metro {
     background: linear-gradient(180deg, #0f1320 0%, #1a2034 55%, #28304a 100%);   // night sky
@@ -938,15 +938,21 @@
   50%      { transform: scaleY(1.06); opacity: 1; }
 }
 
-// Beach scene: drifting sea + floating albatrosses.
+// Beach scene: drifting sea + floating albatrosses + a sailing boat.
 .hero__scene-svg {
   .sea-wave { animation: wave-drift 6s linear infinite; }
   .bird { animation: bird-float 7s ease-in-out infinite; }
   .bird--2 { animation-duration: 8.5s; animation-delay: -2s; }
   .bird--3 { animation-duration: 6.2s; animation-delay: -4s; }
 
+  .beach-boat {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: boat-sail 12s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .sea-wave, .bird { animation: none; }
+    .sea-wave, .bird, .beach-boat { animation: none; }
   }
 }
 
@@ -957,6 +963,11 @@
 @keyframes bird-float {
   0%, 100% { transform: translate(0, 0); }
   50%      { transform: translate(26px, -7px); }
+}
+@keyframes boat-sail {
+  0%   { transform: translate(0, 0) rotate(-1.4deg); }
+  50%  { transform: translate(70px, -1px) rotate(1.4deg); }
+  100% { transform: translate(0, 0) rotate(-1.4deg); }
 }
 
 // Night metropolis: taxis pulling up & leaving, twinkling stars, glowing lamps.

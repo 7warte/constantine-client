@@ -25,7 +25,7 @@
       [opened]="sidenavOpen()"
       class="studio__sidenav"
     >
-      <mat-nav-list>
+      <mat-nav-list [disableRipple]="true">
         @for (item of navItems; track item.route) {
           <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
             <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>

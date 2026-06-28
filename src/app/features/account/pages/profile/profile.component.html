@@ -73,4 +73,35 @@
 
     <app-button type="submit" variant="primary" [loading]="saving()">Save changes</app-button>
   </form>
+
+  <!-- ── My badges ──────────────────────────────────────────────── -->
+  <section class="badges-section">
+    <div class="badges-section__header">
+      <h2 class="badges-section__title">My badges</h2>
+      <span class="badges-section__count">{{ badges.earnedCount() }} of {{ badges.totalCount }}</span>
+      <a routerLink="/badges" class="badges-section__link">View all badges →</a>
+    </div>
+
+    @if (badges.earnedCount() === 0) {
+      <p class="badges-section__empty">
+        No badges yet. <a routerLink="/badges">See what you can earn</a> — buy a tour, write a
+        review or publish your own to get started.
+      </p>
+    } @else {
+      <div class="badges-section__grid">
+        @for (b of badges.earned(); track b.def.id) {
+          <article class="earned-badge">
+            <app-badge-icon [icon]="b.def.icon" [label]="b.def.label" [earned]="true"
+              [alt]="b.def.name" [size]="84"
+              [gradId]="b.def.id" [from]="b.def.gradient[0]" [to]="b.def.gradient[1]" />
+            <h3 class="earned-badge__name">{{ b.def.name }}</h3>
+            <p class="earned-badge__hint">{{ b.def.hint }}</p>
+            <button type="button" class="earned-badge__share" (click)="shareBadge(b.def)">
+              Share
+            </button>
+          </article>
+        }
+      </div>
+    }
+  </section>
 </div>

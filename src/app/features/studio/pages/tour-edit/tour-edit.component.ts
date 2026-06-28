@@ -14,6 +14,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
 import { AudioRecorderComponent } from '../../../../shared/components/audio-recorder/audio-recorder.component';
+import { SelectOnFocusDirective } from '../../../../shared/directives/select-on-focus.directive';
 import { MatIconModule } from '@angular/material/icon';
 import { environment } from '../../../../../environments/environment';
 
@@ -42,7 +43,7 @@ type TownKey = 'start' | 'end' | 'venue' | 'picker';
       ]),
     ]),
   ],
-  imports: [ReactiveFormsModule, RouterLink, CommonModule, TagInputComponent, AudioRecorderComponent, MatIconModule],
+  imports: [ReactiveFormsModule, RouterLink, CommonModule, TagInputComponent, AudioRecorderComponent, SelectOnFocusDirective, MatIconModule],
   templateUrl: './tour-edit.component.html',
   styleUrl: './tour-edit.component.scss',
 })
@@ -53,6 +54,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   private readonly http   = inject(HttpClient);
   private readonly route  = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly host   = inject(ElementRef<HTMLElement>);
 
   // ── State ──────────────────────────────────────────────────────────────
   readonly loading      = signal(false);
@@ -110,6 +112,24 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   // Title field — focused automatically when creating a new tour.
   readonly heroTitle = viewChild<ElementRef<HTMLInputElement>>('heroTitle');
+
+  // ── New-tour title prompt ──────────────────────────────────────────────
+  // When creating a tour we first ask for a title in a small modal; once it's
+  // submitted the normal Basics flow continues (the title stays editable).
+  readonly showTitlePrompt = signal(false);
+  readonly titleDraft      = signal('');
+  readonly titlePromptInput = viewChild<ElementRef<HTMLInputElement>>('titlePromptInput');
+
+  confirmTitle(value: string): void {
+    const title = value.trim() || 'My tour';
+    this.form.controls.title.setValue(title);
+    this.showTitlePrompt.set(false);
+    // Drop the creator straight into the (still editable) inline title field.
+    setTimeout(() => {
+      const el = this.heroTitle()?.nativeElement;
+      if (el) { el.focus(); el.select(); }
+    });
+  }
 
   // ── Step 1 form ────────────────────────────────────────────────────────
   readonly form = this.fb.nonNullable.group({
@@ -488,6 +508,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly editingStopId     = signal<string | null>(null);
   readonly addingDirectionFor      = signal<string | null>(null); // stop id
   readonly addingSpaceDirectionFor = signal<string | null>(null); // space id
+  // Reveal-on-demand inputs: the "new venue" field and per-venue "add point of
+  // interest" field stay hidden behind a button until the creator opens them.
+  readonly addingVenue  = signal(false);
+  readonly addingPoiFor = signal<string | null>(null); // space id whose POI input is open
+
+  openVenueInput(): void {
+    this.addingVenue.set(true);
+    this.focusAndSelect('new-venue-input');
+  }
+  openPoiInput(spaceId: string): void {
+    this.addingPoiFor.set(spaceId);
+    this.focusAndSelect('new-poi-input');
+  }
 
   // ── Stop GPS location picker ───────────────────────────────────────────
   readonly locationPickerOpen = signal(false);
@@ -605,7 +638,52 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
           this.loadStops();
         }
       });
+    } else {
+      // New tour: prefill the required title so the field is never blank, then
+      // ask for the title up-front in a small modal before the Basics flow.
+      const preset = this.route.snapshot.queryParamMap.get('title')?.trim() ?? '';
+      this.titleDraft.set(preset);
+      this.form.controls.title.setValue(preset || 'My tour');
+      this.showTitlePrompt.set(true);
     }
+  }
+
+  // ── Guided field flow ──────────────────────────────────────────────────
+  // Scrolls a field into view, focuses it and selects its (pre-filled) text so
+  // the creator can immediately type over it. Driven by the per-field "next"
+  // buttons in the Basics tab.
+  // Per-field "Next" buttons flip to "Edit" once used, so the creator can hop
+  // back to a field they've already moved past.
+  readonly fieldAdvanced = signal<Record<string, boolean>>({});
+  advance(key: string, nextId: string): void {
+    this.focusAndSelect(nextId);
+    this.fieldAdvanced.update(m => ({ ...m, [key]: true }));
+  }
+
+  focusAndSelect(id: string): void {
+    // Small delay so a field revealed by the same click is in the DOM first.
+    setTimeout(() => {
+      const el = this.host.nativeElement.querySelector('#' + id) as HTMLInputElement | HTMLTextAreaElement | null;
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus({ preventScroll: true });
+      try { (el as HTMLInputElement).select?.(); } catch { /* not selectable */ }
+    }, 40);
+  }
+
+  // After a tab is saved: scroll back up to the tabs, then focus + select the
+  // first editable field of the now-active step.
+  private afterTabAdvance(): void {
+    setTimeout(() => {
+      this.host.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const el = this.host.nativeElement.querySelector(
+        'input[type="text"], input[type="number"], input[type="email"], textarea',
+      ) as HTMLInputElement | HTMLTextAreaElement | null;
+      if (el) {
+        el.focus({ preventScroll: true });
+        try { (el as HTMLInputElement).select?.(); } catch { /* not selectable */ }
+      }
+    }, 350);
   }
 
   ngOnDestroy(): void {
@@ -618,8 +696,13 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   ngAfterViewInit(): void {
     if (this.isNew()) {
-      // Land in the title field straight away when creating a new tour.
-      setTimeout(() => this.heroTitle()?.nativeElement.focus());
+      // Land in the title prompt first; if it's already dismissed, the inline
+      // title field instead.
+      setTimeout(() => {
+        const promptEl = this.titlePromptInput()?.nativeElement;
+        if (this.showTitlePrompt() && promptEl) { promptEl.focus(); promptEl.select(); }
+        else this.heroTitle()?.nativeElement.focus();
+      });
     }
   }
 
@@ -800,6 +883,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
           this.router.navigate(['/studio/tours', tour.id], { replaceUrl: true });
         }
         this.goToStep(2);
+        this.afterTabAdvance();
       },
       error: (err) => {
         this.error.set(err.error?.error ?? 'Failed to save tour.');
@@ -952,6 +1036,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         this.tour.set(tour);
         this.saving.set(false);
         this.goToStep(3);
+        this.afterTabAdvance();
       },
       error: (err) => {
         this.error.set(err.error?.error ?? 'Failed to save location.');
@@ -1205,6 +1290,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (!name) return;
     this.addVenueQuick(name);
     this.venueDraft.set('');
+    this.addingVenue.set(false);
   }
 
   // Quick-add a venue from the compact "New venue" bar (name only).
@@ -1263,7 +1349,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const vid = this.variantId();
     if (!vid) return;
     this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops`, { title: t, space_id: spaceId })
-      .subscribe(() => this.loadStops());
+      .subscribe(() => { this.loadStops(); this.addingPoiFor.set(null); });
   }
 
   editStop(stop: any): void {

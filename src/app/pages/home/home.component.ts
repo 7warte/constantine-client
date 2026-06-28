@@ -217,11 +217,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Show a random scene this visit (rendered browser-side to avoid SSR mismatch),
-    // then rotate scenes every 6 seconds.
-    this.scene.set(this.sceneList[Math.floor(Math.random() * this.sceneList.length)]);
+    // Pinned to the night (metro) scene for review.
+    // To restore the random scene + 6s rotation, swap the two lines below back to:
+    //   this.scene.set(this.sceneList[Math.floor(Math.random() * this.sceneList.length)]);
+    //   ... and re-enable this.restartSceneTimer();
+    this.scene.set('metro');
     this.sceneReady.set(true);
-    this.restartSceneTimer();
+    // this.restartSceneTimer();
 
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 

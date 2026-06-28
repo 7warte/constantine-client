@@ -14,7 +14,7 @@
       Location
     </button>
     <button class="tabs__tab" [class.tabs__tab--active]="step() === 3" [disabled]="!step2Done()" (click)="goToStep(3)" type="button" role="tab">
-      Stops
+      Venues
     </button>
     <button class="tabs__tab" [class.tabs__tab--active]="step() === 4" [disabled]="!step3Done()" (click)="goToStep(4)" type="button" role="tab">
       Publish
@@ -39,12 +39,21 @@
           }
           <div class="tour-hero__scrim"></div>
 
-          <input #heroTitle class="tour-hero__title" type="text" formControlName="title"
-            placeholder="My tour title" maxlength="200" aria-label="Tour title" />
+          <input #heroTitle id="tour-title" appSelectOnFocus class="tour-hero__title" type="text" formControlName="title"
+            placeholder="My tour title" maxlength="200" aria-label="Tour title"
+            (keydown.enter)="$event.preventDefault(); advance('title', 'tour-desc')" />
+
+          <button type="button" class="field-next tour-hero__next"
+            [class.field-next--edit]="fieldAdvanced()['title']"
+            (click)="fieldAdvanced()['title'] ? focusAndSelect('tour-title') : advance('title', 'tour-desc')"
+            [attr.aria-label]="fieldAdvanced()['title'] ? 'Edit title' : 'Save title and continue to description'">
+            <mat-icon>{{ fieldAdvanced()['title'] ? 'edit' : 'save' }}</mat-icon>
+            <span>{{ fieldAdvanced()['title'] ? 'Edit' : 'Next' }}</span>
+          </button>
 
           <button type="button" class="tour-hero__edit" (click)="toggleBgPicker()"
-            [class.tour-hero__edit--open]="bgPickerOpen()" aria-label="Change background">
-            <mat-icon>edit</mat-icon>
+            [class.tour-hero__edit--open]="bgPickerOpen()" aria-label="Change background photo">
+            <mat-icon>photo_camera</mat-icon>
           </button>
 
           @if (uploading()) { <span class="tour-hero__badge">Uploading…</span> }
@@ -83,8 +92,17 @@
           <div class="edit-form basics-fields">
           <div class="form-field">
             <label for="tour-desc" class="form-field__label">Description</label>
-            <textarea id="tour-desc" formControlName="description" class="form-field__textarea"
+            <textarea id="tour-desc" appSelectOnFocus formControlName="description" class="form-field__textarea"
               placeholder="Describe what travellers will experience…" rows="5" maxlength="2000"></textarea>
+            <div class="field-next-row">
+              <button type="button" class="field-next"
+                [class.field-next--edit]="fieldAdvanced()['desc']"
+                (click)="fieldAdvanced()['desc'] ? focusAndSelect('tour-desc') : advance('desc', 'tour-price')"
+                [attr.aria-label]="fieldAdvanced()['desc'] ? 'Edit description' : 'Save description and continue to price'">
+                <mat-icon>{{ fieldAdvanced()['desc'] ? 'edit' : 'save' }}</mat-icon>
+                <span>{{ fieldAdvanced()['desc'] ? 'Edit' : 'Next' }}</span>
+              </button>
+            </div>
           </div>
 
           <div class="form-field">
@@ -138,7 +156,7 @@
               <div class="square-box price-square" [class.square-box--filled]="priceNum() > 0">
                 <div class="price-square__main">
                   <span class="price-square__symbol">&euro;</span>
-                  <input id="tour-price" type="number" formControlName="price_euros" class="price-square__input"
+                  <input id="tour-price" appSelectOnFocus type="number" formControlName="price_euros" class="price-square__input"
                     min="0" step="0.01" placeholder="0.00" aria-label="Price in euros" />
                 </div>
                 <div class="price-square__breakdown">
@@ -341,8 +359,8 @@
     <!-- ═══════════════ STEP 3: VENUES & STOPS ═════════════════════ -->
     @if (step() === 3) {
       <div class="edit-card">
-        <h2 class="edit-card__title">Venues & stops</h2>
-        <p class="edit-card__desc">Start by creating venues (rooms, squares, areas), then add stops within each venue.</p>
+        <h2 class="edit-card__title">Venues & points of interest</h2>
+        <p class="edit-card__desc">Start by creating venues (rooms, squares, areas), then add points of interest within each venue.</p>
 
         @if (spaces().length === 0 && stops().length === 0) {
           <!-- No venues yet — prompt to create the first one -->
@@ -350,18 +368,26 @@
             <h3 class="space-empty__title">Where does your tour begin?</h3>
             <p class="space-empty__desc">
               A <strong>venue</strong> is a place your visitors will stop at — a museum hall, a city square, a park entrance.
-              Each venue can contain multiple stops (individual things to see or hear about).
+              Each venue can contain multiple points of interest (individual things to see or hear about).
             </p>
-            <div class="venue-bar">
-              <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
-              <input type="text" class="venue-bar__input" placeholder="New venue"
-                [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
-                (keyup.enter)="submitVenue()" />
-              <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
-                (click)="submitVenue()" aria-label="Create venue">
-                <mat-icon>save</mat-icon>
+            @if (addingVenue()) {
+              <div class="venue-bar">
+                <input id="new-venue-input" appSelectOnFocus type="text" class="venue-bar__input" placeholder="Venue name"
+                  [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
+                  (keyup.enter)="submitVenue()" />
+                <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
+                  (click)="submitVenue()" aria-label="Save venue">
+                  <mat-icon>save</mat-icon>
+                </button>
+                <button type="button" class="venue-bar__cancel" (click)="addingVenue.set(false); venueDraft.set('')" aria-label="Cancel">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <button type="button" class="reveal-add-btn" (click)="openVenueInput()">
+                <mat-icon>add</mat-icon> New venue
               </button>
-            </div>
+            }
 
             <button type="button" class="space-empty__example-btn space-empty__example-btn--mt" (click)="showExample.set(true)">See an example</button>
           </div>
@@ -377,7 +403,7 @@
                 <div class="example-modal__body">
                   <p class="example-modal__intro">
                     A <strong>venue</strong> is a physical area your visitors will be in — like a room, a square, or an outdoor area.
-                    Inside each venue you add <strong>stops</strong> — the individual things visitors will look at, listen to, or learn about.
+                    Inside each venue you add <strong>points of interest</strong> — the individual things visitors will look at, listen to, or learn about.
                   </p>
 
                   <p class="example-modal__label">VENUE</p>
@@ -387,7 +413,7 @@
                       <span>The main gallery on the ground floor featuring Roman and Greek works</span>
                     </div>
 
-                    <p class="example-modal__label example-modal__label--stop">STOPS INSIDE THIS VENUE</p>
+                    <p class="example-modal__label example-modal__label--stop">POINTS OF INTEREST INSIDE THIS VENUE</p>
 
                     <div class="example-stop">
                       <span class="example-stop__num">1</span>
@@ -406,7 +432,7 @@
                   </div>
 
                   <p class="example-modal__note">
-                    You'll create your first venue now. After that, you'll be able to add stops to it — each with a title, description, audio, and images.
+                    You'll create your first venue now. After that, you'll be able to add points of interest to it — each with a title, description, audio, and images.
                   </p>
                 </div>
               </div>
@@ -565,14 +591,23 @@
                 }
               </div>
 
-              <!-- Add a stop (title only; expand it afterwards for media & location) -->
-              <div class="stop-add-bar">
-                <button type="button" class="stop-add-bar__btn" (click)="addStopQuick(space.id, newStop.value); newStop.value = ''" aria-label="Add stop">
-                  <mat-icon>add</mat-icon>
+              <!-- Add a point of interest (title only; expand it afterwards for media & location) -->
+              @if (addingPoiFor() === space.id) {
+                <div class="stop-add-bar">
+                  <input #newStop id="new-poi-input" appSelectOnFocus type="text" class="stop-add-bar__input" placeholder="Point of interest title"
+                    (keyup.enter)="addStopQuick(space.id, newStop.value); newStop.value = ''" />
+                  <button type="button" class="stop-add-bar__save" (click)="addStopQuick(space.id, newStop.value); newStop.value = ''" aria-label="Save point of interest">
+                    <mat-icon>save</mat-icon>
+                  </button>
+                  <button type="button" class="stop-add-bar__cancel" (click)="addingPoiFor.set(null)" aria-label="Cancel">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <button type="button" class="reveal-add-btn reveal-add-btn--poi" (click)="openPoiInput(space.id)">
+                  <mat-icon>add</mat-icon> Add point of interest
                 </button>
-                <input #newStop type="text" class="stop-add-bar__input" placeholder="new stop title"
-                  (keyup.enter)="addStopQuick(space.id, newStop.value); newStop.value = ''" />
-              </div>
+              }
               </div>
               }
             </div>
@@ -618,7 +653,7 @@
           @if (getStopsForSpace(null).length > 0) {
             <div class="space-block space-block--unassigned">
               <div class="space-block__header">
-                <h3 class="space-block__name">Stops without a venue</h3>
+                <h3 class="space-block__name">Points of interest without a venue</h3>
               </div>
               <div class="stops-list">
                 @for (stop of getStopsForSpace(null); track stop.id; let i = $index) {
@@ -639,10 +674,10 @@
           <!-- Edit stop form (for editing existing stops) -->
           @if (editingStopId()) {
             <div class="stop-form edit-card edit-card--mt">
-              <h3>Edit stop</h3>
+              <h3>Edit point of interest</h3>
               <form [formGroup]="stopForm" (ngSubmit)="saveStop()" class="edit-form" novalidate>
                 <div class="form-field">
-                  <label class="form-field__label">Stop title <span class="required">*</span></label>
+                  <label class="form-field__label">Point of interest title <span class="required">*</span></label>
                   <input type="text" formControlName="title" class="form-field__input" />
                 </div>
                 <div class="form-field">
@@ -667,23 +702,31 @@
                 </div>
                 <div class="edit-form__actions">
                   <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancel</button>
-                  <button type="submit" class="btn btn--primary">Update stop</button>
+                  <button type="submit" class="btn btn--primary">Update point of interest</button>
                 </div>
               </form>
             </div>
           }
 
           <!-- Add another venue -->
-          <div class="venue-bar venue-bar--mt">
-            <span class="venue-bar__lead"><mat-icon>colorize</mat-icon></span>
-            <input type="text" class="venue-bar__input" placeholder="New venue"
-              [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
-              (keyup.enter)="submitVenue()" />
-            <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
-              (click)="submitVenue()" aria-label="Create venue">
-              <mat-icon>save</mat-icon>
+          @if (addingVenue()) {
+            <div class="venue-bar venue-bar--mt">
+              <input id="new-venue-input" appSelectOnFocus type="text" class="venue-bar__input" placeholder="Venue name"
+                [value]="venueDraft()" (input)="venueDraft.set($any($event.target).value)"
+                (keyup.enter)="submitVenue()" />
+              <button type="button" class="venue-bar__save" [disabled]="!venueDraft().trim()"
+                (click)="submitVenue()" aria-label="Save venue">
+                <mat-icon>save</mat-icon>
+              </button>
+              <button type="button" class="venue-bar__cancel" (click)="addingVenue.set(false); venueDraft.set('')" aria-label="Cancel">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @else {
+            <button type="button" class="reveal-add-btn reveal-add-btn--mt" (click)="openVenueInput()">
+              <mat-icon>add</mat-icon> New venue
             </button>
-          </div>
+          }
 
           <!-- Delete venue confirmation -->
           @if (venuePendingDelete(); as venue) {
@@ -989,5 +1032,22 @@
         </div>
       }
     }
+  }
+
+  <!-- ── New-tour title prompt ──────────────────────────────────────── -->
+  @if (showTitlePrompt()) {
+    <div class="title-prompt-backdrop">
+      <div class="title-prompt" role="dialog" aria-modal="true" aria-labelledby="title-prompt-heading">
+        <h2 id="title-prompt-heading" class="title-prompt__title">Name your tour</h2>
+        <p class="title-prompt__text">Give your tour a title to get started — you can change it any time.</p>
+        <input #titlePromptInput class="title-prompt__input" type="text" maxlength="200"
+          [value]="titleDraft()" placeholder="e.g. Hidden gems of Rome" aria-label="Tour title"
+          (keydown.enter)="confirmTitle(titlePromptInput.value)" />
+        <div class="title-prompt__actions">
+          <a routerLink="/studio/tours" class="btn btn--ghost">Cancel</a>
+          <button type="button" class="btn btn--primary" (click)="confirmTitle(titlePromptInput.value)">Create tour</button>
+        </div>
+      </div>
+    </div>
   }
 </section>

@@ -178,12 +178,8 @@ export class ToursListComponent implements OnInit {
       next: (tours) => {
         this.allTours.set(tours);
         this.loading.set(false);
-
-        // Auto-expand tours that have variants
-        const toExpand = tours.filter(t => (t.variant_count ?? 0) > 0);
-        const ids = new Set(toExpand.map(t => t.id));
-        this.expandedTourIds.set(ids);
-        toExpand.forEach(t => this.loadVariants(t.id));
+        // Variants stay collapsed by default — the creator expands a tour
+        // (via the chevron) to reveal its language variants.
       },
       error: () => this.loading.set(false),
     });

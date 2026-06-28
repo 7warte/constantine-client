@@ -293,3 +293,68 @@
     }
   }
 }
+
+// ── Badges ──────────────────────────────────────────────────────────────────
+.ah-badges {
+  padding-block: $space-10;
+  background: $bg-surface;
+  text-align: center;
+
+  &__heading {
+    font-family: $font-family-primary;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin-bottom: $space-4;
+  }
+
+  &__lede {
+    max-width: 680px;
+    margin: 0 auto $space-8;
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: 1.7;
+
+    strong { color: $text-primary; }
+  }
+
+  &__showcase {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: $space-6 $space-5;
+    margin-bottom: $space-8;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-2;
+    width: 110px;
+  }
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__how {
+    max-width: 620px;
+    margin: 0 auto $space-8;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+
+    li {
+      padding: $space-3 0;
+      border-bottom: 1px solid $border-default;
+      font-size: $font-size-base;
+      color: $text-secondary;
+
+      strong { color: $text-primary; }
+    }
+  }
+}

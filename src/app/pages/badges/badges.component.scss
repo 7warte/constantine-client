@@ -1,0 +1,108 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.badges-page {
+  @include container;
+  padding-block: $space-8;
+
+  &__hero {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto $space-8;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin-bottom: $space-3;
+  }
+
+  &__sub {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
+
+  &__count {
+    margin-top: $space-4;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    strong { color: $text-primary; }
+    a { color: $accent-primary; }
+  }
+
+  &__group { margin-bottom: $space-8; }
+
+  &__group-title {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    padding-bottom: $space-2;
+    margin-bottom: $space-5;
+    border-bottom: 1px solid $border-default;
+  }
+}
+
+.badges-grid {
+  display: grid;
+  gap: $space-5 $space-4;
+  grid-template-columns: repeat(2, 1fr);
+
+  @include sm { grid-template-columns: repeat(3, 1fr); }
+  @include md { grid-template-columns: repeat(4, 1fr); }
+  @include lg { grid-template-columns: repeat(5, 1fr); }
+}
+
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-2;
+  padding: $space-4 $space-2;
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    line-height: 1.4;
+  }
+
+  &--earned &__name { color: $text-primary; }
+  &:not(.badge-card--earned) &__name { color: $text-muted; }
+
+  &__earned-tag {
+    margin-top: auto;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $accent-primary;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__progress {
+    width: 70%;
+    height: 4px;
+    margin-top: $space-1;
+    background: $bg-surface-alt;
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__progress-bar {
+    display: block;
+    height: 100%;
+    background: $text-muted;
+    border-radius: $radius-full;
+  }
+}

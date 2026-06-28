@@ -168,6 +168,41 @@
   </div>
 </section>
 
+<!-- ── Badges ──────────────────────────────────────────────────── -->
+<section class="ah-badges" id="badges">
+  <div class="container">
+    <p class="eyebrow">Rewards</p>
+    <h2 class="ah-badges__heading">Collect badges as you go.</h2>
+    <p class="ah-badges__lede">
+      Constantine turns exploring and creating into a bit of a game. As you hit milestones —
+      tours collected, hours listened, places discovered, reviews written, or (for creators) tours
+      published, sold and translated — you unlock badges, each named after a fitting figure from
+      history. Tour the world like <strong>Marco Polo</strong>, write reviews like
+      <strong>Ruskin</strong>, or build an empire of listeners like <strong>Alexander the Great</strong>.
+    </p>
+
+    <div class="ah-badges__showcase" aria-hidden="true">
+      @for (b of sampleBadges; track b.id) {
+        <div class="ah-badges__item">
+          <app-badge-icon [icon]="b.icon" [label]="b.label" [earned]="true" [size]="92"
+            [gradId]="'about-' + b.id" [from]="b.gradient[0]" [to]="b.gradient[1]" />
+          <span class="ah-badges__name">{{ b.name }}</span>
+        </div>
+      }
+    </div>
+
+    <ul class="ah-badges__how">
+      <li><strong>Earn automatically.</strong> Badges unlock the moment you reach a milestone — nothing to claim.</li>
+      <li><strong>See your progress.</strong> Your earned badges live on your profile; the full wall shows everything there is to collect.</li>
+      <li><strong>Share the brag.</strong> Show off any badge you've earned straight to your socials from your profile.</li>
+    </ul>
+
+    <div class="ah-cta">
+      <app-button routerLink="/badges" size="lg" class="btn-wheat">See all badges</app-button>
+    </div>
+  </div>
+</section>
+
 <!-- ── Closing ─────────────────────────────────────────────────── -->
 <section class="ah-closing">
   <div class="container">

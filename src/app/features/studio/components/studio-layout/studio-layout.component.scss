@@ -52,9 +52,9 @@
     text-decoration: none;
     white-space: nowrap;
     border-bottom: 2px solid transparent;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition: color 0.18s ease, border-color 0.18s ease;
 
-    &:hover {
+    &:hover:not(.studio__tab--active) {
       color: #1a1a1a;
     }
 
@@ -107,21 +107,35 @@
       --mdc-list-list-item-label-text-font: #{$font-family-secondary};
       --mdc-list-list-item-label-text-size: 0.875rem;
       --mdc-list-list-item-label-text-color: #666666;
+      // Suppress Material's built-in hover/focus state layers so a clicked item
+      // doesn't stay highlighted — only our :hover / .active-link styles below
+      // decide what's highlighted (one item at a time).
+      --mdc-list-list-item-hover-state-layer-opacity: 0;
+      --mdc-list-list-item-focus-state-layer-opacity: 0;
       border-radius: 0;
       margin: 0;
+      background: transparent;
+      transition: background-color 0.18s ease;
 
       .mat-icon {
         color: #999999;
         font-size: 20px;
         width: 20px;
         height: 20px;
+        transition: color 0.18s ease;
       }
 
-      &:hover {
+      // Only highlight on real pointer hover, and never override the active item.
+      &:hover:not(.active-link) {
         --mdc-list-list-item-label-text-color: #1a1a1a;
         background: #f5f5f5;
 
         .mat-icon { color: #666666; }
+      }
+
+      &:focus-visible {
+        outline: 2px solid rgba($accent-primary, 0.4);
+        outline-offset: -2px;
       }
     }
 

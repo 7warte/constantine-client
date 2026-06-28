@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/creator-profile/creator-profile.component').then(m => m.CreatorProfileComponent),
   },
   {
+    path: 'badges',
+    loadComponent: () => import('./pages/badges/badges.component').then(m => m.BadgesComponent),
+  },
+  {
     path: 'about',
     loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent),
   },

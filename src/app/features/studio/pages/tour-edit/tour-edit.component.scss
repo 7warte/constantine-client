@@ -165,18 +165,31 @@
   &__select,
   &__textarea {
     padding: $space-3 $space-4;
-    border: 1px solid $border-default;
+    border: 1px solid #cdd2db;
     border-radius: $radius-md;
-    background: $bg-surface-alt;
+    // Clearly-grey fill so the field obviously reads as an editable text box.
+    background: #e8eaef;
     color: $text-primary;
     font-size: $font-size-base;
     font-family: $font-family-secondary;
-    transition: border-color $transition-fast;
+    transition: background-color $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
 
-    &:focus { outline: none; border-color: $accent-primary; }
+    &::placeholder { color: #8b9099; }
+
+    &:hover:not(:focus) { background: #e1e4ea; }
+
+    &:focus {
+      outline: none;
+      background: #f5f6f8;
+      border-color: $accent-primary;
+      box-shadow: 0 0 0 3px rgba($accent-primary, 0.16);
+    }
     &--invalid { border-color: $color-error; }
     &--sm { padding: $space-2 $space-3; font-size: $font-size-sm; max-width: 100px; }
   }
+
+  &__input,
+  &__textarea { cursor: text; }
 
   &__textarea { resize: vertical; }
   &__hint { font-size: $font-size-xs; color: $text-muted; }
@@ -212,6 +225,54 @@
   .form-field__select.is-filled {
     border-color: $color-success;
   }
+}
+
+// ── Per-field "save & jump to next field" buttons (guided Basics flow) ───────
+.field-next {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: $space-2 $space-4;
+  border: none;
+  border-radius: $radius-full;
+  background: $accent-primary;
+  color: $white;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: background $transition-fast, transform $transition-fast, box-shadow $transition-fast;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) { background: $accent-hover; transform: translateY(-1px); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  // Once used, the button flips to an "Edit" affordance — yellow from the palette.
+  &--edit {
+    background: $wheat;
+    color: $text-primary;
+    &:hover:not(:disabled) { background: darken($wheat, 8%); }
+  }
+}
+
+.field-next-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $space-2;
+}
+
+// Title field lives on the hero image — float its Next button in the corner.
+.tour-hero__next {
+  position: absolute;
+  right: $space-4;
+  bottom: $space-4;
+  z-index: 3;
+  box-shadow: $shadow-sm;
 }
 
 // ── Audio + Price squares (left half) | duration + setting (right half) ──────
@@ -499,7 +560,7 @@
   &__edit {
     position: absolute;
     right: $space-3;
-    bottom: $space-3;
+    top: $space-3;
     z-index: 3;
     display: inline-flex;
     align-items: center;
@@ -523,7 +584,7 @@
   &__badge {
     position: absolute;
     top: $space-3;
-    right: $space-3;
+    left: $space-3;
     z-index: 3;
     padding: $space-1 $space-3;
     border-radius: $radius-full;
@@ -1754,11 +1815,69 @@
     // Muted grey until a venue name is typed.
     &:disabled { background: $border-strong; cursor: not-allowed; }
   }
+
+  &__cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    flex-shrink: 0;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface-alt;
+    color: $text-secondary;
+    cursor: pointer;
+
+    .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    &:hover { color: $text-primary; }
+  }
+}
+
+// "+ New venue" / "+ Add point of interest" — reveal the input on click.
+.reveal-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  margin-top: $space-5;
+  padding: $space-3 $space-5;
+  border: 1.5px dashed $accent-primary;
+  border-radius: $radius-md;
+  background: rgba($accent-primary, 0.06);
+  color: $accent-primary;
+  font-family: $font-family-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+
+  .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &:hover { background: rgba($accent-primary, 0.12); }
+
+  &--mt { margin-top: $space-6; }
+
+  // The POI add button sits inside a coloured venue block — neutral on any colour.
+  &--poi {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-top: $space-3;
+    background: rgba($white, 0.55);
+    border-color: rgba($black, 0.22);
+    color: $text-primary;
+
+    &:hover { background: rgba($white, 0.78); }
+  }
 }
 
 // Rose venue block (overrides the neutral .space-block look).
 .space-block--venue {
-  border: none;
+  // Frosted-glass frame — the same translucent border/highlight used on the
+  // homepage hero's bottom edge, wrapped all the way around the venue.
+  border: 1px solid rgba($white, 0.45);
+  box-shadow: inset 0 1px 0 rgba($white, 0.55), 0 4px 14px rgba($black, 0.10);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
   background: rgba($accent-primary, 0.5);   // default "vibe"; overridden by space.color inline
   padding: $space-3;
 
@@ -2032,6 +2151,23 @@
     &::placeholder { color: $text-muted; }
     &:focus { outline: none; border-color: $color-success; }
   }
+
+  &__save,
+  &__cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: opacity $transition-fast;
+    .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    &:hover { opacity: 0.9; }
+  }
+  &__save   { background: $color-success; color: $white; }
+  &__cancel { background: $bg-surface-alt; color: $text-secondary; border: 1px solid $border-default; }
 }
 
 // ── Confirm dialog (e.g. deleting a venue) ──────────────────────────────────
@@ -2105,6 +2241,65 @@
       height: 16px;
       line-height: 1;
     }
+  }
+}
+
+// ── New-tour title prompt ────────────────────────────────────────────────────
+.title-prompt-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: $space-4;
+}
+
+.title-prompt {
+  background: $white;
+  width: 100%;
+  max-width: 440px;
+  border-radius: $radius-lg;
+  border: 1px solid $border-default;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  padding: $space-6;
+
+  &__title {
+    margin: 0 0 $space-2;
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__text {
+    margin: 0 0 $space-4;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $space-3 $space-4;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    color: $text-primary;
+    background: $white;
+    transition: border-color $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $accent-primary;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+    margin-top: $space-5;
   }
 }
 

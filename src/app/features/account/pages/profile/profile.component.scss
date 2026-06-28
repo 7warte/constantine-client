@@ -176,3 +176,93 @@
   }
 }
 
+
+// ── My badges ────────────────────────────────────────────────────────────────
+.badges-section {
+  margin-top: $space-8;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: $space-3;
+    padding-bottom: $space-2;
+    margin-bottom: $space-5;
+    border-bottom: 1px solid $border-default;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__link {
+    margin-left: auto;
+    font-size: $font-size-sm;
+    color: $accent-primary;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+
+  &__empty {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+
+    a { color: $accent-primary; }
+  }
+
+  &__grid {
+    display: grid;
+    gap: $space-5 $space-4;
+    grid-template-columns: repeat(2, 1fr);
+
+    @include sm { grid-template-columns: repeat(3, 1fr); }
+    @include md { grid-template-columns: repeat(4, 1fr); }
+  }
+}
+
+.earned-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: $space-2;
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    line-height: 1.4;
+  }
+
+  &__share {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $accent-primary;
+    background: none;
+    border: 1px solid $border-default;
+    border-radius: $radius-full;
+    padding: $space-1 $space-3;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: $accent-primary;
+      color: $white;
+      border-color: $accent-primary;
+    }
+  }
+}

@@ -153,50 +153,40 @@
   }
 
   &__mobile-link {
-    position: relative;
     display: flex;
     align-items: center;
+    gap: $space-3;
     padding: $space-4 $space-5;
     border-radius: $radius-md;
     font-size: $font-size-md;
     font-weight: $font-weight-semibold;
-    color: rgba($white, 0.7);
+    color: rgba($white, 0.85);
     text-align: left;
     width: 100%;
     background: none;
     border: none;
     cursor: pointer;
-    overflow: hidden;   // clip the wipe-fill to the rounded row
 
     @include lg { font-size: $font-size-lg; }
+
+    // Plain instant hover — no animation.
+    &:hover { color: $white; }
   }
 
-  // Wheat panel that wipes in from the left on hover (GSAP animates scaleX).
-  &__mobile-fill {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background: $accent-highlight;
-    border-radius: $radius-md;
-    transform: scaleX(0);
-    transform-origin: left center;
+  // Leading icon, shown on desktop only.
+  &__mobile-icon {
+    display: none;
+    flex-shrink: 0;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+
+    @include lg { display: inline-flex; align-items: center; justify-content: center; }
   }
 
   &__mobile-text {
-    position: relative;
-    z-index: 1;
     display: inline-block;
-    will-change: transform;
-  }
-
-  &__mobile-arrow {
-    position: relative;
-    z-index: 1;
-    margin-left: auto;
-    opacity: 0;
-    transform: translateX(-12px);
-    font-size: $font-size-lg;
-    line-height: 1;
   }
 }
 
