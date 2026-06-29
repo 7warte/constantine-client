@@ -4,8 +4,13 @@
       <p class="text-secondary">Loading…</p>
     } @else if (variant()) {
       <div class="checkout-card__header">
-        <h1>Complete your purchase</h1>
-        <p class="text-secondary">You are about to unlock this tour variant.</p>
+        @if (isGift()) {
+          <h1>Gift this tour</h1>
+          <p class="text-secondary">Pay for this tour and we'll send it to a friend's email.</p>
+        } @else {
+          <h1>Complete your purchase</h1>
+          <p class="text-secondary">You are about to unlock this tour variant.</p>
+        }
       </div>
 
       <div class="checkout-card__summary">
@@ -26,6 +31,15 @@
         </strong>
       </div>
 
+      @if (isGift() && !clientSecret()) {
+        <label class="checkout-card__gift">
+          <span class="checkout-card__gift-label">Recipient's email</span>
+          <input type="email" class="checkout-card__gift-input" placeholder="friend@example.com"
+            [value]="recipientEmail()" (input)="recipientEmail.set($any($event.target).value)" />
+          <span class="checkout-card__gift-hint">They'll get an email to claim it — they just sign up with this address.</span>
+        </label>
+      }
+
       @if (error()) {
         <div class="checkout-card__error" role="alert">{{ error() }}</div>
       }
@@ -41,7 +55,9 @@
       } @else {
         <!-- Initial purchase button (creates PaymentIntent or handles free) -->
         <app-button variant="primary" size="lg" [block]="true" [loading]="paying()" (click)="purchase()">
-          @if (variant()!.price_cents === 0) { Get for free } @else { Pay now }
+          @if (isGift()) { Continue to payment }
+          @else if (variant()!.price_cents === 0) { Get for free }
+          @else { Pay now }
         </app-button>
       }
     } @else {

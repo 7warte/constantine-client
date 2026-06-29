@@ -1,0 +1,148 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.blueprint {
+  max-width: 880px;
+
+  &__head { margin-bottom: $space-6; }
+
+  &__badge {
+    display: inline-block;
+    margin-bottom: $space-3;
+    padding: 3px 10px;
+    border-radius: $radius-full;
+    background: $accent-muted;
+    color: $accent-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  &__subtitle {
+    margin-top: $space-2;
+    font-style: italic;
+    color: $text-secondary;
+  }
+
+  &__desc {
+    margin-top: $space-3;
+    max-width: 640px;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+  }
+
+  &__meta { margin-top: $space-4; }
+
+  &__cta {
+    margin-top: $space-5;
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    flex-wrap: wrap;
+  }
+
+  &__cta-note { font-size: $font-size-sm; color: $text-muted; }
+
+  &__footer {
+    margin-top: $space-8;
+    padding-top: $space-6;
+    border-top: 1px solid $border-default;
+    text-align: center;
+
+    p { margin-bottom: $space-3; color: $text-secondary; }
+  }
+}
+
+.venue {
+  margin-top: $space-6;
+  padding-top: $space-5;
+  border-top: 1px solid $border-default;
+
+  &__num {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $accent-primary;
+  }
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: $space-1 0 $space-1;
+  }
+
+  &__tagline { color: $text-secondary; font-style: italic; }
+
+  &__stops {
+    margin-top: $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+  }
+}
+
+.stop {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: $space-4;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  @media (max-width: #{$bp-sm - 1px}) {
+    grid-template-columns: 1fr;
+  }
+
+  &__image {
+    position: relative;
+    min-height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: #{$bp-sm - 1px}) { aspect-ratio: 16 / 9; }
+  }
+
+  &__image-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba($black, 0.4);
+  }
+
+  &__body { padding: $space-4 $space-4 $space-4 0; @media (max-width: #{$bp-sm - 1px}) { padding: $space-4; } }
+
+  &__numeral {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $accent-primary;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: 2px 0 $space-1;
+  }
+
+  &__text { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; }
+}
+
+// Local button styles (mirror the studio buttons).
+.btn {
+  display: inline-block; text-align: center;
+  padding: $space-3 $space-5; border-radius: $radius-md;
+  font-weight: $font-weight-semibold; font-size: $font-size-sm; cursor: pointer;
+  border: 1px solid transparent; text-decoration: none;
+  transition: background $transition-fast;
+  &--primary { background: $accent-primary; color: $white; &:hover { background: $accent-hover; } }
+  &--lg { padding: $space-4 $space-6; font-size: $font-size-base; }
+}

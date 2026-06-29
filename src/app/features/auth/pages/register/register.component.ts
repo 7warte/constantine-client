@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -12,10 +12,11 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private readonly fb     = inject(FormBuilder);
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route  = inject(ActivatedRoute);
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
@@ -26,6 +27,13 @@ export class RegisterComponent {
     email:        ['', [Validators.required, Validators.email]],
     password:     ['', [Validators.required, Validators.minLength(8)]],
   });
+
+  ngOnInit(): void {
+    // Pre-fill the email when arriving from a gift-claim link (?email=…), so the
+    // recipient signs up with the address the tour was gifted to.
+    const email = this.route.snapshot.queryParamMap.get('email');
+    if (email) this.form.controls.email.setValue(email.toLowerCase());
+  }
 
   submit(): void {
     if (this.form.invalid) return;

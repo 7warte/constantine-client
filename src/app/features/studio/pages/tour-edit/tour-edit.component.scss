@@ -290,14 +290,23 @@
 .square-row {
   display: grid;
   gap: $space-4;
-  grid-template-columns: 1fr 1fr;   // the two squares always sit side by side
+  grid-template-columns: 1fr 1fr;   // the two squares sit side by side on desktop
   align-items: start;
+
+  // On mobile they're too cramped side by side — stack them full-width instead.
+  @media (max-width: #{$bp-md - 1px}) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .square-field { gap: $space-1; }
 
 // Invisible twin of the audio hint so the price box lines up with the audio box.
-.square-field__spacer { visibility: hidden; }
+// Only needed when the boxes sit side by side; drop it once they're stacked.
+.square-field__spacer {
+  visibility: hidden;
+  @media (max-width: #{$bp-md - 1px}) { display: none; }
+}
 
 .square-box {
   margin-top: $space-2;
@@ -309,6 +318,11 @@
   flex-direction: column;
   overflow: hidden;
   transition: border-color $transition-fast;
+
+  // Stacked full-width on mobile — size to the content instead of forcing a square.
+  @media (max-width: #{$bp-md - 1px}) {
+    aspect-ratio: auto;
+  }
 
   // Green when the field is "filled" (price set / audio uploaded).
   &--filled { border-color: $color-success; }

@@ -2,6 +2,15 @@
   <div class="confirmation-card">
     @if (status() === 'loading') {
       <p class="text-secondary">Verifying payment…</p>
+    } @else if (status() === 'success' && gift()) {
+      <span class="confirmation-card__icon" aria-hidden="true">&#127873;</span>
+      <h1>Gift sent!</h1>
+      <p class="text-secondary">We've emailed your recipient an invitation to claim the tour. It lands in their library as soon as they sign up with that email.</p>
+      <div class="confirmation-card__actions">
+        <app-button routerLink="/explore" variant="primary" size="lg" [block]="true">
+          Explore more tours
+        </app-button>
+      </div>
     } @else if (status() === 'success') {
       <span class="confirmation-card__icon" aria-hidden="true">&#x2713;</span>
       <h1>Tour unlocked!</h1>

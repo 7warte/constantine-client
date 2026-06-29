@@ -33,28 +33,26 @@
   }
 
   <div class="earnings__section">
-    <h2 class="section-title">Transaction history</h2>
+    <h2 class="section-title">Earnings by tour</h2>
 
-    @if (transactions().length === 0 && !loading()) {
+    @if ((breakdown() ?? []).length === 0 && !loading()) {
       <div class="empty-state">
-        <p>No transactions yet. Once travellers purchase your tours, earnings will appear here.</p>
+        <p>No sales yet. Once travellers purchase your tours, earnings will appear here.</p>
       </div>
     } @else {
       <div class="tx-table">
         <div class="tx-table__head">
-          <span>Date</span>
           <span>Tour</span>
-          <span>Customer</span>
-          <span>Gross</span>
-          <span>Net</span>
+          <span>Language</span>
+          <span>Sales</span>
+          <span>Earnings</span>
         </div>
-        @for (tx of transactions(); track tx.id) {
+        @for (b of breakdown(); track b.variant_id) {
           <div class="tx-table__row">
-            <span class="tx-table__date">{{ tx.created_at | date:'mediumDate' }}</span>
-            <span class="tx-table__tour">{{ tx.tour_title }}</span>
-            <span class="tx-table__customer">{{ tx.customer_display_name }}</span>
-            <span class="tx-table__amount">€{{ tx.gross | number:'1.2-2' }}</span>
-            <span class="tx-table__amount tx-table__amount--net">€{{ tx.net | number:'1.2-2' }}</span>
+            <span class="tx-table__tour">{{ b.tour_title }}</span>
+            <span>{{ b.language_code | uppercase }}</span>
+            <span class="tx-table__amount">{{ b.sales }}</span>
+            <span class="tx-table__amount tx-table__amount--net">€{{ (b.earnings_cents / 100) | number:'1.2-2' }}</span>
           </div>
         }
       </div>

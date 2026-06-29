@@ -89,11 +89,15 @@
 // so the download button sits directly under the rendered card.
 // Desktop: two columns; the card is on the right, controls stacked on the left.
 .builder {
-  display: grid;
+  // Mobile: a simple stacked column in DOM order (form → card → actions → note).
+  // grid-area on the children is inert here, so nothing can overlap.
+  display: flex;
+  flex-direction: column;
   gap: $space-5;
   margin-top: $space-8;
 
   @include lg {
+    display: grid;
     grid-template-columns: 320px 1fr;
     grid-template-areas:
       "form    stage"

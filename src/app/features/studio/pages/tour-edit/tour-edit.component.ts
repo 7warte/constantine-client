@@ -145,8 +145,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     duration_minutes: [null as number | null],
   });
 
-  // ── Price breakdown (Constantine takes a 20% platform fee per sale) ──────
-  readonly PLATFORM_FEE_RATE = 0.20;
+  // ── Price breakdown (Constantine takes a 9% platform fee per sale) ──────
+  readonly PLATFORM_FEE_RATE = 0.09;
   priceNum(): number {
     const p = parseFloat(this.form.controls.price_euros.value || '0');
     return isNaN(p) || p < 0 ? 0 : p;

@@ -59,10 +59,15 @@
   &__head,
   &__row {
     display: grid;
-    grid-template-columns: 120px 1fr 1fr 80px 80px;
+    grid-template-columns: 1fr 80px 60px 90px;
     gap: $space-4;
     padding: $space-4 $space-5;
     align-items: center;
+
+    @media (max-width: #{$bp-md - 1px}) {
+      gap: $space-2;
+      padding: $space-3 $space-4;
+    }
   }
 
   &__head {

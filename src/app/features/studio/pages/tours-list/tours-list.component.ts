@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, isDevMode } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +32,8 @@ export class ToursListComponent implements OnInit {
 
   readonly allTours = signal<any[]>([]);
   readonly loading  = signal(true);
+  // Dev-only: surfaces the force-delete button for disposable test tours.
+  readonly devMode  = isDevMode();
 
   // Expanded tour variants
   readonly expandedTourIds = signal<Set<string>>(new Set());
@@ -158,14 +160,17 @@ export class ToursListComponent implements OnInit {
     });
   }
 
-  deleteTour(): void {
+  deleteTour(force = false): void {
     const tour = this.deleteTarget();
     if (!tour) return;
 
     this.deleting.set(true);
     this.deleteError.set(null);
 
-    this.api.delete(`/studio/tours/${tour.id}`).subscribe({
+    // Force delete (dev only) removes the tour even if it has purchases — used
+    // by the e2e suite / disposable demo tours; the backend rejects it in prod.
+    const url = `/studio/tours/${tour.id}${force ? '?force=true' : ''}`;
+    this.api.delete(url).subscribe({
       next: () => { this.deleting.set(false); this.cancelDelete(); this.loadTours(); },
       error: (err) => { this.deleteError.set(err.error?.error ?? 'Failed to delete tour.'); this.deleting.set(false); },
     });

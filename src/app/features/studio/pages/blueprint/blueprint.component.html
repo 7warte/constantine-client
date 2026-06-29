@@ -1,0 +1,51 @@
+<section class="blueprint">
+  <div class="blueprint__head">
+    <span class="blueprint__badge">Demo · read-only blueprint</span>
+    <h1 class="page-title">{{ tour.title }}</h1>
+    <p class="blueprint__subtitle">{{ tour.subtitle }}</p>
+    <p class="blueprint__desc">{{ tour.description }}</p>
+
+    <div class="blueprint__meta meta-chips">
+      <span class="meta-chip">{{ tour.meta.venues }} venues</span>
+      <span class="meta-chip">{{ tour.meta.stops }} stops</span>
+      <span class="meta-chip">{{ tour.meta.duration }}</span>
+      <span class="meta-chip">{{ tour.meta.setting }}</span>
+      <span class="meta-chip">{{ tour.meta.price }}</span>
+    </div>
+
+    <div class="blueprint__cta">
+      <a routerLink="/studio/tours/new" class="btn btn--primary">Create your own tour</a>
+      <span class="blueprint__cta-note">This example can't be edited — it's here purely to inspect.</span>
+    </div>
+  </div>
+
+  @for (venue of tour.venues; track venue.name; let vi = $index) {
+    <div class="venue">
+      <div class="venue__head">
+        <span class="venue__num">Venue {{ vi + 1 }}</span>
+        <h2 class="venue__name">{{ venue.name }}</h2>
+        <p class="venue__tagline">{{ venue.tagline }}</p>
+      </div>
+
+      <div class="venue__stops">
+        @for (stop of venue.stops; track stop.numeral) {
+          <article class="stop">
+            <div class="stop__image" [class]="stop.gradient" aria-hidden="true">
+              <span class="stop__image-label">Image</span>
+            </div>
+            <div class="stop__body">
+              <span class="stop__numeral">{{ stop.numeral }}</span>
+              <h3 class="stop__title">{{ stop.title }}</h3>
+              <p class="stop__text">{{ stop.text }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="blueprint__footer">
+    <p>Ready to build the real thing?</p>
+    <a routerLink="/studio/tours/new" class="btn btn--primary btn--lg">Create a tour</a>
+  </div>
+</section>

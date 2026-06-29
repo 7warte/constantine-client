@@ -15,6 +15,10 @@ export const STUDIO_ROUTES: Routes = [
         loadComponent: () => import('./pages/tours-list/tours-list.component').then(m => m.ToursListComponent),
       },
       {
+        path: 'blueprint',
+        loadComponent: () => import('./pages/blueprint/blueprint.component').then(m => m.BlueprintComponent),
+      },
+      {
         path: 'requests',
         loadComponent: () => import('./pages/requests/requests.component').then(m => m.RequestsComponent),
       },

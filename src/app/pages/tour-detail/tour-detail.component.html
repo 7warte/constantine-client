@@ -38,6 +38,14 @@
               } @else {
                 <app-button routerLink="/auth/register" variant="primary" size="lg">Sign up to purchase</app-button>
               }
+
+              <!-- Gifting: paid tours only, for signed-in users (you can gift even if you own it). -->
+              @if (!embedded && auth.isLoggedIn() && v.price_cents > 0) {
+                <app-button variant="outline" size="lg"
+                  [routerLink]="['/checkout', variantId]" [queryParams]="{ tourId: v.tour_id, gift: 1 }">
+                  Gift this tour
+                </app-button>
+              }
             </div>
           </div>
         </div>

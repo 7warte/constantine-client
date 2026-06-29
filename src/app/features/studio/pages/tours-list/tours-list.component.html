@@ -9,10 +9,11 @@
 
   <!-- Search & filter bar -->
   <div class="tours-page__toolbar">
-    <mat-form-field appearance="outline" class="tours-page__search">
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput placeholder="Search tours…" [ngModel]="search()" (ngModelChange)="onSearch($event)" />
-    </mat-form-field>
+    <div class="tours-page__search">
+      <mat-icon class="tours-page__search-icon">search</mat-icon>
+      <input class="tours-page__search-input" type="search" placeholder="Search between your tours…"
+        [ngModel]="search()" (ngModelChange)="onSearch($event)" />
+    </div>
 
     <div class="tours-page__filters">
       <button mat-stroked-button [class.active-filter]="filter() === 'all'" (click)="setFilter('all')">All</button>
@@ -27,6 +28,7 @@
     <div class="tours-page__empty">
       <mat-icon class="tours-page__empty-icon">map</mat-icon>
       <p>No tours found. <a routerLink="/studio/tours/new">Create your first one</a>.</p>
+      <p>Not sure where to start? <a routerLink="/studio/blueprint">Inspect the demo blueprint tour</a>.</p>
     </div>
   } @else {
     <!-- Tours table -->
@@ -138,15 +140,15 @@
             <button mat-icon-button [matMenuTriggerFor]="tourMenu">
               <mat-icon>more_vert</mat-icon>
             </button>
-            <mat-menu #tourMenu="matMenu">
+            <mat-menu #tourMenu="matMenu" class="studio-menu">
               <a mat-menu-item [routerLink]="['/studio/tours', row.id]">
-                <mat-icon>edit</mat-icon> <span>Edit</span>
+                <mat-icon class="studio-menu__icon studio-menu__icon--edit">edit</mat-icon> <span>Edit</span>
               </a>
               <a mat-menu-item [routerLink]="['/studio/tours', row.id, 'variants', 'new']">
-                <mat-icon>translate</mat-icon> <span>Add variant</span>
+                <mat-icon class="studio-menu__icon studio-menu__icon--variant">translate</mat-icon> <span>Add variant</span>
               </a>
               <button mat-menu-item (click)="confirmDelete(row)">
-                <mat-icon color="warn">delete</mat-icon> <span>Delete</span>
+                <mat-icon class="studio-menu__icon studio-menu__icon--delete">delete</mat-icon> <span>Delete</span>
               </button>
             </mat-menu>
           } @else {
@@ -209,6 +211,11 @@
           }
           @if (hasPurchasedVariants()) {
             <p class="modal__hint">Variants with purchases cannot be deleted.</p>
+            @if (devMode) {
+              <button mat-flat-button color="warn" [disabled]="deleting()" (click)="deleteTour(true)">
+                {{ deleting() ? 'Deleting…' : 'Force delete (dev)' }}
+              </button>
+            }
           }
         </div>
       </div>

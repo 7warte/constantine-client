@@ -114,3 +114,34 @@
     gap: $space-6;
   }
 }
+
+// ── Gift recipient field ─────────────────────────────────────────────────────
+.checkout-card__gift {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.checkout-card__gift-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+.checkout-card__gift-input {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-muted);
+  }
+}
+.checkout-card__gift-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}

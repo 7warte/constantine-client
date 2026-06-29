@@ -33,10 +33,15 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   readonly error        = signal<string | null>(null);
   readonly clientSecret = signal<string | null>(null);
 
+  // Gift mode (?gift=1): buy this tour for someone else's email.
+  readonly isGift         = signal(false);
+  readonly recipientEmail = signal('');
+
   @ViewChild('paymentElementRef') paymentElementRef!: ElementRef<HTMLDivElement>;
 
   ngOnInit(): void {
     const tourId = this.route.snapshot.queryParamMap.get('tourId') ?? '';
+    this.isGift.set(this.route.snapshot.queryParamMap.get('gift') === '1');
     this.api.get<any>(`/tours/${tourId}/variants/${this.variantId}`).subscribe({
       next:  v  => { this.variant.set(v); this.loading.set(false); },
       error: () => this.loading.set(false),
@@ -49,10 +54,21 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   /** Step 1: Create a PaymentIntent (or record free purchase) */
   purchase(): void {
+    const body: any = { variant_id: this.variantId };
+    if (this.isGift()) {
+      const email = this.recipientEmail().trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        this.error.set('Enter a valid recipient email to gift this tour.');
+        return;
+      }
+      body.gift = true;
+      body.recipient_email = email;
+    }
+
     this.paying.set(true);
     this.error.set(null);
 
-    this.api.post<any>('/purchases', { variant_id: this.variantId }).subscribe({
+    this.api.post<any>('/purchases', body).subscribe({
       next: async (res) => {
         if (res.free) {
           this.router.navigate(['/checkout/confirmation', res.purchase.id]);

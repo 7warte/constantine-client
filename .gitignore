@@ -9,3 +9,9 @@ dist/
 Dockerfile*
 docker-compose*.yml
 .dockerignore
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

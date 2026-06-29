@@ -18,6 +18,7 @@ export class ConfirmationComponent implements OnInit {
   private readonly api   = inject(ApiService);
 
   readonly status = signal<'loading' | 'success' | 'failed'>('loading');
+  readonly gift   = signal(false);
 
   async ngOnInit(): Promise<void> {
     const purchaseId = this.route.snapshot.paramMap.get('purchaseId');
@@ -52,7 +53,7 @@ export class ConfirmationComponent implements OnInit {
     this.api.post<any>('/purchases/confirm', {
       payment_intent_id: paymentIntent.id,
     }).subscribe({
-      next: () => this.status.set('success'),
+      next: (res) => { this.gift.set(!!res?.gift); this.status.set('success'); },
       error: () => this.status.set('success'), // payment succeeded even if confirm fails
     });
   }

@@ -54,11 +54,46 @@
     flex-wrap: wrap;
   }
 
+  // Compact, rounded search pill.
   &__search {
     flex: 1;
     min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-1 $space-4;
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-full;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
 
-    .mat-mdc-form-field-subscript-wrapper { display: none; }
+    &:focus-within {
+      border-color: $accent-primary;
+      box-shadow: 0 0 0 3px $accent-muted;
+    }
+  }
+
+  &__search-icon {
+    flex-shrink: 0;
+    color: $text-muted;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &__search-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    outline: none;
+    padding: $space-2 0;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+
+    &::placeholder { color: $text-muted; }
+    &::-webkit-search-cancel-button { -webkit-appearance: none; }
   }
 
   &__filters {

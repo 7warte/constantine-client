@@ -68,3 +68,36 @@ $constantine-frontend-theme: mat.define-theme((
 
 html, body { height: 100%; }
 body { margin: 0; font-family: 'Nunito', 'Helvetica Neue', sans-serif; }
+
+// ── Studio dropdown menu (mat-menu) — brand-styled with colourful icons ──────
+.mat-mdc-menu-panel.studio-menu {
+  border-radius: 14px;
+  border: 1px solid $border-default;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+
+  .mat-mdc-menu-content { padding: $space-2; }
+
+  .mat-mdc-menu-item {
+    min-height: 44px;
+    border-radius: 10px;
+    font-family: $font-family-secondary;
+
+    .mat-mdc-menu-item-text,
+    span { font-weight: $font-weight-semibold; color: $text-primary; }
+
+    // Tint the hovered / focused row with the brand colour.
+    &:hover:not([disabled]),
+    &.cdk-program-focused,
+    &.cdk-keyboard-focused {
+      background: $accent-muted;
+    }
+  }
+
+  // Each action gets its own colour so the menu reads at a glance.
+  .studio-menu__icon {
+    &--edit    { color: $color-info; }
+    &--variant { color: $color-success; }
+    &--delete  { color: $color-error; }
+  }
+}

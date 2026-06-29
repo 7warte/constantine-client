@@ -11,6 +11,20 @@ interface EarningsSummary {
   pending_payout: number;
 }
 
+/** Shape returned by GET /studio/earnings (amounts in cents). */
+interface EarningsResponse {
+  total_sales: number;
+  total_revenue_cents: number;
+  total_earnings_cents: number;
+  breakdown: Array<{
+    variant_id: string;
+    language_code: string;
+    tour_title: string;
+    sales: number;
+    earnings_cents: number;
+  }> | null;
+}
+
 @Component({
   selector: 'app-earnings',
   standalone: true,
@@ -23,7 +37,7 @@ export class EarningsComponent implements OnInit {
   private readonly api = inject(ApiService);
 
   readonly summary      = signal<EarningsSummary | null>(null);
-  readonly transactions = signal<any[]>([]);
+  readonly breakdown    = signal<EarningsResponse['breakdown']>([]);
   readonly loading      = signal(true);
 
   // IBAN payout settings
@@ -39,13 +53,21 @@ export class EarningsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.get<EarningsSummary>('/studio/earnings/summary').subscribe({
-      next: (s) => { this.summary.set(s); this.loading.set(false); },
+    // The API reports amounts in cents; the summary cards work in euros.
+    this.api.get<EarningsResponse>('/studio/earnings').subscribe({
+      next: (r) => {
+        const gross = (r.total_revenue_cents ?? 0) / 100;
+        const net   = (r.total_earnings_cents ?? 0) / 100;
+        this.summary.set({
+          total_gross:    gross,
+          platform_fee:   gross - net,
+          total_net:      net,
+          pending_payout: net,
+        });
+        this.breakdown.set(r.breakdown ?? []);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
-    });
-
-    this.api.get<any[]>('/studio/earnings/transactions').subscribe({
-      next: (t) => this.transactions.set(t),
     });
 
     // Load IBAN

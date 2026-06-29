@@ -9,6 +9,7 @@
     <!-- Desktop nav -->
     <nav class="navbar__nav" aria-label="Main navigation">
       <a routerLink="/explore"  routerLinkActive="active" class="navbar__link">Explore</a>
+      <a routerLink="/tour-requests" routerLinkActive="active" class="navbar__link">Requested tours</a>
       <a routerLink="/badges"   routerLinkActive="active" class="navbar__link">Badges</a>
       @if (auth.isLoggedIn()) {
         <a routerLink="/library"  routerLinkActive="active" class="navbar__link">My Library</a>
@@ -49,6 +50,9 @@
     <nav class="navbar__mobile-inner">
       <a routerLink="/explore" class="navbar__mobile-link">
         <mat-icon class="navbar__mobile-icon">travel_explore</mat-icon><span class="navbar__mobile-text">Explore</span>
+      </a>
+      <a routerLink="/tour-requests" class="navbar__mobile-link">
+        <mat-icon class="navbar__mobile-icon">lightbulb</mat-icon><span class="navbar__mobile-text">Requested tours</span>
       </a>
       <a routerLink="/badges" class="navbar__mobile-link">
         <mat-icon class="navbar__mobile-icon">military_tech</mat-icon><span class="navbar__mobile-text">Badges</span>
