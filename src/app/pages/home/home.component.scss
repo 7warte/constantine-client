@@ -212,6 +212,16 @@
 
     > * { min-width: 0; }
   }
+
+  // The cards sit in a narrow 2-up grid, so the default large card title
+  // overflows / clips long single words. Shrink it and let it wrap cleanly.
+  ::ng-deep .tour-card__title {
+    font-size: $font-size-base;
+    line-height: $line-height-tight;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
 }
 
 // ── Mobile only: Search destination box ─────────────────────────────────────
@@ -486,14 +496,14 @@
 
   &__text {
     font-family: $font-family-primary;
-    font-size: $font-size-2xl;
+    font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: $text-primary;
     line-height: $line-height-tight;
     margin: 0 0 $space-4 0;
 
     @media (max-width: #{$bp-md - 1px}) {
-      font-size: $font-size-xl;
+      font-size: $font-size-lg;
     }
   }
 

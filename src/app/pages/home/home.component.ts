@@ -217,11 +217,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Pinned to the night (metro) scene for review.
-    // To restore the random scene + 6s rotation, swap the two lines below back to:
+    // Pinned scene for review: the city reads best on a narrow screen, so mobile
+    // opens on it; desktop opens on the night (metro) scene.
+    // To restore the random scene + 6s rotation, swap the lines below back to:
     //   this.scene.set(this.sceneList[Math.floor(Math.random() * this.sceneList.length)]);
     //   ... and re-enable this.restartSceneTimer();
-    this.scene.set('metro');
+    const isMobile = window.matchMedia?.('(max-width: 767px)').matches ?? false;
+    this.scene.set(isMobile ? 'city' : 'metro');
     this.sceneReady.set(true);
     // this.restartSceneTimer();
 
@@ -281,7 +283,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.openFaq.update(curr => (curr === id ? null : id));
   }
 
-  onSearchDestination(): void {
+  onSearchDestination(event?: Event): void {
+    // The form has no NgForm directive (reactive-only module), so the native
+    // submit must be prevented manually — otherwise the page reloads instead
+    // of routing to /explore.
+    event?.preventDefault();
     const q = this.destinationCtrl.value.trim();
     this.router.navigate(['/explore'], q ? { queryParams: { search: q } } : undefined);
   }

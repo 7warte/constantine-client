@@ -59,6 +59,8 @@ export class PromoteComponent implements OnInit {
   readonly selectedTour = computed(() => this.tours().find(t => t.id === this.selectedTourId()) ?? null);
   readonly featuredTours = computed(() => this.tours().slice(0, 4));
   readonly chosen = computed(() => this.kind() !== null && this.medium() !== null);
+  // The currently-picked option — drives the mobile builder sheet's header.
+  readonly chosenOption = computed(() => this.options.find(o => this.isActive(o)) ?? null);
 
   readonly targetUrl = computed(() => {
     const origin = window.location.origin;
@@ -94,6 +96,12 @@ export class PromoteComponent implements OnInit {
 
   isActive(o: PromoOption): boolean {
     return this.kind() === o.kind && this.medium() === o.medium;
+  }
+
+  /** Closes the builder (used by the mobile full-screen sheet's back button). */
+  close(): void {
+    this.kind.set(null);
+    this.medium.set(null);
   }
 
   onTourChange(id: string): void {

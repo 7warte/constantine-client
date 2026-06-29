@@ -9,10 +9,17 @@
   position: sticky;
   top: 0;
   z-index: $z-nav;
+  // Reserve an exact, constant height in the page flow so the bar is the same
+  // size whether it's at the top of the page or stuck while scrolling.
+  height: 64px;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .navbar {
   height: 64px;
+  min-height: 64px;          // flex children / sub-pixel rounding can't squeeze it
+  box-sizing: border-box;
   background: rgba($dusty-rose, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba($white, 0.2);

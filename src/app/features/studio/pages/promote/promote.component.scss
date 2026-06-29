@@ -16,7 +16,7 @@
   &__hint { color: $text-muted; font-size: $font-size-sm; margin-top: $space-6; }
 }
 
-.page-title { @include heading($font-size-2xl); }
+.page-title { @include page-title; }
 
 // ── Option chooser ──────────────────────────────────────────────────────────
 .promo-groups {
@@ -101,6 +101,61 @@
   background: repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 10px, #fafafa 10px, #fafafa 20px);
   border: 1px solid $border-default; border-radius: $radius-md;
   overflow: auto;
+}
+
+// Sheet header is desktop-hidden; the builder is just an inline panel there.
+.builder__sheet-head { display: none; }
+
+// ── Mobile: the builder opens as a full-screen sheet ─────────────────────────
+// Picking an option below the fold used to update content the user couldn't see.
+// On phones the builder now takes over the screen (preview first) so the result
+// is immediately visible, with a sticky back button to return to the options.
+@media (max-width: #{$bp-md - 1px}) {
+  .builder {
+    position: fixed;
+    inset: 0;
+    z-index: $z-modal;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+    padding: $space-4;
+    background: $bg-base;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .builder__sheet-head {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    position: sticky;
+    top: 0;
+    margin: (-$space-4) (-$space-4) 0;
+    padding: $space-3 $space-4;
+    background: $bg-surface;
+    border-bottom: 1px solid $border-default;
+    z-index: 1;
+  }
+
+  .builder__back {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: $radius-full;
+    color: $text-primary;
+    .mat-icon { font-size: 22px; width: 22px; height: 22px; }
+    &:hover { background: $bg-surface-alt; }
+  }
+
+  .builder__sheet-title {
+    font-family: $font-family-primary;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-md;
+    color: $text-primary;
+  }
+
+  // Show the preview first so the visual result of the pick is what appears.
+  .builder__stage   { order: 1; }
+  .builder__controls { order: 2; }
 }
 
 // ── Buttons (local) ─────────────────────────────────────────────────────────

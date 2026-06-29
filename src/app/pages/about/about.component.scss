@@ -23,21 +23,8 @@
   }
 
   &__title {
-    font-family: $font-family-primary;
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $text-primary;
-    line-height: $line-height-tight;
+    @include page-title;
     margin: 0 0 $space-4 0;
-
-    @include lg { font-size: $font-size-3xl; }
-
-    @media (max-width: #{$bp-md - 1px}) {
-      font-size: $font-size-xl;
-    }
-    @media (max-width: #{$bp-sm - 1px}) {
-      font-size: $font-size-lg;
-    }
   }
 
   &__sub {

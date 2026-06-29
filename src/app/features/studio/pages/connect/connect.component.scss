@@ -21,10 +21,7 @@
   flex-direction: column;
   gap: $space-5;
 
-  &__title {
-    @include heading($font-size-2xl);
-    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
-  }
+  &__title { @include page-title; }
 
   &__desc {
     color: $text-secondary;

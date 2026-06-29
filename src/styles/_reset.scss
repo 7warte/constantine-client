@@ -43,11 +43,13 @@ select {
 // iOS Safari auto-zooms when a focused input's font-size is below 16px.
 // Force a 16px floor on form fields at mobile widths — desktop keeps its
 // smaller sizes ($font-size-sm etc.) where the zoom behavior doesn't apply.
+// `!important` is required: component class selectors (e.g. .filter-bar__search)
+// outrank a bare element selector, so without it many inputs still zoom.
 @media (max-width: #{$bp-lg - 1px}) {
   input,
   textarea,
   select {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 

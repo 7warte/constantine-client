@@ -74,9 +74,11 @@
           @if (row._type === 'tour') {
             <div class="tours-table__title-cell">
               <a [routerLink]="['/studio/tours', row.id]" class="tours-table__title-link">{{ row.title }}</a>
-              <button mat-icon-button class="tours-table__expand-btn" (click)="toggleExpand(row.id); $event.stopPropagation()">
-                <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
-              </button>
+              @if ((row.variant_count ?? 1) > 1) {
+                <button mat-icon-button class="tours-table__expand-btn" (click)="toggleExpand(row.id); $event.stopPropagation()">
+                  <mat-icon>{{ isExpanded(row.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              }
             </div>
           } @else {
             <a [routerLink]="['/studio/tours', row._tourId, 'variants', row.id]" class="tours-table__variant-link">

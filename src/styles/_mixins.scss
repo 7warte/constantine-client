@@ -44,6 +44,18 @@
   color: $text-primary;
 }
 
+// Standard page heading — matches the Creator Studio page titles so every
+// menu-reachable page shares one spacing/size (2xl desktop, lg on mobile).
+@mixin page-title {
+  font-family: $font-family-primary;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-2xl;
+  line-height: $line-height-tight;
+  color: $text-primary;
+
+  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-lg; }
+}
+
 // ── Surfaces ──────────────────────────────────────────────────────────────────
 @mixin card {
   background: $bg-surface;

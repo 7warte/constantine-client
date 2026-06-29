@@ -37,7 +37,8 @@
           </div>
           <div class="purchase-card__footer">
             <a [routerLink]="['/library', purchase.id, 'play']" class="btn btn--primary btn--block purchase-card__start">
-              ▶ Start tour
+              <svg class="ic-play" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.3-23-41L73 39z"/></svg>
+              Start tour
             </a>
             <button type="button" class="btn btn--ghost btn--block" (click)="detailsFor.set(purchase)">
               Details
@@ -48,32 +49,25 @@
     </div>
   }
 
-  <!-- Synthetic details modal -->
+  <!-- Details modal — shows the full tour-detail page inline (scrollable),
+       with a Start tour action pinned at the bottom. No redirect. -->
   @if (detailsFor(); as p) {
     <div class="details-backdrop" (click)="detailsFor.set(null)">
       <div class="details-modal" (click)="$event.stopPropagation()">
         <button type="button" class="details-modal__close" (click)="detailsFor.set(null)" aria-label="Close">&times;</button>
-        <div class="details-modal__cover" [class.details-modal__cover--placeholder]="!p.cover_url">
-          @if (p.cover_url) {
-            <img [src]="p.cover_url" [alt]="p.tour_title" />
-          } @else {
-            <span aria-hidden="true">&#127911;</span>
-          }
+
+        <div class="details-modal__scroll">
+          <app-tour-detail
+            [embedded]="true"
+            [embeddedVariantId]="p.tour_variant_id"
+            [embeddedTourId]="p.tour_id" />
         </div>
-        <div class="details-modal__body">
-          <h2 class="details-modal__title">{{ p.tour_title }}</h2>
-          <p class="details-modal__creator">by {{ p.creator_display_name }}</p>
-          <div class="details-modal__meta">
-            <span class="lang-badge">{{ p.language | uppercase }}</span>
-            <span>{{ p.waypoint_count }} stops</span>
-          </div>
-          @if (p.description) {
-            <p class="details-modal__desc">{{ p.description }}</p>
-          }
-          <div class="details-modal__actions">
-            <a [routerLink]="['/library', p.id, 'play']" class="btn btn--primary">▶ Start tour</a>
-            <a [routerLink]="['/tours', p.tour_variant_id]" [queryParams]="{ tourId: p.tour_id }" class="btn btn--ghost">Full page</a>
-          </div>
+
+        <div class="details-modal__footer">
+          <a [routerLink]="['/library', p.id, 'play']" class="btn btn--primary btn--block">
+            <svg class="ic-play" viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.3-23-41L73 39z"/></svg>
+            Start tour
+          </a>
         </div>
       </div>
     </div>

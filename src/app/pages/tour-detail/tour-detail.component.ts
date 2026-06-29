@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, AfterViewChecked, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, OnDestroy, AfterViewChecked, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,14 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
   private readonly router = inject(Router);
   readonly auth           = inject(AuthService);
 
-  readonly variantId = this.route.snapshot.paramMap.get('variantId') ?? '';
+  // Embedded mode: rendered inside another page (e.g. the library details modal)
+  // rather than as a routed page. When embedded, ids come from inputs and the
+  // hero CTA / report footer are hidden (the host supplies its own actions).
+  @Input() embedded = false;
+  @Input() embeddedVariantId?: string;
+  @Input() embeddedTourId?: string;
+
+  variantId = '';
   private tourId = '';
 
   readonly variant    = signal<any | null>(null);
@@ -53,7 +60,8 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
   private readonly MAX_PREVIEW_SECONDS = 30;
 
   ngOnInit(): void {
-    this.tourId = this.route.snapshot.queryParamMap.get('tourId') ?? '';
+    this.variantId = this.embeddedVariantId ?? this.route.snapshot.paramMap.get('variantId') ?? '';
+    this.tourId    = this.embeddedTourId    ?? this.route.snapshot.queryParamMap.get('tourId') ?? '';
 
     this.api.get<any>(`/tours/${this.tourId}/variants/${this.variantId}`).subscribe({
       next: v => {

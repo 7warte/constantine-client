@@ -32,10 +32,7 @@
   &__empty-icon { font-size: $font-size-3xl; }
 }
 
-.page-title  {
-  @include heading($font-size-2xl);
-  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
-}
+.page-title  { @include page-title; }
 .page-sub    { color: $text-secondary; margin-top: $space-1; }
 .page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
 
@@ -153,16 +150,20 @@
 .details-modal {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 620px;
+  max-height: 92vh;
   background: $bg-surface;
   border-radius: $radius-lg;
   overflow: hidden;
   box-shadow: $shadow-lg;
+  display: flex;
+  flex-direction: column;
 
   &__close {
     position: absolute;
     top: $space-3;
     right: $space-3;
+    z-index: 2;
     width: 32px;
     height: 32px;
     border: none;
@@ -176,26 +177,27 @@
     &:hover { background: rgba($black, 0.6); }
   }
 
-  &__cover {
-    aspect-ratio: 16 / 9;
-    background: $bg-surface-alt;
-    img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    &--placeholder { display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  // Scrollable area holding the embedded tour-detail page.
+  &__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  &__body {
-    padding: $space-5;
-    display: flex;
-    flex-direction: column;
-    gap: $space-3;
+  // Pinned action bar at the bottom of the modal.
+  &__footer {
+    flex-shrink: 0;
+    padding: $space-4 $space-5;
+    border-top: 1px solid $border-default;
+    background: $bg-surface;
   }
+}
 
-  &__title { @include heading($font-size-lg); }
-  &__creator { font-size: $font-size-sm; color: $text-secondary; }
-  &__meta { display: flex; align-items: center; gap: $space-3; font-size: $font-size-sm; color: $text-secondary; }
-  &__desc { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; }
-  &__actions {
-    display: flex; gap: $space-3; margin-top: $space-2;
-    .btn { flex: 1; text-align: center; }
-  }
+// Font Awesome "play" glyph, sized to the current text and tinted to match it.
+.ic-play {
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.5em;
+  vertical-align: -0.06em;
 }

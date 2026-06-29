@@ -18,27 +18,27 @@
 
       <input
         formControlName="tag"
-        class="filter-bar__input"
+        class="filter-bar__input filter-bar__input--advanced"
         type="text"
         placeholder="Filter by tag…"
       />
 
       <input
         formControlName="language"
-        class="filter-bar__input"
+        class="filter-bar__input filter-bar__input--advanced"
         type="text"
         placeholder="Language (e.g. en)"
         maxlength="10"
       />
 
-      <select formControlName="sort" class="filter-bar__select">
+      <select formControlName="sort" class="filter-bar__select filter-bar__select--advanced">
         <option value="newest">Newest</option>
         <option value="top_rated">Top rated</option>
         <option value="price_asc">Price: low to high</option>
         <option value="price_desc">Price: high to low</option>
       </select>
 
-      <app-button type="submit" variant="primary">Search</app-button>
+      <app-button type="submit" variant="primary" class="filter-bar__submit">Search</app-button>
     </form>
   </div>
 

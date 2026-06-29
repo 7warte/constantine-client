@@ -477,6 +477,8 @@
     transition: background $transition-fast;
 
     &:hover { background: $accent-hover; }
+
+    svg { width: 15px; height: 15px; display: block; }
   }
 
   &__bar {
@@ -546,4 +548,27 @@
   padding-block: $space-5;
   border-top: 1px solid $border-light;
   text-align: right;
+}
+
+// ── Embedded mode (rendered inside the library details modal) ────────────────
+// Shrinks the full-bleed hero and removes the centered container so the same
+// page content reads well inside a narrower, scrollable modal.
+.detail--embedded {
+  .detail__loading { min-height: 220px; font-size: $font-size-2xl; }
+  .detail__hero    { min-height: 220px; }
+  .detail__hero-content { padding-block: $space-5; }
+
+  // Comfortable padding inside the tight modal (the modal itself adds none).
+  .container { padding-inline: $space-5; }
+
+  // Force a single vertical column — media queries track the viewport, not the
+  // narrow modal, so on desktop these blocks would otherwise sit side-by-side.
+  .detail__info-map  { flex-direction: column; gap: $space-5; }
+  .detail__info-grid { grid-template-columns: 1fr !important; }
+
+  // Tighter, even vertical rhythm between the stacked sections.
+  .detail__audio-preview,
+  .detail__info-map,
+  .detail__author,
+  .detail__reviews { padding-block: $space-5; }
 }

@@ -47,6 +47,15 @@
     <!-- ── Builder ────────────────────────────────────────────────────── -->
     @if (chosen()) {
       <div class="builder">
+        <!-- Mobile-only sheet header: the builder becomes a full-screen sheet on
+             phones so the preview/controls are immediately visible after a pick. -->
+        <div class="builder__sheet-head">
+          <button type="button" class="builder__back" (click)="close()" aria-label="Back to options">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <span class="builder__sheet-title">{{ chosenOption()?.title }}</span>
+        </div>
+
         <div class="builder__controls">
           @if (kind() === 'tour') {
             <label class="builder__field">

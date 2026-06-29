@@ -20,7 +20,7 @@
     flex-direction: column;
     gap: $space-3;
 
-    h1 { font-family: $font-family-primary; font-size: $font-size-xl; color: $text-primary; margin: 0; }
+    h1 { @include page-title; margin: 0; }
     p  { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; margin: 0; }
   }
 

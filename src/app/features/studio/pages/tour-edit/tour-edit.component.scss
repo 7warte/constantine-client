@@ -28,9 +28,8 @@
 }
 
 .page-title  {
-  @include heading($font-size-2xl);
+  @include page-title;
   margin-top: $space-2;
-  @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
 }
 .page-loading { text-align: center; padding: $space-16; color: $text-secondary; }
 .back-link { font-size: $font-size-sm; color: $text-secondary; &:hover { color: $text-primary; } }

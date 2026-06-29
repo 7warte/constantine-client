@@ -1,4 +1,4 @@
-<div class="detail">
+<div class="detail" [class.detail--embedded]="embedded">
   @if (loading()) {
     <div class="detail__loading">
       <span class="font-decorative font-decorative-animate">&#x10980;</span>
@@ -24,7 +24,9 @@
               </span>
             </div>
             <div class="detail__cta">
-              @if (owned() && purchaseId()) {
+              @if (embedded) {
+                <!-- Host (e.g. library modal) provides its own Start-tour action. -->
+              } @else if (owned() && purchaseId()) {
                 <app-button [routerLink]="['/library', purchaseId(), 'play']" variant="primary" size="lg">Start tour</app-button>
               } @else if (auth.isLoggedIn()) {
                 <app-button variant="primary" size="lg" [loading]="acquiring()" (click)="acquire()">
@@ -49,8 +51,12 @@
           <div class="audio-player">
             <audio #audioPreview [src]="v.presentation_audio_url" (timeupdate)="onAudioTimeUpdate(audioPreview)" preload="metadata"></audio>
             <div class="audio-player__controls">
-              <button type="button" class="audio-player__play" (click)="togglePreview(audioPreview)">
-                {{ previewPlaying() ? '&#9646;&#9646;' : '&#9654;' }}
+              <button type="button" class="audio-player__play" [attr.aria-label]="previewPlaying() ? 'Pause preview' : 'Play preview'" (click)="togglePreview(audioPreview)">
+                @if (previewPlaying()) {
+                  <svg viewBox="0 0 320 512" aria-hidden="true"><path fill="currentColor" d="M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"/></svg>
+                } @else {
+                  <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.3-23-41L73 39z"/></svg>
+                }
               </button>
               <div class="audio-player__bar">
                 <div class="audio-player__progress" [style.width.%]="previewProgress()"></div>
@@ -242,9 +248,11 @@
         }
       </section>
 
-      <div class="detail__footer container">
-        <app-report-button targetType="tour" [targetId]="v.tour_id" label="Report this tour" />
-      </div>
+      @if (!embedded) {
+        <div class="detail__footer container">
+          <app-report-button targetType="tour" [targetId]="v.tour_id" label="Report this tour" />
+        </div>
+      }
     } @else {
       <p class="container" style="padding-block: 4rem; color: var(--color-text-secondary)">Tour not found.</p>
     }

@@ -7,10 +7,7 @@
   min-height: 60dvh;
 
   &__title {
-    font-family: $font-family-primary;
-    font-size: $font-size-xl;
-    font-weight: $font-weight-bold;
-    color: $text-primary;
+    @include page-title;
     margin-bottom: $space-6;
   }
 

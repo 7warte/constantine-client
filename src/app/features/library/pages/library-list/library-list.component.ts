@@ -3,12 +3,13 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../core/services/api.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TourDetailComponent } from '../../../../pages/tour-detail/tour-detail.component';
 
 @Component({
   selector: 'app-library-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CommonModule, EmptyStateComponent],
+  imports: [RouterLink, CommonModule, EmptyStateComponent, TourDetailComponent],
   templateUrl: './library-list.component.html',
   styleUrl: './library-list.component.scss',
 })

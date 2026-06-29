@@ -12,6 +12,23 @@
         <!-- ground -->
         <rect x="0" y="173" width="1600" height="7" fill="#cfcfcf"/>
 
+        <!-- Distant city skyline (background, barely visible) -->
+        <g fill="#a2bdd0" opacity="0.5">
+          <rect x="20" y="96" width="58" height="80"/>
+          <polygon points="16,96 82,96 49,78"/>
+          <rect x="150" y="110" width="46" height="66"/>
+          <rect x="330" y="84" width="66" height="92"/>
+          <polygon points="330,84 396,84 363,66"/>
+          <rect x="470" y="104" width="50" height="72"/>
+          <rect x="690" y="92" width="60" height="84"/>
+          <rect x="900" y="116" width="48" height="60"/>
+          <rect x="1040" y="100" width="56" height="76"/>
+          <polygon points="1036,100 1100,100 1068,82"/>
+          <rect x="1230" y="112" width="46" height="64"/>
+          <rect x="1340" y="88" width="62" height="88"/>
+          <rect x="1500" y="106" width="52" height="70"/>
+        </g>
+
         <!-- Tree A -->
         <g>
           <rect x="56" y="120" width="8" height="60" fill="#6f6f6f"/>
@@ -336,7 +353,6 @@
           <rect x="206" y="118" width="16" height="16" fill="#c4ad8c"/>
           <path d="M150,150 L150,58 A45,45 0 0 1 240,58 L240,150" fill="none" stroke="#cdb896" stroke-width="4"/>
           <line x1="195" y1="58" x2="195" y2="150" stroke="#d8cba8" stroke-width="2"/>
-          <line x1="150" y1="100" x2="240" y2="100" stroke="#d8cba8" stroke-width="2"/>
           <rect x="144" y="150" width="102" height="4" fill="#c9b890"/>
         </g>
 
@@ -354,7 +370,6 @@
           <rect x="678" y="116" width="24" height="16" fill="#c4ad8c"/>
           <path d="M590,150 L590,66 A60,60 0 0 1 710,66 L710,150" fill="none" stroke="#cdb896" stroke-width="4"/>
           <line x1="650" y1="66" x2="650" y2="150" stroke="#d8cba8" stroke-width="2"/>
-          <line x1="590" y1="108" x2="710" y2="108" stroke="#d8cba8" stroke-width="2"/>
           <rect x="584" y="150" width="132" height="4" fill="#c9b890"/>
         </g>
 
@@ -369,7 +384,6 @@
           <ellipse cx="1109" cy="100" rx="16" ry="9" fill="#b7a988"/>
           <path d="M1020,150 L1020,62 A55,55 0 0 1 1130,62 L1130,150" fill="none" stroke="#cdb896" stroke-width="4"/>
           <line x1="1075" y1="62" x2="1075" y2="150" stroke="#d8cba8" stroke-width="2"/>
-          <line x1="1020" y1="104" x2="1130" y2="104" stroke="#d8cba8" stroke-width="2"/>
           <rect x="1014" y="150" width="122" height="4" fill="#c9b890"/>
         </g>
 
@@ -710,6 +724,15 @@
             <rect x="6"  y="34" width="13" height="16" fill="#9fb4d8"/>
             <rect x="29" y="34" width="13" height="16" fill="#3a4258"/>
           </pattern>
+          <!-- Far-distance skyline: many tiny, dim windows so it reads as
+               buildings way in the background (fainter than the front towers). -->
+          <pattern id="metro-win-far" width="20" height="22" patternUnits="userSpaceOnUse">
+            <rect width="20" height="22" fill="#1d2336"/>
+            <rect x="3"  y="3"  width="5" height="6" fill="#c2a258"/>
+            <rect x="12" y="3"  width="5" height="6" fill="#2c3450"/>
+            <rect x="3"  y="13" width="5" height="6" fill="#2c3450"/>
+            <rect x="12" y="13" width="5" height="6" fill="#b6a25e"/>
+          </pattern>
         </defs>
 
         <!-- Stars + moon (sky itself is the SCSS night gradient) -->
@@ -728,6 +751,28 @@
           <circle cx="1108" cy="40" r="17" fill="#f2ead0"/>
           <circle cx="1101" cy="35" r="4" fill="#e1dabf" opacity="0.55"/>
           <circle cx="1114" cy="47" r="3" fill="#e1dabf" opacity="0.5"/>
+        </g>
+
+        <!-- Far distant skyline — short, dim buildings packed with tiny windows,
+             sitting behind the main towers so the city stretches into the distance. -->
+        <g class="metro-towers-far" opacity="0.8">
+          <rect x="0"    y="96"  width="46" height="70" fill="url(#metro-win-far)"/>
+          <rect x="50"   y="78"  width="40" height="88" fill="url(#metro-win-far)"/>
+          <rect x="96"   y="104" width="34" height="62" fill="url(#metro-win-far)"/>
+          <rect x="134"  y="90"  width="44" height="76" fill="url(#metro-win-far)"/>
+          <rect x="250"  y="84"  width="42" height="82" fill="url(#metro-win-far)"/>
+          <rect x="360"  y="100" width="50" height="66" fill="url(#metro-win-far)"/>
+          <rect x="416"  y="112" width="40" height="54" fill="url(#metro-win-far)"/>
+          <rect x="470"  y="92"  width="46" height="74" fill="url(#metro-win-far)"/>
+          <rect x="560"  y="106" width="44" height="60" fill="url(#metro-win-far)"/>
+          <rect x="640"  y="86"  width="50" height="80" fill="url(#metro-win-far)"/>
+          <rect x="700"  y="110" width="42" height="56" fill="url(#metro-win-far)"/>
+          <rect x="760"  y="96"  width="48" height="70" fill="url(#metro-win-far)"/>
+          <rect x="836"  y="108" width="40" height="58" fill="url(#metro-win-far)"/>
+          <rect x="1050" y="104" width="44" height="62" fill="url(#metro-win-far)"/>
+          <rect x="1100" y="88"  width="46" height="78" fill="url(#metro-win-far)"/>
+          <rect x="1330" y="100" width="42" height="66" fill="url(#metro-win-far)"/>
+          <rect x="1380" y="80"  width="50" height="86" fill="url(#metro-win-far)"/>
         </g>
 
         <!-- Skyscrapers (back) — single rect each, filled with a lit-window pattern -->
@@ -948,6 +993,25 @@
         <g class="bird bird--2"><path d="M470,30 q5,-4 10,-1 q4,-3 10,1" stroke="#a9805a" stroke-width="1.3" fill="none"/></g>
         <g class="bird bird--3"><path d="M980,40 q6,-5 11,-1 q5,-4 11,1" stroke="#b08a63" stroke-width="1.4" fill="none"/></g>
 
+        <!-- Distant town on the horizon (background, barely visible) -->
+        <g fill="#aebbb8" opacity="0.45">
+          <rect x="120" y="118" width="44" height="26"/>
+          <rect x="168" y="108" width="34" height="36"/>
+          <path d="M180,108 Q172,92 185,87 Q198,92 190,108 Z"/>
+          <rect x="206" y="122" width="40" height="22"/>
+          <rect x="300" y="114" width="50" height="30"/>
+          <rect x="354" y="124" width="36" height="20"/>
+          <path d="M364,124 Q358,112 369,108 Q380,112 374,124 Z"/>
+          <rect x="760" y="120" width="46" height="24"/>
+          <rect x="810" y="110" width="30" height="34"/>
+          <rect x="836" y="98" width="6" height="12"/>
+          <path d="M810,110 Q804,96 815,91 Q826,96 820,110 Z"/>
+          <rect x="900" y="122" width="42" height="22"/>
+        </g>
+
+        <!-- Far dune ridge (behind, barely visible) -->
+        <path d="M0,142 Q300,124 660,134 Q1000,144 1340,124 Q1480,118 1600,130 L1600,180 L0,180 Z" fill="#e0cea6" opacity="0.7"/>
+
         <!-- Distant dune silhouette -->
         <path d="M0,150 Q260,134 560,146 Q900,158 1240,140 Q1430,131 1600,146 L1600,180 L0,180 Z" fill="#ecd4a4"/>
         <!-- Sand ground -->
@@ -1135,12 +1199,36 @@
         <rect x="0" y="158" width="1600" height="22" fill="#f1f4f7"/>
         <path d="M0,159 Q400,153 800,158 T1600,159" stroke="#dfe6ec" stroke-width="2" fill="none"/>
 
-        <!-- Faint distant rooftops -->
-        <g fill="#cdd5dd" opacity="0.55">
-          <polygon points="360,128 420,128 390,106"/>
-          <polygon points="430,130 494,130 462,106"/>
-          <polygon points="690,128 754,128 722,104"/>
-          <polygon points="1300,130 1360,130 1330,108"/>
+        <!-- Faint distant town (buildings + trees, barely visible) -->
+        <g fill="#aeb9c4" opacity="0.55">
+          <rect x="60" y="124" width="48" height="34"/>
+          <polygon points="54,124 114,124 84,108"/>
+          <rect x="190" y="118" width="40" height="40"/>
+          <polygon points="184,118 236,118 210,104"/>
+          <rect x="360" y="122" width="60" height="36"/>
+          <polygon points="354,122 426,122 390,106"/>
+          <rect x="430" y="126" width="64" height="32"/>
+          <polygon points="424,126 500,126 462,108"/>
+          <rect x="640" y="116" width="44" height="42"/>
+          <polygon points="634,116 690,116 662,100"/>
+          <rect x="690" y="124" width="64" height="34"/>
+          <polygon points="684,124 760,124 722,104"/>
+          <rect x="870" y="120" width="50" height="38"/>
+          <polygon points="864,120 926,120 895,104"/>
+          <rect x="1040" y="124" width="46" height="34"/>
+          <polygon points="1034,124 1092,124 1063,108"/>
+          <rect x="1300" y="120" width="60" height="38"/>
+          <polygon points="1294,120 1366,120 1330,104"/>
+        </g>
+        <!-- Faint distant firs (barely visible) -->
+        <g fill="#9aab9f" opacity="0.55">
+          <polygon points="120,158 152,158 136,124"/>
+          <polygon points="300,158 326,158 313,132"/>
+          <polygon points="540,158 576,158 558,122"/>
+          <polygon points="780,158 808,158 794,130"/>
+          <polygon points="960,158 994,158 977,124"/>
+          <polygon points="1180,158 1206,158 1193,132"/>
+          <polygon points="1240,158 1278,158 1259,122"/>
         </g>
 
         <!-- Townhouse A (brick, blue door) -->
@@ -1350,29 +1438,35 @@
             <polygon points="1130,163 1158,163 1144,144" fill="#3f6b4a"/><polygon points="1138,153 1150,153 1144,144" fill="#eef3f6"/>
             <polygon points="1134,151 1154,151 1144,128" fill="#4a7a55"/><polygon points="1139,139 1149,139 1144,128" fill="#eef3f6"/>
           </g>
-          <!-- snow-mounded bushes -->
+          <!-- snow-mounded bushes (deliberately varied sizes) -->
+          <!-- large -->
           <g>
-            <ellipse cx="212" cy="167" rx="15" ry="9" fill="#4a7a55"/><ellipse cx="207" cy="164" rx="9" ry="6" fill="#3f6b4a"/>
-            <ellipse cx="212" cy="163" rx="13" ry="6" fill="#eef3f6"/><ellipse cx="217" cy="165" rx="6" ry="3.5" fill="#f1f4f7"/>
+            <ellipse cx="212" cy="166" rx="19" ry="12" fill="#4a7a55"/><ellipse cx="205" cy="162" rx="11" ry="7" fill="#3f6b4a"/>
+            <ellipse cx="212" cy="160" rx="16" ry="7" fill="#eef3f6"/><ellipse cx="220" cy="163" rx="7" ry="4" fill="#f1f4f7"/>
           </g>
+          <!-- small -->
           <g>
-            <ellipse cx="432" cy="168" rx="13" ry="8" fill="#4a7a55"/><ellipse cx="428" cy="165" rx="8" ry="5" fill="#3f6b4a"/>
-            <ellipse cx="432" cy="164" rx="11" ry="5" fill="#eef3f6"/>
+            <ellipse cx="432" cy="169" rx="9" ry="6" fill="#4a7a55"/><ellipse cx="429" cy="167" rx="5" ry="3.5" fill="#3f6b4a"/>
+            <ellipse cx="432" cy="166" rx="7" ry="3.5" fill="#eef3f6"/>
           </g>
+          <!-- medium-large -->
           <g>
-            <ellipse cx="706" cy="167" rx="14" ry="9" fill="#4a7a55"/><ellipse cx="710" cy="164" rx="8" ry="5" fill="#3f6b4a"/>
-            <ellipse cx="706" cy="163" rx="12" ry="5.5" fill="#eef3f6"/><ellipse cx="700" cy="165" rx="5" ry="3" fill="#f1f4f7"/>
+            <ellipse cx="706" cy="167" rx="16" ry="10" fill="#4a7a55"/><ellipse cx="711" cy="164" rx="9" ry="6" fill="#3f6b4a"/>
+            <ellipse cx="706" cy="162" rx="13" ry="6" fill="#eef3f6"/><ellipse cx="699" cy="165" rx="5" ry="3" fill="#f1f4f7"/>
           </g>
+          <!-- tiny -->
           <g>
-            <ellipse cx="802" cy="168" rx="12" ry="7" fill="#4a7a55"/><ellipse cx="802" cy="164.5" rx="10" ry="4.5" fill="#eef3f6"/>
+            <ellipse cx="802" cy="170" rx="8" ry="5" fill="#4a7a55"/><ellipse cx="802" cy="167.5" rx="6" ry="3" fill="#eef3f6"/>
           </g>
+          <!-- medium -->
           <g>
             <ellipse cx="1002" cy="168" rx="13" ry="8" fill="#4a7a55"/><ellipse cx="998" cy="165" rx="8" ry="5" fill="#3f6b4a"/>
-            <ellipse cx="1002" cy="164" rx="11" ry="5" fill="#eef3f6"/>
+            <ellipse cx="1002" cy="163" rx="11" ry="5" fill="#eef3f6"/>
           </g>
+          <!-- large -->
           <g>
-            <ellipse cx="1130" cy="168" rx="12" ry="7.5" fill="#4a7a55"/><ellipse cx="1134" cy="165" rx="7" ry="4.5" fill="#3f6b4a"/>
-            <ellipse cx="1130" cy="164" rx="10" ry="5" fill="#eef3f6"/>
+            <ellipse cx="1130" cy="166" rx="17" ry="11" fill="#4a7a55"/><ellipse cx="1136" cy="163" rx="10" ry="6.5" fill="#3f6b4a"/>
+            <ellipse cx="1130" cy="161" rx="14" ry="6" fill="#eef3f6"/><ellipse cx="1122" cy="164" rx="6" ry="3.5" fill="#f1f4f7"/>
           </g>
         </g>
 
@@ -1625,7 +1719,7 @@
 <!-- ── Mobile only: Search destination ─────────────────────────── -->
 <section class="m-destination">
   <div class="container">
-    <form class="m-destination__form" (ngSubmit)="onSearchDestination()">
+    <form class="m-destination__form" (submit)="onSearchDestination($event)">
       <div class="m-destination__field">
         <input
           class="m-destination__input"
