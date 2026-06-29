@@ -42,7 +42,10 @@
 
     @media (max-width: #{$bp-md - 1px}) {
       padding-block: $space-6;
-      padding-bottom: max(70px, 16vw);
+      // Reserve a taller band below the copy so the buttons sit further above
+      // the animated scene. The copy is vertically centred, so this only lifts
+      // the buttons — the hero keeps its height and the rows below stay in view.
+      padding-bottom: max(104px, 22vw);
     }
   }
 
