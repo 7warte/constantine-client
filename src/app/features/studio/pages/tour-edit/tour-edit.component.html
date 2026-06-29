@@ -1036,8 +1036,8 @@
 
   <!-- ── New-tour title prompt ──────────────────────────────────────── -->
   @if (showTitlePrompt()) {
-    <div class="title-prompt-backdrop">
-      <div class="title-prompt" role="dialog" aria-modal="true" aria-labelledby="title-prompt-heading">
+    <div class="title-prompt-backdrop" (click)="cancelTitlePrompt()">
+      <div class="title-prompt" role="dialog" aria-modal="true" aria-labelledby="title-prompt-heading" (click)="$event.stopPropagation()">
         <h2 id="title-prompt-heading" class="title-prompt__title">Name your tour</h2>
         <p class="title-prompt__text">Give your tour a title to get started — you can change it any time.</p>
         <input #titlePromptInput class="title-prompt__input" type="text" maxlength="200"

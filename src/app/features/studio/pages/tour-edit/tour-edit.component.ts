@@ -120,6 +120,11 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly titleDraft      = signal('');
   readonly titlePromptInput = viewChild<ElementRef<HTMLInputElement>>('titlePromptInput');
 
+  /** Dismiss the new-tour prompt — same as Cancel: leave the unnamed tour. */
+  cancelTitlePrompt(): void {
+    this.router.navigate(['/studio/tours']);
+  }
+
   confirmTitle(value: string): void {
     const title = value.trim() || 'My tour';
     this.form.controls.title.setValue(title);
