@@ -508,10 +508,17 @@
                             <mat-icon class="stop-card__geo" title="Has GPS location">place</mat-icon>
                           }
                         </strong>
-                        @if (stop.description) {
-                          <p class="stop-card__desc">{{ stop.description }}</p>
-                        }
+                        <!-- Text description for this point of interest (saved on blur) -->
+                        <label class="stop-card__text-field">
+                          <span class="stop-card__text-label">Text</span>
+                          <textarea class="stop-card__text" rows="2" maxlength="2000"
+                            placeholder="Add a text description for this point of interest…"
+                            [value]="stop.description || ''"
+                            (blur)="updateStopDescription(stop, $event)"></textarea>
+                        </label>
+
                         <div class="stop-card__upload-actions">
+                          <span class="stop-card__upload-label">Or add media:</span>
                           <label class="audio-upload">
                             <input type="file" accept="audio/*" (change)="onMediaSelect(stop.id, 'audio', $event)" hidden />
                             <span class="btn btn--ghost btn--sm btn--icon-text">

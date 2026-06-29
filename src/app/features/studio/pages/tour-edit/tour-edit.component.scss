@@ -1381,6 +1381,35 @@
     &:hover { color: $accent-hover; }
   }
 
+  &__text-field { display: block; margin-top: $space-2; }
+  &__text-label {
+    display: block;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    margin-bottom: $space-1;
+  }
+  &__text {
+    width: 100%;
+    padding: $space-2 $space-3;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    resize: vertical;
+    min-height: 56px;
+
+    &::placeholder { color: $text-muted; }
+    &:focus { outline: none; border-color: $accent-primary; box-shadow: 0 0 0 3px $accent-muted; }
+  }
+
+  &__upload-label {
+    grid-column: 1 / -1;
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+
   &__upload-actions {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

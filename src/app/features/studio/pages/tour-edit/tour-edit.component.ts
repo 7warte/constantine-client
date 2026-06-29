@@ -1430,6 +1430,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       .subscribe(() => { this.loadStops(); this.addingPoiFor.set(null); });
   }
 
+  /** Inline-edit a point of interest's text description (saved on blur). */
+  updateStopDescription(stop: any, event: Event): void {
+    const text = (event.target as HTMLTextAreaElement).value.slice(0, 2000);
+    if (text === (stop.description ?? '')) return;   // nothing changed
+    const vid = this.variantId();
+    if (!vid) return;
+    this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops/${stop.id}`, { description: text })
+      .subscribe({
+        next: (updated) => this.stops.update(s => s.map(x => x.id === stop.id ? { ...x, ...updated } : x)),
+        error: () => this.error.set('Failed to save the text.'),
+      });
+  }
+
   editStop(stop: any): void {
     this.editingStopId.set(stop.id);
     this.stopForm.patchValue({
