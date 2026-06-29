@@ -44,6 +44,9 @@ export class PromoteComponent implements OnInit {
   readonly qrDataUrl      = signal<string | null>(null);
   readonly busy           = signal(false);
   readonly copied         = signal(false);
+  // Mobile-only: shows the rendered promo card in a full-screen modal so it's
+  // actually legible (it's cramped inline on a phone).
+  readonly showPreview    = signal(false);
 
   readonly printSizes: PrintSize[] = ['a4', 'a5', 'a6'];
 
@@ -102,7 +105,11 @@ export class PromoteComponent implements OnInit {
   close(): void {
     this.kind.set(null);
     this.medium.set(null);
+    this.showPreview.set(false);
   }
+
+  openPreview():  void { this.showPreview.set(true); }
+  closePreview(): void { this.showPreview.set(false); }
 
   onTourChange(id: string): void {
     this.selectedTourId.set(id);

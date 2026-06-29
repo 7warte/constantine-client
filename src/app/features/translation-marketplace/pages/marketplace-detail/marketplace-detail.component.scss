@@ -7,7 +7,7 @@
 
   &__header {
     margin-bottom: $space-8;
-    h1 { font-size: $font-size-2xl; margin-bottom: $space-3; }
+    h1 { @include page-title; margin-bottom: $space-3; }
   }
 
   &__lang {

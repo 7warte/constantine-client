@@ -15,10 +15,7 @@
     margin-bottom: $space-3;
     flex-wrap: wrap;
 
-    h1 {
-      font-size: $font-size-2xl;
-      @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
-    }
+    h1 { @include page-title; }
   }
 
   &__status {

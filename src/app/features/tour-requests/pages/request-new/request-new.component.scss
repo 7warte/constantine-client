@@ -10,9 +10,8 @@
   }
 
   &__title {
-    font-size: $font-size-2xl;
+    @include page-title;
     margin-bottom: $space-3;
-    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-xl; }
   }
   &__subtitle { margin-bottom: $space-8; }
 }

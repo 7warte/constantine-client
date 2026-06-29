@@ -44,14 +44,33 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: $space-4;
+    gap: $space-6;
     margin-top: $space-6;
 
     @media (max-width: #{$bp-md - 1px}) {
       flex-wrap: nowrap;
       align-items: stretch;
-      gap: $space-3;
+      gap: $space-5;
     }
+
+    // The two choice buttons default to the same primary style, which makes
+    // them read as one button. Give each its own palette colour.
+    ::ng-deep .btn {
+      width: 100%;
+      border: 1px solid rgba($black, 0.12);
+    }
+  }
+
+  &__choices .ah-choice--explorer ::ng-deep .btn {
+    background: $dusty-rose;
+    color: $white;
+    &:hover { background: $accent-hover; }
+  }
+
+  &__choices .ah-choice--creator ::ng-deep .btn {
+    background: $wheat;
+    color: $text-primary;
+    &:hover { background: darken($wheat, 8%); }
   }
 }
 
