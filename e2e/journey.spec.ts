@@ -49,8 +49,10 @@ test.describe('creator + buyer journey', () => {
 
   test('inspect the demo blueprint in the Studio', async ({ page }) => {
     await page.goto('/studio/blueprint');
+    // Dismiss the purpose reminder, then the itinerary is visible.
+    await page.getByRole('button', { name: /show me the tour/i }).click();
     await expect(page.getByText(/the sunken city that never was/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /create your own tour/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /create a tour/i }).first()).toBeVisible();
   });
 
   test('create and publish a free dummy tour', async ({ page }) => {

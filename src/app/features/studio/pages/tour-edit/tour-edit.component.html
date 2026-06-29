@@ -238,16 +238,23 @@
 
           <div class="form-field address-field">
             <label class="form-field__label">Start address</label>
-            <span class="form-field__hint">Street, square or landmark.</span>
+            <span class="form-field__hint">
+              @if (!startTown()) { Choose the town first. }
+              @else if (startAddress()) { &#10003; Selected — pick again to change it. }
+              @else { Type a street, then pick it from the list. }
+            </span>
             <input type="text" class="form-field__input"
-              [placeholder]="startTown() ? 'e.g. Via dei Fori Imperiali' : 'e.g. Colosseum, Rome'"
-              [value]="startAddress()" (input)="onAddressInput('start', $event)" />
+              [disabled]="!startTown()"
+              [placeholder]="startTown() ? 'e.g. Via dei Fori Imperiali' : 'Choose a town first'"
+              [value]="startAddressInput()" (input)="onAddressInput('start', $event)" />
             @if (startSuggestions().length > 0) {
               <ul class="address-suggestions">
                 @for (s of startSuggestions(); track s.display_name) {
                   <li (mousedown)="selectSuggestion('start', s)">{{ s.display_name }}</li>
                 }
               </ul>
+            } @else if (startNoResults() && !startAddress()) {
+              <p class="address-noresult">No matches — check the street name or look for typos.</p>
             }
           </div>
         </div>
@@ -281,16 +288,23 @@
 
             <div class="form-field address-field">
               <label class="form-field__label">End address</label>
-              <span class="form-field__hint">Street, square or landmark.</span>
+              <span class="form-field__hint">
+                @if (!endTown()) { Choose the town first. }
+                @else if (endAddress()) { &#10003; Selected — pick again to change it. }
+                @else { Type a street, then pick it from the list. }
+              </span>
               <input type="text" class="form-field__input"
-                [placeholder]="endTown() ? 'e.g. Piazza del Duomo' : 'e.g. Vatican City'"
-                [value]="endAddress()" (input)="onAddressInput('end', $event)" />
+                [disabled]="!endTown()"
+                [placeholder]="endTown() ? 'e.g. Piazza del Duomo' : 'Choose a town first'"
+                [value]="endAddressInput()" (input)="onAddressInput('end', $event)" />
               @if (endSuggestions().length > 0) {
                 <ul class="address-suggestions">
                   @for (s of endSuggestions(); track s.display_name) {
                     <li (mousedown)="selectSuggestion('end', s)">{{ s.display_name }}</li>
                   }
                 </ul>
+              } @else if (endNoResults() && !endAddress()) {
+                <p class="address-noresult">No matches — check the street name or look for typos.</p>
               }
             </div>
           </div>

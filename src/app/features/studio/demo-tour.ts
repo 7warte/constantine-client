@@ -11,8 +11,10 @@ export interface DemoStop {
   numeral: string;
   title: string;
   text: string;
-  /** Cover-gradient class used as the image placeholder (cover-grad--g1 … g10). */
+  /** Cover-gradient class used as a fallback image placeholder. */
   gradient: string;
+  /** Real photo (assigned from the assets below). */
+  image?: string;
 }
 
 export interface DemoVenue {
@@ -155,3 +157,23 @@ export const DEMO_TOUR: DemoTour = {
     },
   ],
 };
+
+// Real photos to stand in for stop images (cycled across the 12 stops). Swap in
+// your own uploads here when they land in the assets folder.
+const DEMO_PHOTOS = [
+  'assets/homepage/tourist.jpg',
+  'assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg',
+  'assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',
+  'assets/homepage/chris-czermak.jpg',
+  'assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg',
+  'assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg',
+  'assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg',
+];
+
+let _photoIdx = 0;
+for (const venue of DEMO_TOUR.venues) {
+  for (const stop of venue.stops) {
+    stop.image = DEMO_PHOTOS[_photoIdx % DEMO_PHOTOS.length];
+    _photoIdx++;
+  }
+}

@@ -1,51 +1,77 @@
-<section class="blueprint">
-  <div class="blueprint__head">
-    <span class="blueprint__badge">Demo · read-only blueprint</span>
-    <h1 class="page-title">{{ tour.title }}</h1>
-    <p class="blueprint__subtitle">{{ tour.subtitle }}</p>
-    <p class="blueprint__desc">{{ tour.description }}</p>
-
-    <div class="blueprint__meta meta-chips">
-      <span class="meta-chip">{{ tour.meta.venues }} venues</span>
-      <span class="meta-chip">{{ tour.meta.stops }} stops</span>
-      <span class="meta-chip">{{ tour.meta.duration }}</span>
-      <span class="meta-chip">{{ tour.meta.setting }}</span>
-      <span class="meta-chip">{{ tour.meta.price }}</span>
-    </div>
-
-    <div class="blueprint__cta">
-      <a routerLink="/studio/tours/new" class="btn btn--primary">Create your own tour</a>
-      <span class="blueprint__cta-note">This example can't be edited — it's here purely to inspect.</span>
-    </div>
-  </div>
-
-  @for (venue of tour.venues; track venue.name; let vi = $index) {
-    <div class="venue">
-      <div class="venue__head">
-        <span class="venue__num">Venue {{ vi + 1 }}</span>
-        <h2 class="venue__name">{{ venue.name }}</h2>
-        <p class="venue__tagline">{{ venue.tagline }}</p>
-      </div>
-
-      <div class="venue__stops">
-        @for (stop of venue.stops; track stop.numeral) {
-          <article class="stop">
-            <div class="stop__image" [class]="stop.gradient" aria-hidden="true">
-              <span class="stop__image-label">Image</span>
-            </div>
-            <div class="stop__body">
-              <span class="stop__numeral">{{ stop.numeral }}</span>
-              <h3 class="stop__title">{{ stop.title }}</h3>
-              <p class="stop__text">{{ stop.text }}</p>
-            </div>
-          </article>
-        }
+<section class="bp">
+  <!-- Purpose reminder -->
+  @if (showIntro()) {
+    <div class="bp-intro-backdrop" (click)="closeIntro()">
+      <div class="bp-intro" (click)="$event.stopPropagation()">
+        <span class="bp-intro__badge">Demo · read-only</span>
+        <h2 class="bp-intro__title">This is an example tour</h2>
+        <p class="bp-intro__text">
+          “{{ tour.title }}” is a completely made-up tour. It's here so you can see exactly how a
+          finished Constantine tour looks <strong>when a visitor follows it</strong> — the same
+          venues → stops layout, with photos and descriptions. Poke around, then build your own real
+          one. You can't edit or break this example.
+        </p>
+        <button type="button" class="btn btn--primary" (click)="closeIntro()">Got it — show me the tour</button>
       </div>
     </div>
   }
 
-  <div class="blueprint__footer">
-    <p>Ready to build the real thing?</p>
+  <!-- Welcome header (mirrors the in-tour welcome screen) -->
+  <header class="bp__welcome">
+    <span class="bp__badge">Demo · read-only blueprint</span>
+    <h1 class="bp__title">{{ tour.title }}</h1>
+    <p class="bp__subtitle">{{ tour.subtitle }}</p>
+    <div class="bp__meta meta-chips">
+      <span class="meta-chip">{{ tour.meta.venues }} venues</span>
+      <span class="meta-chip">{{ tour.meta.stops }} stops</span>
+      <span class="meta-chip">{{ tour.meta.duration }}</span>
+      <span class="meta-chip">{{ tour.meta.price }}</span>
+    </div>
+    <p class="bp__desc">{{ tour.description }}</p>
+  </header>
+
+  <!-- Itinerary — the exact accordion layout a visitor sees while following a tour -->
+  <h2 class="bp__section-title">Itinerary</h2>
+  <mat-accordion class="bp__venues" displayMode="flat">
+    @for (venue of tour.venues; track venue.name; let gi = $index) {
+      <mat-expansion-panel class="bp__venue" [expanded]="gi === 0">
+        <mat-expansion-panel-header collapsedHeight="64px" expandedHeight="64px">
+          <mat-panel-title class="bp__venue-title">
+            <span class="bp__venue-num">{{ gi + 1 }}</span>
+            <span class="bp__venue-name">{{ venue.name }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <ng-template matExpansionPanelContent>
+          <p class="bp__venue-tagline">{{ venue.tagline }}</p>
+          <mat-accordion class="bp__stops" displayMode="flat">
+            @for (stop of venue.stops; track stop.numeral) {
+              <mat-expansion-panel class="bp__stop">
+                <mat-expansion-panel-header collapsedHeight="48px" expandedHeight="48px">
+                  <mat-panel-title class="bp__stop-title">
+                    <span class="bp__stop-num">{{ stop.numeral }}</span>
+                    <span class="bp__stop-name">{{ stop.title }}</span>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <ng-template matExpansionPanelContent>
+                  <div class="bp__stop-body">
+                    @if (stop.image) {
+                      <img class="bp__stop-image" [src]="stop.image" [alt]="stop.title" loading="lazy" />
+                    }
+                    <p class="bp__stop-text">{{ stop.text }}</p>
+                  </div>
+                </ng-template>
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </ng-template>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  <div class="bp__footer">
+    <p>This is just an example. Ready to build the real thing?</p>
     <a routerLink="/studio/tours/new" class="btn btn--primary btn--lg">Create a tour</a>
   </div>
 </section>

@@ -686,6 +686,20 @@
 
 .address-field { position: relative; }
 
+// Street field is disabled until a city is chosen.
+.address-field .form-field__input:disabled {
+  background: $bg-surface-alt;
+  color: $text-muted;
+  cursor: not-allowed;
+}
+
+// "No matches — check for typos" prompt under the street search.
+.address-noresult {
+  margin-top: $space-1;
+  font-size: $font-size-xs;
+  color: $color-warning;
+}
+
 .map-wrapper {
   margin-top: $space-4;
   margin-bottom: $space-4;

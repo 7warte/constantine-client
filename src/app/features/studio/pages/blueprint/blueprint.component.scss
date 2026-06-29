@@ -1,10 +1,11 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
 
-.blueprint {
-  max-width: 880px;
+.bp {
+  max-width: 760px;
 
-  &__head { margin-bottom: $space-6; }
+  // ── Welcome header ─────────────────────────────────────────────────────────
+  &__welcome { margin-bottom: $space-6; }
 
   &__badge {
     display: inline-block;
@@ -19,124 +20,147 @@
     letter-spacing: 0.06em;
   }
 
-  &__subtitle {
-    margin-top: $space-2;
-    font-style: italic;
-    color: $text-secondary;
-  }
-
+  &__title { @include page-title; }
+  &__subtitle { margin-top: $space-2; font-style: italic; color: $text-secondary; }
+  &__meta { margin-top: $space-4; }
   &__desc {
-    margin-top: $space-3;
-    max-width: 640px;
+    margin-top: $space-4;
     color: $text-secondary;
     line-height: $line-height-loose;
   }
 
-  &__meta { margin-top: $space-4; }
-
-  &__cta {
-    margin-top: $space-5;
-    display: flex;
-    align-items: center;
-    gap: $space-4;
-    flex-wrap: wrap;
+  &__section-title {
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: $space-6 0 $space-4;
   }
 
-  &__cta-note { font-size: $font-size-sm; color: $text-muted; }
+  // ── Venues / stops accordion (mirrors the player) ──────────────────────────
+  &__venues { display: block; }
 
+  // Flatten Material's default card chrome into a clean list.
+  ::ng-deep .mat-expansion-panel {
+    box-shadow: none !important;
+    border-radius: $radius-md !important;
+    border: 1px solid $border-default;
+    margin-bottom: $space-3;
+    background: $bg-surface;
+  }
+  ::ng-deep .mat-expansion-panel-body { padding: 0 $space-5 $space-4; }
+
+  &__venue {
+    ::ng-deep .mat-expansion-panel-header { padding: 0 $space-4; }
+  }
+
+  &__venue-title { display: flex; align-items: center; gap: $space-3; }
+  &__venue-num {
+    @include flex-center;
+    width: 28px; height: 28px; flex-shrink: 0;
+    border-radius: $radius-full;
+    background: $accent-muted;
+    color: $accent-primary;
+    font-family: $font-family-primary;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-sm;
+  }
+  &__venue-name {
+    font-family: $font-family-primary;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+  }
+  &__venue-tagline {
+    color: $text-secondary;
+    font-style: italic;
+    margin-bottom: $space-3;
+  }
+
+  &__stops { display: block; }
+  &__stop {
+    ::ng-deep .mat-expansion-panel-header { padding: 0 $space-3; }
+    border-color: $border-light;
+  }
+
+  &__stop-title { display: flex; align-items: center; gap: $space-3; }
+  &__stop-num {
+    font-family: $font-family-primary;
+    font-weight: $font-weight-bold;
+    color: $accent-primary;
+    font-size: $font-size-sm;
+    min-width: 28px;
+  }
+  &__stop-name { color: $text-primary; font-weight: $font-weight-semibold; }
+
+  &__stop-body { padding-top: $space-2; }
+  &__stop-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: $radius-md;
+    margin-bottom: $space-3;
+  }
+  &__stop-text { color: $text-secondary; line-height: $line-height-loose; }
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
   &__footer {
     margin-top: $space-8;
     padding-top: $space-6;
     border-top: 1px solid $border-default;
     text-align: center;
-
     p { margin-bottom: $space-3; color: $text-secondary; }
   }
 }
 
-.venue {
-  margin-top: $space-6;
-  padding-top: $space-5;
-  border-top: 1px solid $border-default;
+// ── Purpose modal ─────────────────────────────────────────────────────────────
+.bp-intro-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  background: rgba($black, 0.55);
+}
+.bp-intro {
+  width: 100%;
+  max-width: 460px;
+  background: $bg-surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  padding: $space-6;
+  text-align: center;
 
-  &__num {
+  &__badge {
+    display: inline-block;
+    margin-bottom: $space-3;
+    padding: 3px 10px;
+    border-radius: $radius-full;
+    background: $accent-muted;
+    color: $accent-primary;
     font-size: $font-size-xs;
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: $accent-primary;
   }
-
-  &__name {
-    font-family: $font-family-primary;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-    color: $text-primary;
-    margin: $space-1 0 $space-1;
-  }
-
-  &__tagline { color: $text-secondary; font-style: italic; }
-
-  &__stops {
-    margin-top: $space-4;
-    display: flex;
-    flex-direction: column;
-    gap: $space-4;
-  }
-}
-
-.stop {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: $space-4;
-  background: $bg-surface;
-  border: 1px solid $border-default;
-  border-radius: $radius-lg;
-  overflow: hidden;
-
-  @media (max-width: #{$bp-sm - 1px}) {
-    grid-template-columns: 1fr;
-  }
-
-  &__image {
-    position: relative;
-    min-height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    @media (max-width: #{$bp-sm - 1px}) { aspect-ratio: 16 / 9; }
-  }
-
-  &__image-label {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba($black, 0.4);
-  }
-
-  &__body { padding: $space-4 $space-4 $space-4 0; @media (max-width: #{$bp-sm - 1px}) { padding: $space-4; } }
-
-  &__numeral {
-    font-family: $font-family-primary;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-bold;
-    color: $accent-primary;
-  }
-
   &__title {
     font-family: $font-family-primary;
-    font-size: $font-size-md;
+    font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: $text-primary;
-    margin: 2px 0 $space-1;
+    margin-bottom: $space-3;
   }
-
-  &__text { font-size: $font-size-sm; color: $text-secondary; line-height: $line-height-loose; }
+  &__text {
+    color: $text-secondary;
+    line-height: $line-height-loose;
+    margin-bottom: $space-5;
+    text-align: left;
+    strong { color: $text-primary; }
+  }
 }
 
-// Local button styles (mirror the studio buttons).
+// Local button styles.
 .btn {
   display: inline-block; text-align: center;
   padding: $space-3 $space-5; border-radius: $radius-md;

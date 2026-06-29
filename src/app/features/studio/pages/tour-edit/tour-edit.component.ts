@@ -204,12 +204,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   // brief square resize never flashes on screen.
   readonly capturingMap = signal(false);
 
-  readonly startAddress = signal('');
-  readonly endAddress   = signal('');
+  // `…Address` holds the COMMITTED value (only ever set by clicking a list item);
+  // `…AddressInput` holds the raw text being typed, used only to filter the list.
+  readonly startAddress      = signal('');
+  readonly endAddress        = signal('');
+  readonly startAddressInput = signal('');
+  readonly endAddressInput   = signal('');
   readonly startCoords  = signal<[number, number] | null>(null);
   readonly endCoords    = signal<[number, number] | null>(null);
   readonly startSuggestions = signal<any[]>([]);
   readonly endSuggestions   = signal<any[]>([]);
+  // True when a ≥3-char search returned nothing — prompt the user to fix typos.
+  readonly startNoResults = signal(false);
+  readonly endNoResults   = signal(false);
 
   private geocode$ = new Subject<{ query: string; target: 'start' | 'end' | 'picker' | 'venue' | 'town-start' | 'town-end' | 'town-venue' | 'town-picker' }>();
   private geoSub!: Subscription;
@@ -563,8 +570,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       debounceTime(400),
       switchMap(({ query, target }) => {
         if (query.length < 3) {
-          if (target === 'start')              this.startSuggestions.set([]);
-          else if (target === 'end')           this.endSuggestions.set([]);
+          if (target === 'start')              { this.startSuggestions.set([]); this.startNoResults.set(false); }
+          else if (target === 'end')           { this.endSuggestions.set([]); this.endNoResults.set(false); }
           else if (target === 'picker')        this.pickerSuggestions.set([]);
           else if (target === 'venue')         this.venuePickerSuggestions.set([]);
           else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set([]);
@@ -593,8 +600,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         boundingbox: r.boundingbox,
       }));
       const target = data.target;
-      if (target === 'start')              this.startSuggestions.set(suggestions);
-      else if (target === 'end')           this.endSuggestions.set(suggestions);
+      const empty = suggestions.length === 0;
+      if (target === 'start')              { this.startSuggestions.set(suggestions); this.startNoResults.set(empty); }
+      else if (target === 'end')           { this.endSuggestions.set(suggestions); this.endNoResults.set(empty); }
       else if (target === 'picker')        this.pickerSuggestions.set(suggestions);
       else if (target === 'venue')         this.venuePickerSuggestions.set(suggestions);
       else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set(suggestions);
@@ -625,8 +633,20 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
           if (tour.end_latitude && tour.end_longitude) {
             this.endCoords.set([Number(tour.end_latitude), Number(tour.end_longitude)]);
           }
-          if (tour.start_address) this.startAddress.set(tour.start_address);
-          if (tour.end_address) this.endAddress.set(tour.end_address);
+          // Restore committed addresses + their input text, and derive a city so
+          // the street field is enabled (the saved address doesn't store the town).
+          if (tour.start_address) {
+            this.startAddress.set(tour.start_address);
+            this.startAddressInput.set(tour.start_address);
+            const t = this.deriveTown(tour.start_address);
+            this.startTown.set(t); this.startTownInput.set(t);
+          }
+          if (tour.end_address) {
+            this.endAddress.set(tour.end_address);
+            this.endAddressInput.set(tour.end_address);
+            const t = this.deriveTown(tour.end_address);
+            this.endTown.set(t); this.endTownInput.set(t);
+          }
           if (tour.start_address && tour.end_address && tour.start_address === tour.end_address) {
             this.sameAddress.set(true);
           }
@@ -905,7 +925,33 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     s.input.set(query);
     s.name.set('');          // editing invalidates the chosen scope
     s.vb.set(null);
+    // Changing the city resets that scope's street — it belonged to the old city.
+    this.resetAddressFor(which);
     this.geocode$.next({ query, target: `town-${which}` as any });
+  }
+
+  /** Clear the street/address tied to a given city scope. */
+  private resetAddressFor(which: TownKey): void {
+    if (which === 'start') {
+      this.startAddressInput.set(''); this.startAddress.set(''); this.startCoords.set(null);
+      this.startSuggestions.set([]); this.startNoResults.set(false);
+      if (this.startMarker) { this.startMarker.remove(); this.startMarker = null; }
+    } else if (which === 'end') {
+      this.endAddressInput.set(''); this.endAddress.set(''); this.endCoords.set(null);
+      this.endSuggestions.set([]); this.endNoResults.set(false);
+      if (this.endMarker) { this.endMarker.remove(); this.endMarker = null; }
+    } else if (which === 'venue') {
+      this.venuePickerAddress.set(''); this.venuePickerSuggestions.set([]);
+    }
+  }
+
+  /** Best-effort city token from a saved address (used only to re-enable/scope
+   *  the street field when editing an existing tour). */
+  private deriveTown(address: string): string {
+    const seg = (address || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (seg.length <= 1) return seg[0] || '';
+    const noCountry = seg.slice(0, -1).filter(s => !/^\d[\d\s-]*$/.test(s));
+    return noCountry[noCountry.length - 1] || seg[0];
   }
 
   selectTown(which: TownKey, suggestion: any): void {
@@ -923,8 +969,21 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   onAddressInput(target: 'start' | 'end', event: Event): void {
     const query = (event.target as HTMLInputElement).value;
-    if (target === 'start') this.startAddress.set(query);
-    else this.endAddress.set(query);
+    // Typing only filters the list — it never commits a value. The committed
+    // address/coords are cleared until the user clicks a list item.
+    if (target === 'start') {
+      this.startAddressInput.set(query);
+      this.startAddress.set('');
+      this.startCoords.set(null);
+      this.startNoResults.set(false);
+      if (this.startMarker) { this.startMarker.remove(); this.startMarker = null; }
+    } else {
+      this.endAddressInput.set(query);
+      this.endAddress.set('');
+      this.endCoords.set(null);
+      this.endNoResults.set(false);
+      if (this.endMarker) { this.endMarker.remove(); this.endMarker = null; }
+    }
     this.geocode$.next({ query, target });
   }
 
@@ -932,12 +991,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (target === 'start') {
       this.startCoords.set([suggestion.lat, suggestion.lon]);
       this.startAddress.set(suggestion.display_name);
+      this.startAddressInput.set(suggestion.display_name);
       this.startSuggestions.set([]);
+      this.startNoResults.set(false);
       this.placeStartMarker(suggestion.lat, suggestion.lon);
     } else {
       this.endCoords.set([suggestion.lat, suggestion.lon]);
       this.endAddress.set(suggestion.display_name);
+      this.endAddressInput.set(suggestion.display_name);
       this.endSuggestions.set([]);
+      this.endNoResults.set(false);
       this.placeEndMarker(suggestion.lat, suggestion.lon);
     }
     if (this.map) {
@@ -952,6 +1015,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   }
 
   async saveLocation(skipWarning = false): Promise<void> {
+    // Enforce "pick from the list": typed-but-unselected text isn't a real place.
+    if (this.startAddressInput().trim() && !this.startAddress()) {
+      this.error.set('Pick the start address from the list — it has to be a real match.');
+      return;
+    }
+    if (!this.sameAddress() && this.endAddressInput().trim() && !this.endAddress()) {
+      this.error.set('Pick the end address from the list — it has to be a real match.');
+      return;
+    }
+
     // Check if map has pinned spaces — warn before resetting
     if (!skipWarning && this.map && this.tour()?.map_image_url) {
       const hasPins = this.spaces().some(s => s.map_x != null);
