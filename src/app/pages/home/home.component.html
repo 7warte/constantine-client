@@ -1705,7 +1705,7 @@
     @if (topRatedTours().length > 0) {
       <div class="m-tour-rows__row">
         <p class="m-tour-rows__label">Most rated</p>
-        <div class="m-tour-rows__grid">
+        <div class="m-tour-rows__grid m-tour-rows__grid--carousel">
           @for (tour of topRatedTours(); track tour.variant_id) {
             <app-card [tour]="tour" />
           }

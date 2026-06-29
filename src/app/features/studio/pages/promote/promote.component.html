@@ -11,51 +11,34 @@
     <div class="promote__loading" role="status">Loading your tours…</div>
   } @else {
 
-    <!-- ── Option chooser ─────────────────────────────────────────────── -->
-    <div class="promo-groups">
-      <div class="promo-group">
-        <h2 class="promo-group__title"><mat-icon>print</mat-icon> Printable</h2>
-        <div class="promo-group__cards">
-          @for (o of options; track o.title) {
-            @if (o.medium === 'print') {
-              <button type="button" class="promo-opt" [class.promo-opt--active]="isActive(o)" (click)="pick(o)">
-                <mat-icon class="promo-opt__icon">{{ o.icon }}</mat-icon>
-                <span class="promo-opt__title">{{ o.title }}</span>
-                <span class="promo-opt__desc">{{ o.desc }}</span>
-              </button>
-            }
-          }
-        </div>
-      </div>
+    <!-- ── Printable / Digital switch (always visible) ──────────────────── -->
+    <div class="medium-switch" role="tablist" aria-label="Promo type">
+      <button type="button" class="medium-switch__btn" role="tab"
+        [class.medium-switch__btn--active]="medium() === 'print'"
+        [attr.aria-selected]="medium() === 'print'" (click)="setMedium('print')">
+        <mat-icon>print</mat-icon> Printable
+      </button>
+      <button type="button" class="medium-switch__btn" role="tab"
+        [class.medium-switch__btn--active]="medium() === 'digital'"
+        [attr.aria-selected]="medium() === 'digital'" (click)="setMedium('digital')">
+        <mat-icon>smartphone</mat-icon> Digital
+      </button>
+    </div>
 
-      <div class="promo-group">
-        <h2 class="promo-group__title"><mat-icon>smartphone</mat-icon> Digital</h2>
-        <div class="promo-group__cards">
-          @for (o of options; track o.title) {
-            @if (o.medium === 'digital') {
-              <button type="button" class="promo-opt" [class.promo-opt--active]="isActive(o)" (click)="pick(o)">
-                <mat-icon class="promo-opt__icon">{{ o.icon }}</mat-icon>
-                <span class="promo-opt__title">{{ o.title }}</span>
-                <span class="promo-opt__desc">{{ o.desc }}</span>
-              </button>
-            }
-          }
-        </div>
-      </div>
+    <!-- Options for the selected medium -->
+    <div class="promo-group__cards">
+      @for (o of visibleOptions(); track o.title) {
+        <button type="button" class="promo-opt" [class.promo-opt--active]="isActive(o)" (click)="pick(o)">
+          <mat-icon class="promo-opt__icon">{{ o.icon }}</mat-icon>
+          <span class="promo-opt__title">{{ o.title }}</span>
+          <span class="promo-opt__desc">{{ o.desc }}</span>
+        </button>
+      }
     </div>
 
     <!-- ── Builder ────────────────────────────────────────────────────── -->
     @if (chosen()) {
       <div class="builder">
-        <!-- Mobile-only sheet header: the builder becomes a full-screen sheet on
-             phones so the preview/controls are immediately visible after a pick. -->
-        <div class="builder__sheet-head">
-          <button type="button" class="builder__back" (click)="close()" aria-label="Back to options">
-            <mat-icon>arrow_back</mat-icon>
-          </button>
-          <span class="builder__sheet-title">{{ chosenOption()?.title }}</span>
-        </div>
-
         <div class="builder__controls">
           @if (kind() === 'tour') {
             <label class="builder__field">
@@ -205,7 +188,7 @@
         </div>
       </div>
     } @else {
-      <p class="promote__hint">Pick one of the four options above to start building your promo.</p>
+      <p class="promote__hint">Pick an option above to start building your promo.</p>
     }
   }
 </section>

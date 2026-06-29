@@ -29,11 +29,20 @@
           }
           <div class="purchase-card__body">
             <h2 class="purchase-card__title">{{ purchase.tour_title }}</h2>
-            <p class="purchase-card__meta">
-              <span class="lang-badge">{{ purchase.language | uppercase }}</span>
-              <span class="purchase-card__waypoints">{{ purchase.waypoint_count }} stops</span>
-            </p>
-            <p class="purchase-card__creator">by {{ purchase.creator_display_name }}</p>
+            <div class="purchase-card__meta meta-chips">
+              <span class="meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                {{ purchase.language | uppercase }}
+              </span>
+              <span class="meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ purchase.waypoint_count }} stops
+              </span>
+              <span class="meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="meta-chip__text">{{ purchase.creator_display_name }}</span>
+              </span>
+            </div>
           </div>
           <div class="purchase-card__footer">
             <a [routerLink]="['/library', purchase.id, 'play']" class="btn btn--primary btn--block purchase-card__start">

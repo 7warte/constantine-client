@@ -14,20 +14,36 @@
   </div>
 
   <div class="tour-card__body">
-    <span class="tour-card__lang">{{ tour.language_code | uppercase }}</span>
     <h3 class="tour-card__title">{{ tour.tour_title }}</h3>
-    <p class="tour-card__creator">
-      by {{ tour.creator_username }}@if (tour.translator_username) {
-        <span class="tour-card__translated"> · translated by {{ tour.translator_username }}</span>
-      }
-    </p>
 
-    <div class="tour-card__footer">
-      <app-star-rating [rating]="tour.average_rating" [count]="tour.review_count" />
-      <span class="tour-card__price">
-        @if (tour.price_cents === 0) { Free }
-        @else { {{ tour.price_cents / 100 | currency:'EUR' }} }
+    <!-- Metadata, each as a consistent little chip -->
+    <div class="tour-card__meta meta-chips">
+      <span class="meta-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        {{ tour.language_code | uppercase }}
       </span>
+      <span class="meta-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="meta-chip__text">{{ tour.creator_username }}</span>
+      </span>
+      @if (tour.duration_minutes) {
+        <span class="meta-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ tour.duration_minutes }} min
+        </span>
+      }
+      @if (tour.setting) {
+        <span class="meta-chip">{{ tour.setting | titlecase }}</span>
+      }
     </div>
+
+    <div class="tour-card__rating">
+      <app-star-rating [rating]="tour.average_rating" [count]="tour.review_count" />
+    </div>
+
+    <span class="tour-card__price">
+      @if (tour.price_cents === 0) { Free }
+      @else { {{ tour.price_cents / 100 | currency:'EUR' }} }
+    </span>
   </div>
 </article>

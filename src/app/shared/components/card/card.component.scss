@@ -70,39 +70,38 @@
     flex: 1;
   }
 
-  &__lang {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    color: $accent-primary;
-    letter-spacing: 0.1em;
-  }
-
   &__title {
     font-family: $font-family-primary;
-    font-size: $font-size-lg;
+    font-size: $font-size-md;
+    line-height: $line-height-tight;
     color: $text-primary;
+    overflow-wrap: anywhere;
     @include line-clamp(2);
   }
 
-  &__creator {
-    font-size: $font-size-sm;
-    color: $text-secondary;
+  &__meta {
+    margin-top: $space-1;
   }
 
-  &__translated {
-    color: $accent-primary;
-    font-style: italic;
-  }
-
-  &__footer {
-    @include flex-between;
+  // Rating + price are pinned to the bottom; price sits on its own line, last.
+  &__rating {
     margin-top: auto;
-    padding-top: $space-4;
+    padding-top: $space-3;
   }
 
   &__price {
+    margin-top: $space-1;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
     color: $text-primary;
+  }
+
+  // Rating stars are oversized for a card — shrink them (more so on mobile).
+  ::ng-deep .stars__star { font-size: $font-size-base; }
+  ::ng-deep .stars__count { font-size: $font-size-xs; }
+
+  @media (max-width: #{$bp-md - 1px}) {
+    &__title { font-size: $font-size-base; }
+    ::ng-deep .stars__star { font-size: 13px; }
   }
 }

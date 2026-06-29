@@ -79,19 +79,21 @@
       align-items: stretch;
 
       &__cover {
-        flex: 0 0 40%;
+        flex: 0 0 38%;
+        align-self: flex-start;
         aspect-ratio: 1 / 1;
       }
 
       &__body {
         flex: 1;
-        padding: $space-3 $space-4;
-        gap: $space-1;
+        min-width: 0;
+        padding: $space-4;          // a little more room to fit the meta chips
+        gap: $space-2;
       }
 
       &__title { font-size: $font-size-base; }
-
-      &__footer { padding-top: $space-2; }
+      &__meta  { margin-top: $space-1; }
+      &__rating { padding-top: $space-2; }
     }
   }
 }

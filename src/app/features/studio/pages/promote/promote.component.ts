@@ -35,8 +35,11 @@ export class PromoteComponent implements OnInit {
   readonly tours   = signal<any[]>([]);
   readonly loading = signal(true);
 
+  // `medium` is always set — it drives the Printable/Digital switch at the top
+  // and which options are shown. `kind` stays null until an option is picked,
+  // which is what reveals the builder.
   readonly kind           = signal<PromoKind | null>(null);
-  readonly medium         = signal<PromoMedium | null>(null);
+  readonly medium         = signal<PromoMedium>('print');
   readonly selectedTourId = signal<string>('');
   readonly variantId      = signal<string | null>(null);
   readonly printSize      = signal<PrintSize>('a5');
@@ -61,9 +64,10 @@ export class PromoteComponent implements OnInit {
 
   readonly selectedTour = computed(() => this.tours().find(t => t.id === this.selectedTourId()) ?? null);
   readonly featuredTours = computed(() => this.tours().slice(0, 4));
-  readonly chosen = computed(() => this.kind() !== null && this.medium() !== null);
-  // The currently-picked option — drives the mobile builder sheet's header.
+  readonly chosen = computed(() => this.kind() !== null);
   readonly chosenOption = computed(() => this.options.find(o => this.isActive(o)) ?? null);
+  // Options shown for the currently-selected medium (Printable or Digital).
+  readonly visibleOptions = computed(() => this.options.filter(o => o.medium === this.medium()));
 
   readonly targetUrl = computed(() => {
     const origin = window.location.origin;
@@ -101,11 +105,12 @@ export class PromoteComponent implements OnInit {
     return this.kind() === o.kind && this.medium() === o.medium;
   }
 
-  /** Closes the builder (used by the mobile full-screen sheet's back button). */
-  close(): void {
-    this.kind.set(null);
-    this.medium.set(null);
-    this.showPreview.set(false);
+  /** Switch between Printable / Digital. Keeps the chosen kind so the preview
+   *  just re-renders in the new medium if a builder is already open. */
+  setMedium(m: PromoMedium): void {
+    if (this.medium() === m) return;
+    this.medium.set(m);
+    if (this.kind() !== null) this.refresh();
   }
 
   openPreview():  void { this.showPreview.set(true); }

@@ -46,6 +46,40 @@
 .card       { @include card; }
 .card-light { @include card-light; }
 
+// ── Meta chips ────────────────────────────────────────────────────────────────
+// A consistent little info pill (language, author, stops, duration…) used on the
+// tour cards and the library cards so every piece of metadata reads the same.
+.meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1 $space-2;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
+  font-family: $font-family-secondary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  // Long values (e.g. author name) truncate instead of breaking the row.
+  &__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 // ── Misc ──────────────────────────────────────────────────────────────────────
 .truncate   { @include truncate; }
 .sr-only {

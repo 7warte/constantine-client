@@ -18,21 +18,50 @@
 
 .page-title { @include page-title; }
 
-// ── Option chooser ──────────────────────────────────────────────────────────
-.promo-groups {
-  display: grid;
-  gap: $space-6;
-  @include md { grid-template-columns: 1fr 1fr; }
+// ── Printable / Digital switch ───────────────────────────────────────────────
+.medium-switch {
+  display: inline-flex;
+  gap: $space-1;
+  padding: $space-1;
+  margin-bottom: $space-5;
+  background: $bg-surface-alt;
+  border: 1px solid $border-default;
+  border-radius: $radius-full;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    display: flex;
+    width: 100%;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    padding: $space-2 $space-5;
+    border: none;
+    background: none;
+    border-radius: $radius-full;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    .mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    &--active { background: $accent-primary; color: $white; }
+
+    @media (max-width: #{$bp-md - 1px}) { flex: 1; }
+  }
 }
 
-.promo-group {
-  &__title {
-    display: flex; align-items: center; gap: $space-2;
-    font-family: $font-family-primary; font-size: $font-size-md; color: $text-primary;
-    margin-bottom: $space-4;
-    .mat-icon { color: $text-muted; }
-  }
-  &__cards { display: flex; flex-direction: column; gap: $space-3; }
+// ── Option cards (for the selected medium) ───────────────────────────────────
+.promo-group__cards {
+  display: grid;
+  gap: $space-3;
+  @include md { grid-template-columns: 1fr 1fr; }
 }
 
 .promo-opt {
@@ -103,59 +132,13 @@
   overflow: auto;
 }
 
-// Sheet header, preview button and preview-close are desktop-hidden; the
-// builder is just an inline panel with an always-visible preview there.
-.builder__sheet-head  { display: none; }
+// Preview button and preview-close are desktop-hidden; the builder is an inline
+// panel with an always-visible preview there.
 .builder__preview-btn { display: none; }
 .builder__stage-close { display: none; }
 
-// ── Mobile: the builder opens as a full-screen sheet ─────────────────────────
-// Picking an option below the fold used to update content the user couldn't see.
-// On phones the builder now takes over the screen (preview first) so the result
-// is immediately visible, with a sticky back button to return to the options.
+// ── Mobile: builder flows inline; the cramped preview moves to a modal ───────
 @media (max-width: #{$bp-md - 1px}) {
-  .builder {
-    position: fixed;
-    inset: 0;
-    z-index: $z-modal;
-    margin-top: 0;
-    display: flex;
-    flex-direction: column;
-    gap: $space-5;
-    padding: $space-4;
-    background: $bg-base;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .builder__sheet-head {
-    display: flex;
-    align-items: center;
-    gap: $space-3;
-    position: sticky;
-    top: 0;
-    margin: (-$space-4) (-$space-4) 0;
-    padding: $space-3 $space-4;
-    background: $bg-surface;
-    border-bottom: 1px solid $border-default;
-    z-index: 1;
-  }
-
-  .builder__back {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border-radius: $radius-full;
-    color: $text-primary;
-    .mat-icon { font-size: 22px; width: 22px; height: 22px; }
-    &:hover { background: $bg-surface-alt; }
-  }
-
-  .builder__sheet-title {
-    font-family: $font-family-primary;
-    font-weight: $font-weight-semibold;
-    font-size: $font-size-md;
-    color: $text-primary;
-  }
-
   // The inline preview is cramped on a phone, so hide it and surface a Preview
   // button instead. The stage is kept in the DOM (the PDF/image export reads it)
   // but only shown when opened as a full-screen modal.
