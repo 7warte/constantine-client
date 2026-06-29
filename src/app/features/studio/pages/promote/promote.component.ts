@@ -47,9 +47,6 @@ export class PromoteComponent implements OnInit {
   readonly qrDataUrl      = signal<string | null>(null);
   readonly busy           = signal(false);
   readonly copied         = signal(false);
-  // Mobile-only: shows the rendered promo card in a full-screen modal so it's
-  // actually legible (it's cramped inline on a phone).
-  readonly showPreview    = signal(false);
 
   readonly printSizes: PrintSize[] = ['a4', 'a5', 'a6'];
 
@@ -60,7 +57,8 @@ export class PromoteComponent implements OnInit {
     { kind: 'creator', medium: 'digital', icon: 'share',               title: 'Creator showcase',     desc: 'A social-ready image promoting you and all of your tours.' },
   ];
 
-  readonly preview = viewChild<ElementRef<HTMLElement>>('preview');
+  readonly preview   = viewChild<ElementRef<HTMLElement>>('preview');
+  readonly builderEl = viewChild<ElementRef<HTMLElement>>('builder');
 
   readonly selectedTour = computed(() => this.tours().find(t => t.id === this.selectedTourId()) ?? null);
   readonly featuredTours = computed(() => this.tours().slice(0, 4));
@@ -99,6 +97,8 @@ export class PromoteComponent implements OnInit {
     this.kind.set(option.kind);
     this.medium.set(option.medium);
     this.refresh();
+    // The builder + preview appear below the options — bring them into view.
+    setTimeout(() => this.builderEl()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
 
   isActive(o: PromoOption): boolean {
@@ -113,8 +113,6 @@ export class PromoteComponent implements OnInit {
     if (this.kind() !== null) this.refresh();
   }
 
-  openPreview():  void { this.showPreview.set(true); }
-  closePreview(): void { this.showPreview.set(false); }
 
   onTourChange(id: string): void {
     this.selectedTourId.set(id);

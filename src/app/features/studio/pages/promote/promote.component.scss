@@ -132,62 +132,13 @@
   overflow: auto;
 }
 
-// Preview button and preview-close are desktop-hidden; the builder is an inline
-// panel with an always-visible preview there.
-.builder__preview-btn { display: none; }
-.builder__stage-close { display: none; }
-
-// ── Mobile: builder flows inline; the cramped preview moves to a modal ───────
+// ── Mobile: builder + preview flow inline (no modal) ─────────────────────────
 @media (max-width: #{$bp-md - 1px}) {
-  // The inline preview is cramped on a phone, so hide it and surface a Preview
-  // button instead. The stage is kept in the DOM (the PDF/image export reads it)
-  // but only shown when opened as a full-screen modal.
-  .builder__preview-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: $space-2;
-    .mat-icon { font-size: 18px; width: 18px; height: 18px; }
-  }
-
   .builder__stage {
-    display: none;
-
-    &--preview-open {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: fixed;
-      inset: 0;
-      z-index: $z-modal + 1;
-      margin: 0;
-      padding: $space-5;
-      border: none;
-      border-radius: 0;
-      background: rgba($black, 0.9);
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-
-      // `margin: auto` centres the card when it fits and lets it scroll from
-      // the top when it's taller than the screen (no clipping).
-      .promo { margin: auto; }
-    }
-  }
-
-  .builder__stage-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    top: $space-4;
-    right: $space-4;
-    z-index: 1;
-    width: 40px;
-    height: 40px;
-    border-radius: $radius-full;
-    background: rgba($white, 0.15);
-    color: $white;
-    .mat-icon { font-size: 24px; width: 24px; height: 24px; }
+    padding: $space-4;
+    // The card scales to the phone width; it only scrolls if it's genuinely
+    // taller than the screen (e.g. an A-series print layout).
+    .promo { width: 100%; max-width: 360px; }
   }
 }
 

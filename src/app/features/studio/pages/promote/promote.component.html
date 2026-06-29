@@ -38,7 +38,7 @@
 
     <!-- ── Builder ────────────────────────────────────────────────────── -->
     @if (chosen()) {
-      <div class="builder">
+      <div class="builder" #builder>
         <div class="builder__controls">
           @if (kind() === 'tour') {
             <label class="builder__field">
@@ -87,11 +87,6 @@
             <button type="button" class="btn btn--ghost" (click)="copyLink()">
               {{ copied() ? 'Link copied ✓' : 'Copy link' }}
             </button>
-            <!-- Mobile only: the inline preview is cramped, so offer a button
-                 that opens the rendered card in a full-screen modal. -->
-            <button type="button" class="btn btn--ghost builder__preview-btn" (click)="openPreview()">
-              <mat-icon>visibility</mat-icon> Preview
-            </button>
           </div>
 
           <p class="builder__note">
@@ -101,13 +96,9 @@
           </p>
         </div>
 
-        <!-- Preview stage — inline on desktop; on mobile it's hidden until the
-             Preview button opens it as a full-screen modal. -->
-        <div class="builder__stage" [class.builder__stage--preview-open]="showPreview()" (click)="closePreview()">
-          <button type="button" class="builder__stage-close" (click)="closePreview()" aria-label="Close preview">
-            <mat-icon>close</mat-icon>
-          </button>
-          <div #preview class="promo" (click)="$event.stopPropagation()"
+        <!-- Preview stage — shown inline on every screen size. -->
+        <div class="builder__stage">
+          <div #preview class="promo"
             [class.promo--print]="medium() === 'print'"
             [class.promo--square]="medium() === 'digital' && digitalFormat() === 'square'"
             [class.promo--story]="medium() === 'digital' && digitalFormat() === 'story'">
