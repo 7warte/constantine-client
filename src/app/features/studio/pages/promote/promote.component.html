@@ -89,6 +89,10 @@
             </button>
           </div>
 
+          @if (exportError()) {
+            <p class="builder__error" role="alert">{{ exportError() }}</p>
+          }
+
           <p class="builder__note">
             <mat-icon>qr_code_2</mat-icon>
             QR &amp; link point to

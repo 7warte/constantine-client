@@ -105,6 +105,14 @@
   &:focus { outline: none; border-color: $accent-primary; }
 }
 .builder__empty { font-size: $font-size-sm; color: $text-muted; }
+.builder__error {
+  font-size: $font-size-sm;
+  color: $color-error;
+  background: rgba($color-error, 0.08);
+  border: 1px solid rgba($color-error, 0.3);
+  border-radius: $radius-sm;
+  padding: $space-3;
+}
 .builder__actions { display: flex; flex-direction: column; gap: $space-3; }
 .builder__note {
   display: flex; align-items: flex-start; gap: $space-2;

@@ -47,6 +47,7 @@ export class PromoteComponent implements OnInit {
   readonly qrDataUrl      = signal<string | null>(null);
   readonly busy           = signal(false);
   readonly copied         = signal(false);
+  readonly exportError    = signal<string | null>(null);
 
   readonly printSizes: PrintSize[] = ['a4', 'a5', 'a6'];
 
@@ -168,45 +169,93 @@ export class PromoteComponent implements OnInit {
     const el = this.preview()?.nativeElement;
     if (!el) return;
     this.busy.set(true);
+    this.exportError.set(null);
     try {
       const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        // Render the element at its real on-screen size (some mobile browsers
+        // otherwise capture a 0-size or clipped canvas).
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+        windowWidth: document.documentElement.clientWidth,
+      });
       const blob = await new Promise<Blob | null>(r => canvas.toBlob(b => r(b), 'image/png'));
-      if (blob) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `constantine-${this.kind()}-${this.digitalFormat()}.png`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      }
-    } catch (e) {
+      if (!blob) throw new Error('The image could not be generated.');
+      await this.deliverImage(blob, `constantine-${this.kind()}-${this.digitalFormat()}.png`);
+    } catch (e: any) {
       console.error('Promo export failed:', e);
+      this.exportError.set(e?.message || 'Could not create the image. Please try again.');
     } finally {
       this.busy.set(false);
     }
   }
 
+  /** Save an image reliably across desktop and mobile (iOS ignores <a download>). */
+  private async deliverImage(blob: Blob, filename: string): Promise<void> {
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    // Mobile: use the native share/save sheet when it can handle files.
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: filename });
+        return;
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;   // user dismissed the sheet
+        // any other failure → fall through to the anchor download
+      }
+    }
+
+    // Desktop / fallback: anchor download (must be in the DOM; revoke later so
+    // the browser has time to start the download before the URL is freed).
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
   async print(): Promise<void> {
     const el = this.preview()?.nativeElement;
     if (!el) return;
+    // Open the print window synchronously within the click gesture so mobile
+    // pop-up blockers don't kill it; we fill it in once the image is ready.
+    const w = window.open('', '_blank');
     this.busy.set(true);
+    this.exportError.set(null);
     try {
       const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
-      const img = canvas.toDataURL('image/png');
+      const canvas = await html2canvas(el, {
+        scale: 3, useCORS: true, backgroundColor: '#ffffff',
+        width: el.offsetWidth, height: el.offsetHeight,
+      });
       const size = this.printSize().toUpperCase();
-      const w = window.open('', '_blank');
-      if (!w) return;
-      w.document.write(
-        `<!doctype html><html><head><title>Constantine promo</title><style>`
-        + `@page { size: ${size}; margin: 0; }`
-        + `html,body { margin:0; padding:0; height:100%; }`
-        + `img { width:100%; height:100vh; object-fit:contain; display:block; }`
-        + `</style></head><body><img src="${img}" onload="window.focus();window.print();"></body></html>`
-      );
-      w.document.close();
-    } catch (e) {
+      if (w) {
+        w.document.write(
+          `<!doctype html><html><head><title>Constantine promo</title><style>`
+          + `@page { size: ${size}; margin: 0; }`
+          + `html,body { margin:0; padding:0; height:100%; }`
+          + `img { width:100%; height:100vh; object-fit:contain; display:block; }`
+          + `</style></head><body><img src="${canvas.toDataURL('image/png')}" onload="window.focus();window.print();"></body></html>`
+        );
+        w.document.close();
+      } else {
+        // Pop-up blocked — save the poster as an image instead.
+        const blob = await new Promise<Blob | null>(r => canvas.toBlob(b => r(b), 'image/png'));
+        if (!blob) throw new Error('The image could not be generated.');
+        await this.deliverImage(blob, `constantine-${this.kind()}-${this.printSize()}.png`);
+        this.exportError.set('Pop-ups are blocked, so we saved the poster as an image instead.');
+      }
+    } catch (e: any) {
+      w?.close();
       console.error('Promo print failed:', e);
+      this.exportError.set(e?.message || 'Could not prepare the print. Please try again.');
     } finally {
       this.busy.set(false);
     }
