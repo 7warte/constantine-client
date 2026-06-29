@@ -180,16 +180,16 @@
     &:hover { color: $white; }
   }
 
-  // Leading icon, shown on desktop only.
+  // Leading icon, shown at every breakpoint.
   &__mobile-icon {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     font-size: 22px;
     width: 22px;
     height: 22px;
     line-height: 22px;
-
-    @include lg { display: inline-flex; align-items: center; justify-content: center; }
   }
 
   &__mobile-text {
