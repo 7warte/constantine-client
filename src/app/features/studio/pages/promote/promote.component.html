@@ -39,7 +39,7 @@
     <!-- ── Builder ────────────────────────────────────────────────────── -->
     @if (chosen()) {
       <div class="builder" #builder>
-        <div class="builder__controls">
+        <div class="builder__form">
           @if (kind() === 'tour') {
             <label class="builder__field">
               <span class="builder__label">Tour</span>
@@ -74,34 +74,10 @@
             </div>
           }
 
-          <div class="builder__actions">
-            @if (medium() === 'print') {
-              <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="print()">
-                {{ busy() ? 'Preparing…' : 'Print / Save as PDF' }}
-              </button>
-            } @else {
-              <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="download()">
-                {{ busy() ? 'Rendering…' : 'Download image' }}
-              </button>
-            }
-            <button type="button" class="btn btn--ghost" (click)="copyLink()">
-              {{ copied() ? 'Link copied ✓' : 'Copy link' }}
-            </button>
-          </div>
-
-          @if (exportError()) {
-            <p class="builder__error" role="alert">{{ exportError() }}</p>
-          }
-
-          <p class="builder__note">
-            <mat-icon>qr_code_2</mat-icon>
-            QR &amp; link point to
-            {{ kind() === 'tour' ? 'this tour’s booking page' : 'your creator showcase page' }}.
-          </p>
         </div>
 
-        <!-- Preview stage — shown inline on every screen size. -->
-        <div class="builder__stage">
+        <!-- Rendered card — sits between the form and the actions on mobile. -->
+        <div class="builder__stage" #stage>
           <div #preview class="promo"
             [class.promo--print]="medium() === 'print'"
             [class.promo--square]="medium() === 'digital' && digitalFormat() === 'square'"
@@ -181,6 +157,31 @@
             }
           </div>
         </div>
+
+        <!-- Actions — directly below the rendered card -->
+        <div class="builder__actions">
+          @if (medium() === 'print') {
+            <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="print()">
+              {{ busy() ? 'Preparing…' : 'Print / Save as PDF' }}
+            </button>
+          } @else {
+            <button type="button" class="btn btn--primary" [disabled]="busy()" (click)="download()">
+              {{ busy() ? 'Rendering…' : 'Download image' }}
+            </button>
+          }
+          <button type="button" class="btn btn--ghost" (click)="copyLink()">
+            {{ copied() ? 'Link copied ✓' : 'Copy link' }}
+          </button>
+          @if (exportError()) {
+            <p class="builder__error" role="alert">{{ exportError() }}</p>
+          }
+        </div>
+
+        <p class="builder__note">
+          <mat-icon>qr_code_2</mat-icon>
+          QR &amp; link point to
+          {{ kind() === 'tour' ? 'this tour’s booking page' : 'your creator showcase page' }}.
+        </p>
       </div>
     } @else {
       <p class="promote__hint">Pick an option above to start building your promo.</p>

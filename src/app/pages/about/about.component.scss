@@ -44,17 +44,11 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: $space-6;
-    margin-top: $space-6;
+    gap: $space-5;
+    margin-top: $space-5;
+    margin-bottom: $space-3;          // ~10px extra breathing room below the buttons
 
-    @media (max-width: #{$bp-md - 1px}) {
-      flex-wrap: nowrap;
-      align-items: stretch;
-      gap: $space-5;
-    }
-
-    // The two choice buttons default to the same primary style, which makes
-    // them read as one button. Give each its own palette colour.
+    // Each choice button gets its own palette colour and fills its small cell.
     ::ng-deep .btn {
       width: 100%;
       border: 1px solid rgba($black, 0.12);
@@ -74,36 +68,15 @@
   }
 }
 
-// Hero choice cell: button on desktop, illustration-on-top + button on mobile.
+// Hero choice cell — a small, fixed-width button. A definite width keeps the
+// two buttons sized predictably and apart (so they never collapse/overlap).
 .ah-choice {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  // Definite width on desktop so the two full-width buttons size predictably
-  // and sit apart (without it the buttons collapse and overlap).
-  width: 220px;
-  max-width: 100%;
+  width: 150px;
+  max-width: 42%;
 
-  &__illust {
-    display: none;
-  }
-
-  @media (max-width: #{$bp-md - 1px}) {
-    width: auto;
-    flex: 1 1 0;
-    min-width: 0;
-    align-items: center;
-    gap: $space-2;
-
-    &__illust {
-      display: block;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: $bg-surface-alt;
-      border: 1px solid $border-default;
-      border-radius: $radius-md;
-    }
-  }
+  &__illust { display: none; }
 }
 
 // ── Mission intro ───────────────────────────────────────────────────────────

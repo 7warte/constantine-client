@@ -85,18 +85,32 @@
 }
 
 // ── Builder ─────────────────────────────────────────────────────────────────
+// Mobile (default): single column in DOM order — form, card, actions, note —
+// so the download button sits directly under the rendered card.
+// Desktop: two columns; the card is on the right, controls stacked on the left.
 .builder {
   display: grid;
-  gap: $space-6;
+  gap: $space-5;
   margin-top: $space-8;
-  @include lg { grid-template-columns: 320px 1fr; align-items: start; }
+
+  @include lg {
+    grid-template-columns: 320px 1fr;
+    grid-template-areas:
+      "form    stage"
+      "actions stage"
+      "note    stage";
+    column-gap: $space-6;
+    align-items: start;
+  }
 }
 
-.builder__controls {
+.builder__form {
+  grid-area: form;
   display: flex; flex-direction: column; gap: $space-5;
   padding: $space-5;
   background: $bg-surface; border: 1px solid $border-default; border-radius: $radius-md;
 }
+.builder__stage  { grid-area: stage; }
 .builder__field { display: flex; flex-direction: column; gap: $space-2; }
 .builder__label { font-size: $font-size-sm; font-weight: $font-weight-semibold; color: $text-primary; }
 .builder__select {
@@ -113,8 +127,9 @@
   border-radius: $radius-sm;
   padding: $space-3;
 }
-.builder__actions { display: flex; flex-direction: column; gap: $space-3; }
+.builder__actions { grid-area: actions; display: flex; flex-direction: column; gap: $space-3; }
 .builder__note {
+  grid-area: note;
   display: flex; align-items: flex-start; gap: $space-2;
   font-size: $font-size-xs; color: $text-muted; line-height: $line-height-loose;
   .mat-icon { font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; }

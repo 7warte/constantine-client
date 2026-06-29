@@ -217,15 +217,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Pinned scene for review: the city reads best on a narrow screen, so mobile
-    // opens on it; desktop opens on the night (metro) scene.
-    // To restore the random scene + 6s rotation, swap the lines below back to:
-    //   this.scene.set(this.sceneList[Math.floor(Math.random() * this.sceneList.length)]);
-    //   ... and re-enable this.restartSceneTimer();
+    // Open on a sensible first scene — the city reads best on a narrow screen,
+    // so mobile starts there; desktop opens on the night (metro) scene — then
+    // rotate through the rest every 6s.
     const isMobile = window.matchMedia?.('(max-width: 767px)').matches ?? false;
     this.scene.set(isMobile ? 'city' : 'metro');
     this.sceneReady.set(true);
-    // this.restartSceneTimer();
+    this.restartSceneTimer();
 
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 

@@ -66,6 +66,13 @@
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
     color: $text-primary;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color $transition-fast;
+
+    &:hover { color: $accent-primary; text-decoration: underline; }
   }
 
   &__hint {
@@ -100,5 +107,75 @@
     height: 100%;
     background: $text-muted;
     border-radius: $radius-full;
+  }
+}
+
+// ── Historical-figure info popup ─────────────────────────────────────────────
+.badge-info-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+  background: rgba($black, 0.55);
+}
+
+.badge-info {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: $bg-surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  padding: $space-6;
+
+  &__close {
+    position: absolute;
+    top: $space-3;
+    right: $space-3;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: $radius-full;
+    background: $bg-surface-alt;
+    color: $text-secondary;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+    &:hover { background: $border-default; color: $text-primary; }
+  }
+
+  &__eyebrow {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $accent-primary;
+  }
+
+  &__name {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin: $space-1 0 $space-3;
+  }
+
+  &__blurb {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    line-height: $line-height-loose;
+    margin-bottom: $space-4;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    padding-top: $space-3;
+    border-top: 1px solid $border-default;
+    strong { color: $text-primary; }
   }
 }

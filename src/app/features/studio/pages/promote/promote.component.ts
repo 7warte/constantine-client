@@ -58,8 +58,8 @@ export class PromoteComponent implements OnInit {
     { kind: 'creator', medium: 'digital', icon: 'share',               title: 'Creator showcase',     desc: 'A social-ready image promoting you and all of your tours.' },
   ];
 
-  readonly preview   = viewChild<ElementRef<HTMLElement>>('preview');
-  readonly builderEl = viewChild<ElementRef<HTMLElement>>('builder');
+  readonly preview = viewChild<ElementRef<HTMLElement>>('preview');
+  readonly stageEl = viewChild<ElementRef<HTMLElement>>('stage');
 
   readonly selectedTour = computed(() => this.tours().find(t => t.id === this.selectedTourId()) ?? null);
   readonly featuredTours = computed(() => this.tours().slice(0, 4));
@@ -98,8 +98,8 @@ export class PromoteComponent implements OnInit {
     this.kind.set(option.kind);
     this.medium.set(option.medium);
     this.refresh();
-    // The builder + preview appear below the options — bring them into view.
-    setTimeout(() => this.builderEl()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    // Scroll the rendered card into view (the download button sits right below it).
+    setTimeout(() => this.stageEl()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   isActive(o: PromoOption): boolean {
@@ -165,63 +165,53 @@ export class PromoteComponent implements OnInit {
     } catch { /* clipboard blocked — ignore */ }
   }
 
+  private isHandheld(): boolean {
+    return window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  /** Render the promo card to a high-resolution canvas (~1080px+ short edge). */
+  private async renderCanvas(el: HTMLElement): Promise<HTMLCanvasElement> {
+    const html2canvas = (await import('html2canvas')).default;
+    const scale = Math.min(4, Math.max(2, Math.ceil(1080 / el.offsetWidth)));
+    return html2canvas(el, {
+      scale,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      // Render at the real on-screen size (some mobile browsers otherwise
+      // capture a 0-size or clipped canvas).
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      windowWidth: document.documentElement.clientWidth,
+    });
+  }
+
   async download(): Promise<void> {
     const el = this.preview()?.nativeElement;
     if (!el) return;
+    const handheld = this.isHandheld();
+    // Mobile: open the tab synchronously within the click so it isn't blocked.
+    const win = handheld ? window.open('', '_blank') : null;
     this.busy.set(true);
     this.exportError.set(null);
     try {
-      const html2canvas = (await import('html2canvas')).default;
-      // Render at high resolution (~1080px+ on the short edge) so the exported
-      // social image is crisp, regardless of the small on-screen preview size.
-      const scale = Math.min(4, Math.max(2, Math.ceil(1080 / el.offsetWidth)));
-      const canvas = await html2canvas(el, {
-        scale,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        // Render the element at its real on-screen size (some mobile browsers
-        // otherwise capture a 0-size or clipped canvas).
-        width: el.offsetWidth,
-        height: el.offsetHeight,
-        windowWidth: document.documentElement.clientWidth,
-      });
-      const blob = await new Promise<Blob | null>(r => canvas.toBlob(b => r(b), 'image/png'));
-      if (!blob) throw new Error('The image could not be generated.');
-      await this.deliverImage(blob, `constantine-${this.kind()}-${this.digitalFormat()}.png`);
+      const canvas = await this.renderCanvas(el);
+      const filename = `constantine-${this.kind()}-${this.digitalFormat()}.png`;
+      if (handheld) {
+        // On mobile, open the image in a new page — the user can long-press to save.
+        this.showImageInTab(win, canvas.toDataURL('image/png'));
+      } else {
+        // On desktop, download the file directly.
+        const blob = await new Promise<Blob | null>(r => canvas.toBlob(b => r(b), 'image/png'));
+        if (!blob) throw new Error('The image could not be generated.');
+        this.triggerDownload(blob, filename);
+      }
     } catch (e: any) {
+      win?.close();
       console.error('Promo export failed:', e);
       this.exportError.set(e?.message || 'Could not create the image. Please try again.');
     } finally {
       this.busy.set(false);
     }
-  }
-
-  /** Save an image reliably across desktop and mobile (iOS ignores <a download>). */
-  private async deliverImage(blob: Blob, filename: string): Promise<void> {
-    const file = new File([blob], filename, { type: 'image/png' });
-
-    // Mobile: use the native share/save sheet when it can handle files.
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: filename });
-        return;
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return;   // user dismissed the sheet
-        // any other failure → fall through to the anchor download
-      }
-    }
-
-    // Desktop / fallback: anchor download (must be in the DOM; revoke later so
-    // the browser has time to start the download before the URL is freed).
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
   async print(): Promise<void> {
@@ -233,11 +223,7 @@ export class PromoteComponent implements OnInit {
     this.busy.set(true);
     this.exportError.set(null);
     try {
-      const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(el, {
-        scale: 3, useCORS: true, backgroundColor: '#ffffff',
-        width: el.offsetWidth, height: el.offsetHeight,
-      });
+      const canvas = await this.renderCanvas(el);
       const size = this.printSize().toUpperCase();
       if (w) {
         w.document.write(
@@ -249,10 +235,10 @@ export class PromoteComponent implements OnInit {
         );
         w.document.close();
       } else {
-        // Pop-up blocked — save the poster as an image instead.
+        // Pop-up blocked — on desktop fall back to downloading the image.
         const blob = await new Promise<Blob | null>(r => canvas.toBlob(b => r(b), 'image/png'));
         if (!blob) throw new Error('The image could not be generated.');
-        await this.deliverImage(blob, `constantine-${this.kind()}-${this.printSize()}.png`);
+        this.triggerDownload(blob, `constantine-${this.kind()}-${this.printSize()}.png`);
         this.exportError.set('Pop-ups are blocked, so we saved the poster as an image instead.');
       }
     } catch (e: any) {
@@ -262,5 +248,34 @@ export class PromoteComponent implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  /** Show the rendered image in a new page (mobile: long-press to save). */
+  private showImageInTab(win: Window | null, dataUrl: string): void {
+    if (!win) {
+      this.exportError.set('Allow pop-ups for this site, then tap Download again.');
+      return;
+    }
+    win.document.write(
+      `<!doctype html><html><head><title>Constantine promo</title>`
+      + `<meta name="viewport" content="width=device-width, initial-scale=1">`
+      + `<style>html,body{margin:0;height:100%;background:#111;display:flex;align-items:center;`
+      + `justify-content:center}img{max-width:100%;max-height:100%;height:auto;display:block}</style></head>`
+      + `<body><img src="${dataUrl}" alt="Constantine promo"></body></html>`
+    );
+    win.document.close();
+  }
+
+  /** Download a blob as a file (desktop). */
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 }

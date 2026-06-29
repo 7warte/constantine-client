@@ -26,7 +26,8 @@
             <app-badge-icon [icon]="b.def.icon" [label]="b.def.label" [earned]="b.earned"
               [alt]="b.def.name" [size]="96"
               [gradId]="b.def.id" [from]="b.def.gradient[0]" [to]="b.def.gradient[1]" />
-            <h3 class="badge-card__name">{{ b.def.name }}</h3>
+            <button type="button" class="badge-card__name" (click)="openInfo(b.def)"
+              [attr.aria-label]="'About ' + b.def.name">{{ b.def.name }}</button>
             <p class="badge-card__hint">{{ b.def.hint }}</p>
 
             @if (auth.isLoggedIn() && !b.earned && b.progress > 0) {
@@ -38,6 +39,23 @@
             }
           </article>
         }
+      </div>
+    </div>
+  }
+
+  <!-- Historical-figure info popup -->
+  @if (selected(); as def) {
+    <div class="badge-info-backdrop" (click)="closeInfo()">
+      <div class="badge-info" (click)="$event.stopPropagation()">
+        <button type="button" class="badge-info__close" (click)="closeInfo()" aria-label="Close">&times;</button>
+        <span class="badge-info__eyebrow">Behind the badge</span>
+        <h3 class="badge-info__name">{{ def.name }}</h3>
+        @if (def.blurb) {
+          <p class="badge-info__blurb">{{ def.blurb }}</p>
+        }
+        <p class="badge-info__hint">
+          <strong>How to earn it:</strong> {{ def.hint }}
+        </p>
       </div>
     </div>
   }
