@@ -172,8 +172,11 @@ export class PromoteComponent implements OnInit {
     this.exportError.set(null);
     try {
       const html2canvas = (await import('html2canvas')).default;
+      // Render at high resolution (~1080px+ on the short edge) so the exported
+      // social image is crisp, regardless of the small on-screen preview size.
+      const scale = Math.min(4, Math.max(2, Math.ceil(1080 / el.offsetWidth)));
       const canvas = await html2canvas(el, {
-        scale: 2,
+        scale,
         useCORS: true,
         backgroundColor: '#ffffff',
         // Render the element at its real on-screen size (some mobile browsers
