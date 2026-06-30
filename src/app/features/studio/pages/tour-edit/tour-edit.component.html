@@ -476,10 +476,10 @@
                   }
                 </div>
 
-                <button type="button" class="space-block__pin" [class.space-block__pin--placed]="space.latitude != null"
+                <button type="button" class="space-block__pin" [class.space-block__pin--placed]="space.polygon != null"
                   (click)="openVenuePicker(space)">
-                  <mat-icon>place</mat-icon>
-                  <span>{{ space.latitude != null ? 'Pinned' : 'Pin on map' }}</span>
+                  <mat-icon>pentagon</mat-icon>
+                  <span>{{ space.polygon != null ? 'Area set' : 'Draw area' }}</span>
                 </button>
 
                 <div class="space-block__bar-right">
@@ -720,6 +720,9 @@
                       Set location
                     </button>
                   }
+                  @if (stopAreaWarning()) {
+                    <p class="stop-area-warning">{{ stopAreaWarning() }}</p>
+                  }
                 </div>
                 <div class="edit-form__actions">
                   <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancel</button>
@@ -777,7 +780,7 @@
           <div class="pin-modal-backdrop" (click)="closeVenuePicker()">
             <div class="pin-modal pin-modal--location" (click)="$event.stopPropagation()">
               <div class="pin-modal__header">
-                <h3>Place "{{ venuePickerSpace()!.name }}" on the map</h3>
+                <h3>Outline the area of "{{ venuePickerSpace()!.name }}"</h3>
                 <button type="button" class="btn-icon" (click)="closeVenuePicker()">&times;</button>
               </div>
 
@@ -809,11 +812,12 @@
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
                   {{ venuePickerLocating() ? 'Locating…' : 'Use my current location' }}
                 </button>
-                @if (venuePickerLat() != null && venuePickerLng() != null) {
-                  <span class="loc-picker__coords">{{ venuePickerLat() | number:'1.5-5' }}, {{ venuePickerLng() | number:'1.5-5' }}</span>
-                } @else {
-                  <span class="loc-picker__coords loc-picker__coords--muted">Drag the pin, search an address, or use your location</span>
-                }
+                <span class="loc-picker__coords" [class.loc-picker__coords--muted]="venuePolygon().length < 3">
+                  @if (venuePolygon().length === 0) { Click the map to start outlining the area }
+                  @else { {{ venuePolygon().length }} point{{ venuePolygon().length === 1 ? '' : 's' }} {{ venuePolygon().length < 3 ? '(need 3+)' : '— area defined' }} }
+                </span>
+                <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePolygon().length === 0" (click)="undoVenueVertex()">Undo point</button>
+                <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePolygon().length === 0" (click)="clearVenuePolygon()">Clear</button>
               </div>
 
               @if (venuePickerError()) {
@@ -824,15 +828,12 @@
 
               <div class="pin-modal__footer">
                 <p class="pin-modal__hint">
-                  @if (venuePickerLat() == null) {
-                    Click anywhere on the map to drop a pin.
-                  } @else {
-                    Drag the pin or click elsewhere on the map to move it.
-                  }
+                  Click around the venue to drop points — the shape closes itself. Search an address or use your
+                  location to find the spot first.
                 </p>
                 <div class="pin-modal__actions">
                   <button type="button" class="btn btn--ghost" (click)="closeVenuePicker()">Cancel</button>
-                  <button type="button" class="btn btn--primary" [disabled]="venuePickerLat() == null || venuePickerLng() == null" (click)="saveVenueLocation()">Save location</button>
+                  <button type="button" class="btn btn--primary" [disabled]="venuePolygon().length < 3" (click)="saveVenueLocation()">Save area</button>
                 </div>
               </div>
             </div>

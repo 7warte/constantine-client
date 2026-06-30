@@ -263,8 +263,13 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly venuePickerSuggestions = signal<any[]>([]);
   readonly venuePickerLocating    = signal(false);
   readonly venuePickerError       = signal<string | null>(null);
+  // The venue is delineated by a self-closing polygon (a list of [lat,lng] vertices).
+  readonly venuePolygon           = signal<[number, number][]>([]);
+  // Soft warning when a stop is placed outside its venue's area.
+  readonly stopAreaWarning        = signal<string | null>(null);
   private venuePickerMap: L.Map | null = null;
-  private venuePickerMarker: L.Marker | null = null;
+  private venuePolyLayer: L.Polygon | L.Polyline | null = null;
+  private venueVertexLayers: L.CircleMarker[] = [];
   private venuePickerMapRendered = false;
 
   openVenuePicker(space: any): void {
@@ -274,19 +279,23 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.venuePickerAddress.set('');
     this.venuePickerSuggestions.set([]);
 
-    // Pre-fill from existing coords, else from tour start
-    if (space.latitude != null && space.longitude != null) {
-      this.venuePickerLat.set(+space.latitude);
-      this.venuePickerLng.set(+space.longitude);
+    // Load any existing polygon (JSONB comes back as a parsed array).
+    const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
+    const poly: [number, number][] = Array.isArray(raw)
+      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
+      : [];
+    this.venuePolygon.set(poly);
+
+    // View target: polygon centroid, else saved point, else tour start.
+    if (poly.length) {
+      const c = this.polygonCentroid(poly);
+      this.venuePickerLat.set(c[0]); this.venuePickerLng.set(c[1]);
+    } else if (space.latitude != null && space.longitude != null) {
+      this.venuePickerLat.set(+space.latitude); this.venuePickerLng.set(+space.longitude);
     } else {
       const tourStart = this.startCoords();
-      if (tourStart) {
-        this.venuePickerLat.set(tourStart[0]);
-        this.venuePickerLng.set(tourStart[1]);
-      } else {
-        this.venuePickerLat.set(null);
-        this.venuePickerLng.set(null);
-      }
+      this.venuePickerLat.set(tourStart ? tourStart[0] : null);
+      this.venuePickerLng.set(tourStart ? tourStart[1] : null);
     }
 
     this.venuePickerOpen.set(true);
@@ -295,13 +304,18 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   closeVenuePicker(): void {
     this.venuePickerOpen.set(false);
+    this.clearVenuePolyLayers();
     this.venuePickerMap?.remove();
     this.venuePickerMap = null;
-    this.venuePickerMarker = null;
     this.venuePickerMapRendered = false;
     this.venuePickerSpace.set(null);
+    this.venuePolygon.set([]);
     this.venuePickerAddress.set('');
     this.venuePickerSuggestions.set([]);
+  }
+
+  private safeParse(s: string): any {
+    try { return JSON.parse(s); } catch { return null; }
   }
 
   useVenueCurrentLocation(): void {
@@ -317,10 +331,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         this.venuePickerLat.set(latitude);
         this.venuePickerLng.set(longitude);
         this.venuePickerLocating.set(false);
-        if (this.venuePickerMap) {
-          this.updateVenuePickerMarker(latitude, longitude);
-          this.venuePickerMap.panTo([latitude, longitude]);
-        }
+        // Just move the map there so the user can trace the area; don't drop a vertex.
+        this.venuePickerMap?.setView([latitude, longitude], 17);
       },
       (err) => {
         this.venuePickerLocating.set(false);
@@ -349,26 +361,78 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.venuePickerAddress.set(suggestion.display_name);
     this.venuePickerSuggestions.set([]);
     this.venuePickerError.set(null);
-    if (this.venuePickerMap) {
-      this.updateVenuePickerMarker(suggestion.lat, suggestion.lon);
-      this.venuePickerMap.panTo([suggestion.lat, suggestion.lon]);
+    // Navigate the map to the area; the user then traces the venue's outline.
+    this.venuePickerMap?.setView([suggestion.lat, suggestion.lon], 17);
+  }
+
+  // ── Venue polygon drawing ──────────────────────────────────────────────────
+  undoVenueVertex(): void {
+    this.venuePolygon.update(v => v.slice(0, -1));
+    this.redrawVenuePolygon();
+  }
+  clearVenuePolygon(): void {
+    this.venuePolygon.set([]);
+    this.redrawVenuePolygon();
+  }
+
+  private redrawVenuePolygon(): void {
+    if (!this.venuePickerMap) return;
+    this.clearVenuePolyLayers();
+    const pts = this.venuePolygon();
+    if (pts.length >= 3) {
+      this.venuePolyLayer = L.polygon(pts as any, { color: '#c98a8c', weight: 2, fillOpacity: 0.18 })
+        .addTo(this.venuePickerMap);
+    } else if (pts.length === 2) {
+      this.venuePolyLayer = L.polyline(pts as any, { color: '#c98a8c', weight: 2, dashArray: '4 4' })
+        .addTo(this.venuePickerMap);
     }
+    pts.forEach((p, i) => {
+      const m = L.circleMarker(p as any, { radius: 6, color: '#c98a8c', fillColor: '#fff', fillOpacity: 1, weight: 2 })
+        .addTo(this.venuePickerMap!).bindTooltip(`${i + 1}`);
+      this.venueVertexLayers.push(m);
+    });
+  }
+
+  private clearVenuePolyLayers(): void {
+    if (this.venuePolyLayer) { this.venuePolyLayer.remove(); this.venuePolyLayer = null; }
+    this.venueVertexLayers.forEach(m => m.remove());
+    this.venueVertexLayers = [];
+  }
+
+  private polygonCentroid(pts: [number, number][]): [number, number] {
+    const n = pts.length || 1;
+    const sum = pts.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]);
+    return [sum[0] / n, sum[1] / n];
+  }
+
+  /** Ray-casting point-in-polygon ([lat,lng] points). */
+  private pointInPolygon(lat: number, lng: number, poly: [number, number][]): boolean {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [latI, lngI] = poly[i];
+      const [latJ, lngJ] = poly[j];
+      const intersect = ((lngI > lng) !== (lngJ > lng)) &&
+        (lat < (latJ - latI) * (lng - lngI) / (lngJ - lngI) + latI);
+      if (intersect) inside = !inside;
+    }
+    return inside;
   }
 
   saveVenueLocation(): void {
     const space = this.venuePickerSpace();
-    const lat = this.venuePickerLat();
-    const lng = this.venuePickerLng();
-    if (!space || lat == null || lng == null) {
-      this.venuePickerError.set('Place a pin on the map first.');
+    const poly = this.venuePolygon();
+    if (!space || poly.length < 3) {
+      this.venuePickerError.set('Draw at least 3 points to outline the venue area.');
       return;
     }
     const vid = this.variantId();
     if (!vid) return;
 
+    const c = this.polygonCentroid(poly);
     this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces/${space.id}`, {
-      latitude:  Number(lat.toFixed(6)),
-      longitude: Number(lng.toFixed(6)),
+      polygon:   poly.map(p => [Number(p[0].toFixed(6)), Number(p[1].toFixed(6))]),
+      latitude:  Number(c[0].toFixed(6)),
+      longitude: Number(c[1].toFixed(6)),
     }).subscribe(updated => {
       this.spaces.update(s => s.map(sp => sp.id === space.id ? updated : sp));
       this.closeVenuePicker();
@@ -419,29 +483,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       this.venuePickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
     }
 
-    if (lat != null && lng != null) this.updateVenuePickerMarker(lat, lng);
-
-    this.venuePickerMap.on('click', (e: L.LeafletMouseEvent) => {
-      this.venuePickerLat.set(e.latlng.lat);
-      this.venuePickerLng.set(e.latlng.lng);
-      this.updateVenuePickerMarker(e.latlng.lat, e.latlng.lng);
-    });
-
     this.venuePickerMapRendered = true;
-  }
 
-  private updateVenuePickerMarker(lat: number, lng: number): void {
-    if (!this.venuePickerMap) return;
-    if (!this.venuePickerMarker) {
-      this.venuePickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.venuePickerMap);
-      this.venuePickerMarker.on('drag', (e: L.LeafletEvent) => {
-        const ll = (e.target as L.Marker).getLatLng();
-        this.venuePickerLat.set(ll.lat);
-        this.venuePickerLng.set(ll.lng);
-      });
-    } else {
-      this.venuePickerMarker.setLatLng([lat, lng]);
+    // Draw an existing polygon and fit the view to it.
+    this.redrawVenuePolygon();
+    if (this.venuePolygon().length >= 2) {
+      this.venuePickerMap.fitBounds(L.latLngBounds(this.venuePolygon() as any), { padding: [40, 40], maxZoom: 18 });
     }
+
+    // Each click drops a vertex; the polygon self-closes once it has 3+ points.
+    this.venuePickerMap.on('click', (e: L.LeafletMouseEvent) => {
+      this.venuePolygon.update(v => [...v, [e.latlng.lat, e.latlng.lng]]);
+      this.redrawVenuePolygon();
+    });
   }
 
   openPinModal(space: any): void {
@@ -1536,7 +1590,25 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       latitude:  Number(lat.toFixed(6)),
       longitude: Number(lng.toFixed(6)),
     });
+    this.checkStopArea(lat, lng);
     this.closeLocationPicker();
+  }
+
+  /** Soft check: warn (don't block) if the stop falls outside its venue's area. */
+  private checkStopArea(lat: number, lng: number): void {
+    this.stopAreaWarning.set(null);
+    const stopId = this.editingStopId();
+    if (!stopId) return;
+    const stop = this.stops().find(s => s.id === stopId);
+    const space = stop ? this.spaces().find(sp => sp.id === stop.space_id) : null;
+    if (!space) return;
+    const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
+    const poly: [number, number][] = Array.isArray(raw)
+      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
+      : [];
+    if (poly.length >= 3 && !this.pointInPolygon(lat, lng, poly)) {
+      this.stopAreaWarning.set(`Heads up — this point sits outside “${space.name}”'s drawn area.`);
+    }
   }
 
   clearStopLocation(): void {

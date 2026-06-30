@@ -686,6 +686,13 @@
 
 .address-field { position: relative; }
 
+// Soft "outside the venue area" notice on a stop's location.
+.stop-area-warning {
+  margin-top: $space-2;
+  font-size: $font-size-xs;
+  color: $color-warning;
+}
+
 // Street field is disabled until a city is chosen.
 .address-field .form-field__input:disabled {
   background: $bg-surface-alt;
