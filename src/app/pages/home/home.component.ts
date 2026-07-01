@@ -67,6 +67,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (len <= 1) return;   // single clip loops natively via [loop]
     this.currentIndex.update(i => (i + 1) % len);
   }
+
+  // Autoplay attributes are unreliable (Angular re-creates the <video> when the
+  // src swaps from the bundled clip to the uploaded one). A muted play() is
+  // always allowed by the autoplay policy, so force it the moment it can play.
+  startVideo(e: Event): void {
+    const v = e.target as HTMLVideoElement;
+    v.muted = true;
+    v.play().catch(() => setTimeout(() => v.play().catch(() => {}), 250));
+  }
   readonly activeSlide     = signal(0);
   readonly indoorTours     = signal<any[]>([]);
   readonly outdoorTours    = signal<any[]>([]);

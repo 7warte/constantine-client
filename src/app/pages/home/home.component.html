@@ -14,6 +14,8 @@
         <video class="hero__video" autoplay muted playsinline preload="auto"
                [loop]="playlist().length <= 1"
                (ended)="onVideoEnded()"
+               (loadedmetadata)="startVideo($event)"
+               (canplay)="startVideo($event)"
                poster="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg"
                [src]="src"></video>
       }
