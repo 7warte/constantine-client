@@ -1,14 +1,22 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { GoogleSigninComponent } from '../../../../shared/components/google-signin/google-signin.component';
+
+/** Group validator: the two password fields must match. */
+function passwordsMatch(group: AbstractControl): ValidationErrors | null {
+  const pw  = group.get('password')?.value;
+  const cpw = group.get('confirm_password')?.value;
+  return pw && cpw && pw !== cpw ? { passwordMismatch: true } : null;
+}
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, GoogleSigninComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
@@ -22,11 +30,13 @@ export class RegisterComponent implements OnInit {
   readonly error   = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
-    display_name: ['', [Validators.required, Validators.maxLength(80)]],
-    username:     ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-z0-9_-]+$/)]],
-    email:        ['', [Validators.required, Validators.email]],
-    password:     ['', [Validators.required, Validators.minLength(8)]],
-  });
+    display_name:     ['', [Validators.required, Validators.maxLength(80)]],
+    username:         ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-zA-Z0-9_-]+$/)]],
+    email:            ['', [Validators.required, Validators.email]],
+    phone:            ['', [Validators.maxLength(30)]],
+    password:         ['', [Validators.required, Validators.minLength(8)]],
+    confirm_password: ['', [Validators.required]],
+  }, { validators: passwordsMatch });
 
   ngOnInit(): void {
     // Pre-fill the email when arriving from a gift-claim link (?email=…), so the
@@ -40,10 +50,24 @@ export class RegisterComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.auth.register(this.form.getRawValue()).subscribe({
+    const { confirm_password, ...payload } = this.form.getRawValue();
+    this.auth.register(payload).subscribe({
       next:  () => this.router.navigate(['/about']),
       error: (err) => {
         this.error.set(err.error?.error ?? 'Registration failed. Please try again.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onGoogle(credential: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.auth.loginWithGoogle(credential).subscribe({
+      next:  () => this.router.navigate(['/about']),
+      error: (err) => {
+        this.error.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },
     });

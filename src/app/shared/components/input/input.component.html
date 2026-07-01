@@ -13,15 +13,26 @@
       (blur)="onTouched()"
     ></textarea>
   } @else {
-    <input
-      class="field__input"
-      [type]="type"
-      [placeholder]="placeholder"
-      [value]="value"
-      [disabled]="disabled"
-      (input)="onInput($event)"
-      (blur)="onTouched()"
-    />
+    <div class="field__control">
+      <input
+        class="field__input"
+        [class.field__input--with-toggle]="isPassword"
+        [type]="effectiveType"
+        [placeholder]="placeholder"
+        [value]="value"
+        [disabled]="disabled"
+        (input)="onInput($event)"
+        (blur)="onTouched()"
+      />
+      @if (isPassword) {
+        <button
+          type="button"
+          class="field__toggle"
+          (click)="toggleReveal()"
+          [attr.aria-label]="revealed ? 'Hide password' : 'Show password'"
+        >{{ revealed ? 'Hide' : 'Show' }}</button>
+      }
+    </div>
   }
   <span class="field__message">
     @if (invalid && errorMessage) {

@@ -27,9 +27,9 @@
         <app-input
           label="Username"
           formControlName="username"
-          hint="3-30 characters, lowercase letters, numbers, _ and - only"
+          hint="3-30 characters: letters, numbers, _ and - (capitals allowed)"
           [invalid]="form.controls.username.invalid && form.controls.username.touched"
-          errorMessage="Choose a valid username (a-z, 0-9, _, -)"
+          errorMessage="Choose a valid username (letters, numbers, _, -)"
         />
 
         <app-input
@@ -41,6 +41,15 @@
         />
 
         <app-input
+          label="Phone (optional)"
+          type="tel"
+          formControlName="phone"
+          hint="Only used if we need to reach you about a purchase"
+          [invalid]="form.controls.phone.invalid && form.controls.phone.touched"
+          errorMessage="Phone number is too long"
+        />
+
+        <app-input
           label="Password"
           type="password"
           formControlName="password"
@@ -49,10 +58,22 @@
           errorMessage="Password must be at least 8 characters"
         />
 
+        <app-input
+          label="Confirm password"
+          type="password"
+          formControlName="confirm_password"
+          [invalid]="(form.controls.confirm_password.invalid || form.errors?.['passwordMismatch']) && form.controls.confirm_password.touched"
+          [errorMessage]="form.controls.confirm_password.invalid ? 'Please repeat your password' : 'Passwords do not match'"
+        />
+
         <app-button type="submit" variant="primary" size="lg" [loading]="loading()" [block]="true">
           Create account
         </app-button>
       </form>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <app-google-signin (credential)="onGoogle($event)" />
 
       <p class="auth-card__switch">
         Already have an account?

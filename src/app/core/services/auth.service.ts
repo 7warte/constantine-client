@@ -46,7 +46,7 @@ export class AuthService {
     }
   }
 
-  register(body: { email: string; username: string; display_name: string; password: string }) {
+  register(body: { email: string; username: string; display_name: string; password: string; phone?: string }) {
     return this.api.post<AuthResponse>('/auth/register', body).pipe(
       tap(res => this.saveSession(res))
     );
@@ -54,6 +54,13 @@ export class AuthService {
 
   login(body: { email: string; password: string }) {
     return this.api.post<AuthResponse>('/auth/login', body).pipe(
+      tap(res => this.saveSession(res))
+    );
+  }
+
+  /** Sign in / sign up with a Google ID token (the GIS `credential`). */
+  loginWithGoogle(credential: string) {
+    return this.api.post<AuthResponse>('/auth/google', { credential }).pipe(
       tap(res => this.saveSession(res))
     );
   }

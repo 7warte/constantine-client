@@ -29,8 +29,13 @@ export class InputComponent implements ControlValueAccessor {
   @Input() rows        = 3;
 
   value    = '';
+  revealed = false;
   onChange = (_: string) => {};
   onTouched = () => {};
+
+  get isPassword(): boolean { return this.type === 'password'; }
+  get effectiveType(): string { return this.isPassword && this.revealed ? 'text' : this.type; }
+  toggleReveal(): void { this.revealed = !this.revealed; }
 
   writeValue(val: string): void       { this.value = val ?? ''; }
   registerOnChange(fn: any): void     { this.onChange = fn; }

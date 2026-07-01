@@ -42,6 +42,10 @@
         </app-button>
       </form>
 
+      <div class="auth-divider"><span>or</span></div>
+
+      <app-google-signin (credential)="onGoogle($event)" />
+
       <p class="auth-card__switch">
         Don't have an account?
         <a routerLink="/auth/register">Create one</a>

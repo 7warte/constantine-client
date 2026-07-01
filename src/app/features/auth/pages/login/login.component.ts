@@ -4,11 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { GoogleSigninComponent } from '../../../../shared/components/google-signin/google-signin.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, GoogleSigninComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -34,6 +35,19 @@ export class LoginComponent {
       next:  () => this.router.navigate(['/explore']),
       error: (err) => {
         this.error.set(err.error?.error ?? 'Login failed. Please try again.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onGoogle(credential: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.auth.loginWithGoogle(credential).subscribe({
+      next:  () => this.router.navigate(['/explore']),
+      error: (err) => {
+        this.error.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },
     });
