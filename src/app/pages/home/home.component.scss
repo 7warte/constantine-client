@@ -272,12 +272,12 @@
     gap: 0;
   }
 
-  // Wheat container — 2× button height, holds a smaller white input inside.
+  // Teal container — 2× button height, holds a smaller white input inside.
   // Bottom corners are sharp so it joins flush with the button below.
   &__field {
     width: 100%;
     height: $btn-height * 2;
-    background: $wheat;
+    background: $accent-teal;
     border-radius: $radius-md $radius-md 0 0;
     display: flex;
     align-items: center;
@@ -309,18 +309,26 @@
   &__btn {
     width: 100%;
     height: $btn-height;
-    background: $accent-blue;
+    // Same warm animated gradient as the .btn-wheat CTAs ("Create tours…").
+    background: linear-gradient(135deg, $dusty-rose 0%, $wheat 55%, $mist 100%);
+    background-size: 180% 180%;
+    background-position: 0% 50%;
     color: $text-primary;
-    border: none;
+    border: 1px solid rgba($black, 0.12);
     border-radius: 0 0 $radius-md $radius-md;
     padding: 0 $space-5;
     font-family: $font-family-secondary;
     font-size: $font-size-base;
     font-weight: $font-weight-semibold;
     cursor: pointer;
-    transition: background $transition-fast;
+    box-shadow: 0 6px 18px rgba($dusty-rose, 0.28);
+    transition: background-position 600ms ease, box-shadow 400ms ease, transform 300ms ease;
 
-    &:hover { background: darken($mist, 8%); }
+    &:hover {
+      background-position: 100% 50%;
+      box-shadow: 0 10px 26px rgba($dusty-rose, 0.38);
+      transform: translateY(-2px);
+    }
   }
 }
 
@@ -336,8 +344,8 @@
     display: block;
     width: 100%;
     text-align: center;
-    background: $accent-blue;
-    color: $text-primary;
+    background: $accent-teal;
+    color: $white;
     border-radius: $radius-full;
     padding: $space-4 $space-5;
     font-family: $font-family-secondary;
@@ -346,7 +354,7 @@
     text-decoration: none;
     transition: background $transition-fast;
 
-    &:hover { background: darken($mist, 8%); }
+    &:hover { background: darken($accent-teal, 8%); }
   }
 }
 
@@ -578,11 +586,13 @@
     gap: $space-4;
     cursor: pointer;
     font-family: $font-family-secondary;
-    font-size: $font-size-sm;
+    font-size: $font-size-base;                 // match the "How it works" list items
     font-weight: $font-weight-semibold;
     color: $text-primary;
     text-align: left;
     transition: color $transition-fast;
+
+    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-sm; }
 
     &:hover { color: $accent-primary; }
   }
@@ -599,9 +609,11 @@
   &__answer {
     padding: 0 0 $space-4 0;
     font-family: $font-family-secondary;
-    font-size: $font-size-sm;
+    font-size: $font-size-base;                 // match the "How it works" list items
     color: $text-secondary;
     line-height: $line-height-loose;
+
+    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-sm; }
   }
 
   &__more {
