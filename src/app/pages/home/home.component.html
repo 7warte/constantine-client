@@ -2,7 +2,7 @@
 <section class="hero hero--video">
   <div class="hero__media" aria-hidden="true">
     @for (src of [currentSrc()]; track src) {
-      <video class="hero__video" autoplay muted playsinline
+      <video class="hero__video" autoplay muted playsinline preload="auto"
              [loop]="playlist().length <= 1"
              (ended)="onVideoEnded()"
              poster="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg"

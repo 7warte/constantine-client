@@ -41,11 +41,10 @@
     padding-bottom: max(80px, 14vw);
 
     @media (max-width: #{$bp-md - 1px}) {
-      padding-block: $space-6;
-      // Reserve a taller band below the copy so the buttons sit further above
-      // the animated scene. The copy is vertically centred, so this only lifts
-      // the buttons — the hero keeps its height and the rows below stay in view.
-      padding-bottom: max(104px, 22vw);
+      // The animated scene moved out of the hero, so no reserved band is needed.
+      // Bias the padding downward (top > bottom) so the copy sits lower over the
+      // video instead of being pushed up.
+      padding-block: $space-8 $space-6;
     }
   }
 
@@ -692,12 +691,21 @@
 // overflow on phones and cause horizontal scroll.
 @media (max-width: #{$bp-md - 1px}) {
 
-  // Hero: stack buttons vertically, left-aligned (matching the title/subtitle
-  // above), capped width.
+  // Hero: stack buttons vertically, full content width so they share the same
+  // left/right margin as the title/subtitle above — aligned left, yet centred.
   .hero__actions {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     width: 100%;
+  }
+
+  // Hero CTAs fill the content width (drop the 320px cap) and sit a bit shorter.
+  ::ng-deep .hero__actions app-button {
+    max-width: none;
+    width: 100%;
+  }
+  ::ng-deep .hero__actions .btn {
+    padding-block: $space-3;
   }
 
   // Wheat CTAs: center within their flex column on mobile
