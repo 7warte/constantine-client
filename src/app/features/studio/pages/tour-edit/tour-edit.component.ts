@@ -1019,6 +1019,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     s.input.set(suggestion.display_name);
     s.sugg.set([]);
     s.vb.set(viewbox);
+
+    // In the venue picker, jump the map to the chosen city right away so the
+    // creator can start tracing the area without entering a street first.
+    if (which === 'venue' && this.venuePickerMap) {
+      if (Array.isArray(bb) && bb.length === 4) {
+        this.venuePickerMap.fitBounds(L.latLngBounds([+bb[0], +bb[2]], [+bb[1], +bb[3]]), { padding: [20, 20] });
+      } else if (suggestion.lat != null && suggestion.lon != null) {
+        this.venuePickerMap.setView([suggestion.lat, suggestion.lon], 13);
+      }
+    }
   }
 
   onAddressInput(target: 'start' | 'end', event: Event): void {

@@ -900,3 +900,25 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+// ── Interactive area map (venue polygons) ────────────────────────────────────
+.player__area-map {
+  width: 100%;
+  height: 80vh;
+  max-height: 760px;
+}
+
+// Leaflet builds these markers outside Angular's view encapsulation.
+::ng-deep .player__area-marker span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 12px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}

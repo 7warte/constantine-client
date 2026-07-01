@@ -4,6 +4,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { gsap } from 'gsap';
+import * as L from 'leaflet';
 import { ApiService } from '../../../../core/services/api.service';
 
 @Component({
@@ -179,11 +180,29 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // ── Map modal ────────────────────────────────────────────────────
   readonly showMapModal = signal(false);
   readonly mapSpaces    = signal<any[]>([]);
+  private areaMap: L.Map | null = null;
+
+  // Use a real interactive map whenever there's geo data (drawn venue areas,
+  // venue coords, or a start point) — otherwise fall back to the screenshot.
+  readonly hasAreaMap = computed(() => {
+    if (this.variant()?.latitude != null) return true;
+    return this.mapSpaces().some(s => s.polygon || (s.latitude != null && s.longitude != null));
+  });
 
   @ViewChild('mapFrame') mapFrameRef?: ElementRef<HTMLElement>;
 
+  closeMap(): void {
+    this.showMapModal.set(false);
+    this.areaMap?.remove();
+    this.areaMap = null;
+  }
+
   openMap(): void {
     this.showMapModal.set(true);
+    if (this.hasAreaMap()) {
+      setTimeout(() => this.renderAreaMap(), 80);
+      return;
+    }
     // After the modal renders, scroll the active dot into the centre of the frame.
     setTimeout(() => {
       const frame = this.mapFrameRef?.nativeElement;
@@ -204,6 +223,82 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   getRomanNumeral(idx: number): string {
     const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return numerals[idx] ?? String(idx + 1);
+  }
+
+  // ── Interactive area map (venue polygons + start/finish) ─────────────────
+  private renderAreaMap(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const el = document.getElementById('player-area-map');
+    if (!el) return;
+    this.areaMap?.remove();
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+    });
+
+    const map = L.map(el, { zoomControl: true });
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; OpenStreetMap',
+      maxZoom: 20,
+    } as any).addTo(map);
+
+    const all: L.LatLngExpression[] = [];
+
+    this.mapSpaces().forEach((sp, i) => {
+      const poly = this.parsePolygon(sp.polygon);
+      const color = sp.color || '#c98a8c';
+      if (poly.length >= 3) {
+        L.polygon(poly as any, { color, weight: 2, fillColor: color, fillOpacity: 0.2 })
+          .addTo(map).bindTooltip(sp.name);
+        poly.forEach(p => all.push(p));
+        L.marker(this.centroid(poly) as any, { icon: this.numberIcon(this.getRomanNumeral(i), color) })
+          .addTo(map).bindTooltip(sp.name);
+      } else if (sp.latitude != null && sp.longitude != null) {
+        const ll: L.LatLngExpression = [+sp.latitude, +sp.longitude];
+        L.marker(ll, { icon: this.numberIcon(this.getRomanNumeral(i), color) }).addTo(map).bindTooltip(sp.name);
+        all.push(ll);
+      }
+    });
+
+    const v = this.variant();
+    if (v?.latitude != null && v?.longitude != null) {
+      const s: L.LatLngExpression = [+v.latitude, +v.longitude];
+      L.marker(s).addTo(map).bindTooltip('Start');
+      all.push(s);
+    }
+    if (v?.end_latitude != null && v?.end_longitude != null) {
+      const e: L.LatLngExpression = [+v.end_latitude, +v.end_longitude];
+      L.marker(e).addTo(map).bindTooltip('Finish');
+      all.push(e);
+    }
+
+    if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [30, 30], maxZoom: 17 });
+    else map.setView([41.9028, 12.4964], 5);
+    setTimeout(() => map.invalidateSize(), 60);
+    this.areaMap = map;
+  }
+
+  private parsePolygon(raw: any): [number, number][] {
+    const arr = typeof raw === 'string' ? this.safeJson(raw) : raw;
+    return Array.isArray(arr)
+      ? arr.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
+      : [];
+  }
+  private safeJson(s: string): any { try { return JSON.parse(s); } catch { return null; } }
+  private centroid(pts: [number, number][]): [number, number] {
+    const n = pts.length || 1;
+    const sum = pts.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]);
+    return [sum[0] / n, sum[1] / n];
+  }
+  private numberIcon(label: string, color: string): L.DivIcon {
+    return L.divIcon({
+      className: 'player__area-marker',
+      html: `<span style="background:${color}">${label}</span>`,
+      iconSize: [26, 26], iconAnchor: [13, 13],
+    });
   }
 
   // ── Resource helpers ─────────────────────────────────────────────
@@ -479,6 +574,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.closeCompass();
     this.destroyAudioPlayer();
+    this.areaMap?.remove();
+    this.areaMap = null;
   }
 }
 
