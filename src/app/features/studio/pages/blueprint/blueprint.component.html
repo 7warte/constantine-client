@@ -1,7 +1,7 @@
 <section class="bp">
   <!-- Purpose reminder -->
   @if (showIntro()) {
-    <div class="bp-intro-backdrop" (click)="closeIntro()">
+    <div class="bp-intro-backdrop" appBodyPortal (click)="closeIntro()">
       <div class="bp-intro" (click)="$event.stopPropagation()">
         <span class="bp-intro__badge">Demo · read-only</span>
         <h2 class="bp-intro__title">This is an example tour</h2>

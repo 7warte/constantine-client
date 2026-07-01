@@ -116,7 +116,7 @@
 .bp-intro-backdrop {
   position: fixed;
   inset: 0;
-  z-index: $z-modal;
+  z-index: $z-nav + 1;   // above the app header/nav so the modal isn't clipped by it
   display: flex;
   align-items: center;
   justify-content: center;
