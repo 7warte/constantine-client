@@ -20,6 +20,7 @@ export class LoginComponent {
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
+  readonly googleError = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     email:    ['', [Validators.required, Validators.email]],
@@ -43,11 +44,12 @@ export class LoginComponent {
   onGoogle(credential: string): void {
     this.loading.set(true);
     this.error.set(null);
+    this.googleError.set(null);
 
     this.auth.loginWithGoogle(credential).subscribe({
       next:  () => this.router.navigate(['/explore']),
       error: (err) => {
-        this.error.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
+        this.googleError.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },
     });

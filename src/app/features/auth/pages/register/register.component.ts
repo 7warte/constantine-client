@@ -28,6 +28,7 @@ export class RegisterComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
+  readonly googleError = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     display_name:     ['', [Validators.required, Validators.maxLength(80)]],
@@ -63,11 +64,12 @@ export class RegisterComponent implements OnInit {
   onGoogle(credential: string): void {
     this.loading.set(true);
     this.error.set(null);
+    this.googleError.set(null);
 
     this.auth.loginWithGoogle(credential).subscribe({
       next:  () => this.router.navigate(['/about']),
       error: (err) => {
-        this.error.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
+        this.googleError.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },
     });

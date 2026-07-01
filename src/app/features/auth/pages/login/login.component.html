@@ -46,6 +46,10 @@
 
       <app-google-signin (credential)="onGoogle($event)" />
 
+      @if (googleError()) {
+        <div class="auth-form__error auth-form__error--google" role="alert">{{ googleError() }}</div>
+      }
+
       <p class="auth-card__switch">
         Don't have an account?
         <a routerLink="/auth/register">Create one</a>
