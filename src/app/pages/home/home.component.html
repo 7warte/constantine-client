@@ -1,12 +1,22 @@
 <!-- ── Hero ─────────────────────────────────────────────────────── -->
 <section class="hero hero--video">
   <div class="hero__media" aria-hidden="true">
-    @for (src of [currentSrc()]; track src) {
-      <video class="hero__video" autoplay muted playsinline preload="auto"
-             [loop]="playlist().length <= 1"
-             (ended)="onVideoEnded()"
-             poster="assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg"
-             [src]="src"></video>
+    @if (isMobile()) {
+      <!-- Mobile: a light crossfading image slideshow (no video → saves data,
+           avoids iOS autoplay issues). -->
+      @for (img of heroImages; track img.src; let i = $index) {
+        <img class="hero__img" [class.hero__img--active]="i === activeSlide()" [src]="img.src" alt="" />
+      }
+    } @else {
+      <!-- Desktop: a base image (also the reduced-motion fallback) under the video. -->
+      <img class="hero__img hero__img--active" src="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" />
+      @for (src of [currentSrc()]; track src) {
+        <video class="hero__video" autoplay muted playsinline preload="auto"
+               [loop]="playlist().length <= 1"
+               (ended)="onVideoEnded()"
+               poster="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg"
+               [src]="src"></video>
+      }
     }
     <div class="hero__scrim"></div>
   </div>

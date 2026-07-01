@@ -162,12 +162,12 @@ export const DEMO_TOUR: DemoTour = {
 // your own uploads here when they land in the assets folder.
 const DEMO_PHOTOS = [
   'assets/homepage/tourist.jpg',
-  'assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg',
-  'assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',
-  'assets/homepage/chris-czermak.jpg',
-  'assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg',
-  'assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg',
-  'assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg',
+  'assets/homepage/hero-images/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg',
+  'assets/homepage/hero-images/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',
+  'assets/homepage/hero-images/chris-czermak.jpg',
+  'assets/homepage/hero-images/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg',
+  'assets/homepage/hero-images/andrei-mike-LLRENtzIo34-unsplash.jpg',
+  'assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg',
 ];
 
 let _photoIdx = 0;

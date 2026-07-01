@@ -277,7 +277,7 @@
   &__field {
     width: 100%;
     height: $btn-height * 2;
-    background: $accent-teal;
+    background: $accent-dark;
     border-radius: $radius-md $radius-md 0 0;
     display: flex;
     align-items: center;
@@ -344,7 +344,7 @@
     display: block;
     width: 100%;
     text-align: center;
-    background: $accent-teal;
+    background: $accent-dark;
     color: $white;
     border-radius: $radius-full;
     padding: $space-4 $space-5;
@@ -354,7 +354,7 @@
     text-decoration: none;
     transition: background $transition-fast;
 
-    &:hover { background: darken($accent-teal, 8%); }
+    &:hover { background: darken($accent-dark, 8%); }
   }
 }
 
@@ -803,6 +803,20 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
+}
+
+.hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+
+  &--active { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) { transition: none; }
 }
 
 .hero__video {

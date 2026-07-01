@@ -76,12 +76,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // Each image declares its text color so the hero title/sub stay readable.
   // Use 'dark' for light/bright photos, 'light' for dim/dark photos.
   readonly heroImages: { src: string; textColor: 'dark' | 'light' }[] = [
-    { src: 'assets/homepage/chris-czermak.jpg',                       textColor: 'dark'  },
-    { src: 'assets/homepage/andrei-mike-LLRENtzIo34-unsplash.jpg',    textColor: 'light' },
-    { src: 'assets/homepage/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg', textColor: 'light' },
-    { src: 'assets/homepage/kai-pilger-1_D59lYGpZA-unsplash.jpg',     textColor: 'light' },
-    { src: 'assets/homepage/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',  textColor: 'light' },
-    { src: 'assets/homepage/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg', textColor: 'light' },
+    { src: 'assets/homepage/hero-images/chris-czermak.jpg',                       textColor: 'dark'  },
+    { src: 'assets/homepage/hero-images/andrei-mike-LLRENtzIo34-unsplash.jpg',    textColor: 'light' },
+    { src: 'assets/homepage/hero-images/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg', textColor: 'light' },
+    { src: 'assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg',     textColor: 'light' },
+    { src: 'assets/homepage/hero-images/olivia-pedler-YX0HXl2SwIo-unsplash.jpg',  textColor: 'light' },
+    { src: 'assets/homepage/hero-images/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg', textColor: 'light' },
   ];
 
   readonly activeTextColor = computed(() => this.heroImages[this.activeSlide()].textColor);
@@ -136,6 +136,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           this.heroMobile.set(v.mobile ?? []);
           this.currentIndex.set(0);
         });
+
+      // Rotate the mobile hero images as a slow crossfade slideshow.
+      this.slideTimer = setInterval(
+        () => this.activeSlide.update(i => (i + 1) % this.heroImages.length),
+        5000,
+      );
     }
 
     this.api.get<Faq[]>('/faqs', { home: 1 })
