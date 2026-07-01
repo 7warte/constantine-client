@@ -692,10 +692,11 @@
 // overflow on phones and cause horizontal scroll.
 @media (max-width: #{$bp-md - 1px}) {
 
-  // Hero: stack buttons vertically, centered, capped width
+  // Hero: stack buttons vertically, left-aligned (matching the title/subtitle
+  // above), capped width.
   .hero__actions {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
   }
 
