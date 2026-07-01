@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, NgZone, PLATFORM_ID, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, NgZone, PLATFORM_ID, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -50,22 +50,52 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return list.length ? list : [this.BUNDLED_HERO];
   });
 
-  readonly currentIndex = signal(0);
-  readonly currentSrc = computed(() => {
-    const list = this.playlist();
-    return list[this.currentIndex() % list.length];
-  });
+  // ── Desktop video: double-buffered so the next clip preloads while the
+  //    current one plays — no gap/poster flash between clips. ──────────────────
+  readonly slotA      = signal('');
+  readonly slotB      = signal('');
+  readonly activeSlot = signal<0 | 1>(0);   // which <video> is visible
+  private nextToLoad  = 0;                   // playlist index queued into the hidden slot
+
+  @ViewChild('vidA') private vidA?: ElementRef<HTMLVideoElement>;
+  @ViewChild('vidB') private vidB?: ElementRef<HTMLVideoElement>;
 
   private heroMql: MediaQueryList | null = null;
   private readonly onHeroMqlChange = (e: MediaQueryListEvent) => {
     this.isMobile.set(e.matches);
-    this.currentIndex.set(0);   // playlist may change with viewport — restart it
+    if (!e.matches) this.initHeroBuffers();   // (re)prime the desktop buffers
   };
 
-  onVideoEnded(): void {
-    const len = this.playlist().length;
-    if (len <= 1) return;   // single clip loops natively via [loop]
-    this.currentIndex.update(i => (i + 1) % len);
+  /** Load the first two clips into the two <video> slots and mark A active. */
+  initHeroBuffers(): void {
+    const pl = this.playlist();
+    if (pl.length <= 1) return;   // single clip loops natively; no buffering needed
+    this.slotA.set(pl[0]);
+    this.slotB.set(pl[1 % pl.length]);
+    this.activeSlot.set(0);
+    this.nextToLoad = 2;
+  }
+
+  /** Only the visible slot autoplays; the hidden slot merely preloads. */
+  onSlotCanPlay(slot: 0 | 1, e: Event): void {
+    const v = e.target as HTMLVideoElement;
+    v.muted = true;
+    if (slot === this.activeSlot()) {
+      v.play().catch(() => setTimeout(() => v.play().catch(() => {}), 250));
+    }
+  }
+
+  /** When the visible clip ends, crossfade to the preloaded slot and queue the next. */
+  onSlotEnded(slot: 0 | 1): void {
+    const pl = this.playlist();
+    if (pl.length <= 1) return;
+    const other: 0 | 1 = slot === 0 ? 1 : 0;
+    this.activeSlot.set(other);                       // crossfade to the already-buffered clip
+    const el = (other === 0 ? this.vidA : this.vidB)?.nativeElement;
+    if (el) { el.currentTime = 0; el.muted = true; el.play().catch(() => {}); }
+    // Queue the following clip into the slot that just finished (preloads it).
+    (slot === 0 ? this.slotA : this.slotB).set(pl[this.nextToLoad % pl.length]);
+    this.nextToLoad++;
   }
 
   // Autoplay attributes are unreliable (Angular re-creates the <video> when the
@@ -143,7 +173,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         .subscribe(v => {
           this.heroDesktop.set(v.desktop ?? []);
           this.heroMobile.set(v.mobile ?? []);
-          this.currentIndex.set(0);
+          this.initHeroBuffers();
         });
 
       // Rotate the mobile hero images as a slow crossfade slideshow.

@@ -12,6 +12,14 @@
         <p>Create, discover, and share tours worldwide</p>
       </div>
 
+      <app-google-signin (credential)="onGoogle($event)" />
+
+      @if (googleError()) {
+        <div class="auth-form__error auth-form__error--google" role="alert">{{ googleError() }}</div>
+      }
+
+      <div class="auth-line"></div>
+
       <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
         @if (error()) {
           <div class="auth-form__error" role="alert">{{ error() }}</div>
@@ -70,14 +78,6 @@
           Create account
         </app-button>
       </form>
-
-      <div class="auth-divider"><span>or</span></div>
-
-      <app-google-signin (credential)="onGoogle($event)" />
-
-      @if (googleError()) {
-        <div class="auth-form__error auth-form__error--google" role="alert">{{ googleError() }}</div>
-      }
 
       <p class="auth-card__switch">
         Already have an account?

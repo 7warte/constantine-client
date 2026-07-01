@@ -92,7 +92,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: $space-5;
+  gap: $space-3;
 
   &__error {
     background: rgba($color-error, 0.08);
@@ -113,6 +113,12 @@
       &:hover { color: $accent-primary; }
     }
   }
+}
+
+.auth-line {
+  height: 1px;
+  background: rgba($black, 0.1);
+  margin: $space-4 0;
 }
 
 .auth-divider {

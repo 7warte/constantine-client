@@ -10,14 +10,24 @@
     } @else {
       <!-- Desktop: a base image (also the reduced-motion fallback) under the video. -->
       <img class="hero__img hero__img--active" src="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg" alt="" />
-      @for (src of [currentSrc()]; track src) {
-        <video class="hero__video" autoplay muted playsinline preload="auto"
-               [loop]="playlist().length <= 1"
-               (ended)="onVideoEnded()"
-               (loadedmetadata)="startVideo($event)"
-               (canplay)="startVideo($event)"
+      @if (playlist().length <= 1) {
+        <!-- Single clip: loops natively. -->
+        <video class="hero__video hero__video--active" autoplay muted playsinline preload="auto" loop
+               (loadedmetadata)="startVideo($event)" (canplay)="startVideo($event)"
                poster="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg"
-               [src]="src"></video>
+               [src]="playlist()[0]"></video>
+      } @else {
+        <!-- Multiple clips: two buffers so the next preloads while the current plays. -->
+        <video #vidA class="hero__video" [class.hero__video--active]="activeSlot() === 0"
+               muted playsinline preload="auto"
+               (canplay)="onSlotCanPlay(0, $event)" (ended)="onSlotEnded(0)"
+               poster="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg"
+               [src]="slotA()"></video>
+        <video #vidB class="hero__video" [class.hero__video--active]="activeSlot() === 1"
+               muted playsinline preload="auto"
+               (canplay)="onSlotCanPlay(1, $event)" (ended)="onSlotEnded(1)"
+               poster="assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg"
+               [src]="slotB()"></video>
       }
     }
     <div class="hero__scrim"></div>

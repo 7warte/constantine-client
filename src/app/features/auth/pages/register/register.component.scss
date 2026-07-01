@@ -107,6 +107,12 @@
   }
 }
 
+.auth-line {
+  height: 1px;
+  background: rgba($black, 0.1);
+  margin: $space-4 0;
+}
+
 .auth-divider {
   display: flex;
   align-items: center;
