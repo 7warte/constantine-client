@@ -1,0 +1,128 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.admin-resources {
+  padding: $space-6;
+  max-width: 1200px;
+
+  @media (max-width: #{$bp-md - 1px}) {
+    padding: $space-4 $space-3;
+  }
+
+  &__head {
+    margin-bottom: $space-6;
+
+    h1 {
+      font-family: $font-family-primary;
+      font-size: $font-size-xl;
+      color: $text-primary;
+      margin: 0 0 $space-1;
+    }
+
+    p {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  &__section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+    margin: $space-6 0 $space-3;
+
+    &:first-of-type { margin-top: 0; }
+  }
+
+  &__loading,
+  &__error,
+  &__note {
+    font-size: $font-size-sm;
+  }
+  &__error { color: $color-error; }
+  &__note  { color: $text-muted; font-style: italic; }
+
+  &__cards {
+    display: grid;
+    gap: $space-3;
+    grid-template-columns: 1fr;
+
+    @include sm { grid-template-columns: repeat(2, 1fr); }
+    @include md { grid-template-columns: repeat(3, 1fr); }
+    @include lg { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  &__card {
+    background: $bg-surface;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    padding: $space-4 $space-5;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 96px;
+  }
+
+  &__card-label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+  }
+
+  &__card-value {
+    font-family: $font-family-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    line-height: 1.1;
+
+    &--warn { color: $color-warning; }
+  }
+
+  &__card-foot {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-top: auto;
+  }
+
+  &__bar {
+    height: 4px;
+    width: 100%;
+    background: $border-light;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: $space-2;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    background: $accent-primary;
+    border-radius: 2px;
+    transition: width $transition-fast;
+
+    &--ok     { background: $color-success; }
+    &--warn   { background: $color-warning; }
+    &--danger { background: $color-error; }
+  }
+
+  &__links {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    margin-top: $space-3;
+
+    a {
+      font-size: $font-size-sm;
+      color: $text-primary;
+      text-decoration: underline;
+      width: fit-content;
+
+      &:hover { color: $accent-primary; }
+    }
+  }
+}

@@ -56,6 +56,7 @@ export class AdminLayoutComponent {
         { label: 'Privacy policy',       icon: 'shield',       path: '/admin/legal/privacy' },
         { label: 'FAQs',                 icon: 'help_outline', path: '/admin/faqs' },
         { label: 'Hero videos',          icon: 'movie',        path: '/admin/hero-videos' },
+        { label: 'Resources',            icon: 'monitoring',   path: '/admin/resources' },
       ],
     },
     {

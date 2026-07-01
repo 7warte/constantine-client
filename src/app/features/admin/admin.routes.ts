@@ -111,6 +111,11 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent),
       },
+      {
+        path: 'resources',
+        loadComponent: () =>
+          import('./pages/resources/admin-resources.component').then(m => m.AdminResourcesComponent),
+      },
     ],
   },
 

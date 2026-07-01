@@ -16,13 +16,28 @@
             {{ slot === 'desktop' ? 'Desktop (landscape)' : 'Mobile (portrait)' }}
           </h2>
 
-          @if (data()[slot]; as v) {
-            <div class="hero-videos__preview" [class.hero-videos__preview--portrait]="slot === 'mobile'">
-              <video [src]="v.url" muted loop autoplay playsinline></video>
-            </div>
-            <p class="hero-videos__meta">{{ v.width }}×{{ v.height }} · {{ formatBytes(v.bytes) }}</p>
+          @if (data()[slot].length) {
+            <ul class="hero-videos__list">
+              @for (v of data()[slot]; track v.public_id) {
+                <li class="hero-videos__item">
+                  <div class="hero-videos__preview" [class.hero-videos__preview--portrait]="slot === 'mobile'">
+                    <video [src]="v.url" muted loop autoplay playsinline></video>
+                  </div>
+                  <div class="hero-videos__item-meta">
+                    <p class="hero-videos__meta">{{ v.width }}×{{ v.height }} · {{ formatBytes(v.bytes) }}</p>
+                    <button type="button" class="hero-videos__btn hero-videos__btn--danger"
+                      [disabled]="uploading()[slot]"
+                      (click)="remove(slot, v)">Delete</button>
+                  </div>
+                </li>
+              }
+            </ul>
           } @else {
-            <p class="hero-videos__empty">No video set — using the bundled clip.</p>
+            <p class="hero-videos__empty">
+              {{ slot === 'mobile'
+                  ? 'No videos yet — desktop clips will be used on mobile.'
+                  : 'No videos yet — using the bundled clip.' }}
+            </p>
           }
 
           <div class="hero-videos__actions">
@@ -34,14 +49,8 @@
             <button type="button" class="hero-videos__btn hero-videos__btn--primary"
               [disabled]="!selected()[slot] || uploading()[slot]"
               (click)="upload(slot)">
-              {{ uploading()[slot] ? 'Uploading…' : 'Upload' }}
+              {{ uploading()[slot] ? 'Uploading…' : 'Add video' }}
             </button>
-
-            @if (data()[slot]) {
-              <button type="button" class="hero-videos__btn hero-videos__btn--danger"
-                [disabled]="uploading()[slot]"
-                (click)="remove(slot)">Delete</button>
-            }
           </div>
 
           @if (slotError()[slot]) {

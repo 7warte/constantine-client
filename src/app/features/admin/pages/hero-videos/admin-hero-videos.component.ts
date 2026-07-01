@@ -11,8 +11,8 @@ interface HeroVideo {
 }
 
 interface HeroVideos {
-  desktop: HeroVideo | null;
-  mobile: HeroVideo | null;
+  desktop: HeroVideo[];
+  mobile: HeroVideo[];
 }
 
 type Slot = 'desktop' | 'mobile';
@@ -32,7 +32,7 @@ export class AdminHeroVideosComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly error   = signal<string | null>(null);
-  readonly data    = signal<HeroVideos>({ desktop: null, mobile: null });
+  readonly data    = signal<HeroVideos>({ desktop: [], mobile: [] });
 
   // Per-slot transient UI state.
   readonly selected   = signal<{ desktop: File | null; mobile: File | null }>({ desktop: null, mobile: null });
@@ -67,7 +67,7 @@ export class AdminHeroVideosComponent implements OnInit {
     this.uploading.update(s => ({ ...s, [slot]: true }));
     this.slotError.update(s => ({ ...s, [slot]: null }));
 
-    this.api.upload<HeroVideo>(`/hero-videos/${slot}`, fd).subscribe({
+    this.api.upload<HeroVideo[]>(`/hero-videos/${slot}`, fd).subscribe({
       next: () => {
         this.uploading.update(s => ({ ...s, [slot]: false }));
         this.selected.update(s => ({ ...s, [slot]: null }));
@@ -80,9 +80,10 @@ export class AdminHeroVideosComponent implements OnInit {
     });
   }
 
-  remove(slot: Slot): void {
-    if (!confirm('Delete this hero video? The homepage will fall back to the bundled clip.')) return;
-    this.api.delete(`/hero-videos/${slot}`).subscribe({
+  remove(slot: Slot, video: HeroVideo): void {
+    if (!confirm('Delete this hero clip?')) return;
+    this.slotError.update(s => ({ ...s, [slot]: null }));
+    this.api.deleteBody(`/hero-videos/${slot}`, { public_id: video.public_id }).subscribe({
       next: () => this.reload(),
       error: (e) => this.slotError.update(s => ({ ...s, [slot]: e.error?.error ?? 'Delete failed' })),
     });

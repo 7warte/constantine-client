@@ -32,6 +32,11 @@ export class AdminApiService {
     return this.http.delete<T>(`${this.base}${path}`, { withCredentials: true });
   }
 
+  /** DELETE with a JSON request body (e.g. removing one item by id). */
+  deleteBody<T>(path: string, body: unknown): Observable<T> {
+    return this.http.delete<T>(`${this.base}${path}`, { withCredentials: true, body });
+  }
+
   /**
    * Multipart upload. Passes the FormData through untouched so the browser sets
    * the correct multipart Content-Type (with boundary); auth still rides the
