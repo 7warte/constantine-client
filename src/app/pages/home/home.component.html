@@ -63,24 +63,6 @@
   </div>
 </section>
 
-<!-- ── Mobile only: Search destination ─────────────────────────── -->
-<section class="m-destination">
-  <div class="container">
-    <form class="m-destination__form" (submit)="onSearchDestination($event)">
-      <div class="m-destination__field">
-        <input
-          class="m-destination__input"
-          type="text"
-          [formControl]="destinationCtrl"
-          placeholder="Rome"
-          aria-label="Destination"
-        />
-      </div>
-      <button class="m-destination__btn" type="submit">Search destination</button>
-    </form>
-  </div>
-</section>
-
 <!-- ── Three features ──────────────────────────────────────────── -->
 <section class="features">
   <div class="container">
@@ -147,6 +129,24 @@
       <p class="quote__text">"{{ activeQuote.text }}"</p>
       <cite class="quote__author">{{ activeQuote.author }}</cite>
     </blockquote>
+  </div>
+</section>
+
+<!-- ── Mobile only: Search destination (moved below the quote on mobile) ── -->
+<section class="m-destination">
+  <div class="container">
+    <form class="m-destination__form" (submit)="onSearchDestination($event)">
+      <div class="m-destination__field">
+        <input
+          class="m-destination__input"
+          type="text"
+          [formControl]="destinationCtrl"
+          placeholder="Rome"
+          aria-label="Destination"
+        />
+      </div>
+      <button class="m-destination__btn" type="submit">Search destination</button>
+    </form>
   </div>
 </section>
 
