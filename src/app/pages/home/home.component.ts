@@ -35,19 +35,38 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly faqItems        = signal<Faq[]>([]);
   readonly openFaq         = signal<string | null>(null);
 
-  // Hero background video — admin-managed, falls back to the bundled clip.
+  // Hero background videos — admin-managed playlists, fall back to the bundled clip.
   private readonly BUNDLED_HERO = 'assets/hero-videos/7062383-hd_1920_1080_24fps.mp4';
-  readonly heroDesktopUrl = signal<string | null>(null);
-  readonly heroMobileUrl  = signal<string | null>(null);
-  readonly isMobile       = signal(false);
+  readonly heroDesktop = signal<string[]>([]);
+  readonly heroMobile  = signal<string[]>([]);
+  readonly isMobile    = signal(false);
 
-  readonly heroVideoSrc = computed(() =>
-    this.isMobile()
-      ? (this.heroMobileUrl() ?? this.heroDesktopUrl() ?? this.BUNDLED_HERO)
-      : (this.heroDesktopUrl() ?? this.BUNDLED_HERO));
+  // Active playlist: mobile clips on mobile (falling back to desktop clips),
+  // desktop clips otherwise; the bundled clip when nothing is configured.
+  readonly playlist = computed<string[]>(() => {
+    const list = this.isMobile()
+      ? (this.heroMobile().length ? this.heroMobile() : this.heroDesktop())
+      : this.heroDesktop();
+    return list.length ? list : [this.BUNDLED_HERO];
+  });
+
+  readonly currentIndex = signal(0);
+  readonly currentSrc = computed(() => {
+    const list = this.playlist();
+    return list[this.currentIndex() % list.length];
+  });
 
   private heroMql: MediaQueryList | null = null;
-  private readonly onHeroMqlChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
+  private readonly onHeroMqlChange = (e: MediaQueryListEvent) => {
+    this.isMobile.set(e.matches);
+    this.currentIndex.set(0);   // playlist may change with viewport — restart it
+  };
+
+  onVideoEnded(): void {
+    const len = this.playlist().length;
+    if (len <= 1) return;   // single clip loops natively via [loop]
+    this.currentIndex.update(i => (i + 1) % len);
+  }
   readonly activeSlide     = signal(0);
   readonly indoorTours     = signal<any[]>([]);
   readonly outdoorTours    = signal<any[]>([]);
@@ -111,10 +130,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isMobile.set(this.heroMql.matches);
       this.heroMql.addEventListener('change', this.onHeroMqlChange);
 
-      this.api.get<{ desktop: string | null; mobile: string | null }>('/hero-videos')
+      this.api.get<{ desktop: string[]; mobile: string[] }>('/hero-videos')
         .subscribe(v => {
-          this.heroDesktopUrl.set(v.desktop);
-          this.heroMobileUrl.set(v.mobile);
+          this.heroDesktop.set(v.desktop ?? []);
+          this.heroMobile.set(v.mobile ?? []);
+          this.currentIndex.set(0);
         });
     }
 

@@ -1,7 +1,7 @@
 <section class="hero-videos">
   <header class="hero-videos__head">
     <h1>Hero videos</h1>
-    <p>Background videos for the homepage hero. Desktop must be landscape, mobile must be portrait. Max 15&nbsp;MB each. Falls back to the bundled clip when a slot is empty.</p>
+    <p>Background videos for the homepage hero. Each slot loops through its clips in order. Desktop must be landscape, mobile must be portrait. Max 100&nbsp;MB each. When the mobile slot is empty the desktop clips are used; when a slot has no clips at all the bundled clip is shown.</p>
   </header>
 
   @if (loading()) {

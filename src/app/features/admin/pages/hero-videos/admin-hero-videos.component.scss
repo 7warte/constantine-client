@@ -52,6 +52,28 @@
     margin: 0;
   }
 
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__item-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2;
+  }
+
   &__preview {
     width: 100%;
     background: $bg-surface-alt;
