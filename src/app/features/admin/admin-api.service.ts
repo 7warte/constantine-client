@@ -32,6 +32,15 @@ export class AdminApiService {
     return this.http.delete<T>(`${this.base}${path}`, { withCredentials: true });
   }
 
+  /**
+   * Multipart upload. Passes the FormData through untouched so the browser sets
+   * the correct multipart Content-Type (with boundary); auth still rides the
+   * admin cookie via withCredentials.
+   */
+  upload<T>(path: string, formData: FormData): Observable<T> {
+    return this.http.post<T>(`${this.base}${path}`, formData, { withCredentials: true });
+  }
+
   /** Build a fully-qualified URL — useful for opening downloads / iframes. */
   url(path: string): string {
     return `${this.base}${path}`;

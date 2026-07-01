@@ -1,0 +1,412 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// Reusable band that hosts the extracted animated town scene + strolling
+// figures. Positioned relative so the scene (.hero__scene, position:absolute
+// inset:0) and the figures/edge fill it. The SVG scene anchors to the bottom
+// and scales with width (viewBox 1600×180 → ~11.25% of width tall), so the
+// band gets a min-height that comfortably shows the town at common widths.
+.hero-scene-band {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  min-height: 220px;
+  // Give the scene its sky/backdrop while the buildings sit along the bottom.
+  background: linear-gradient(180deg, lighten($dusty-rose, 18%) 0%, $white 100%);
+
+  @media (max-width: #{$bp-md - 1px}) {
+    min-height: 180px;
+  }
+}
+
+// Glass "shine" easter-egg town scene + tourists, moved verbatim from HomeComponent.
+
+// ── Easter egg: tiny tourists on the hero's glass trim ──────────────────────
+.hero__figures {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  z-index: $z-raised;
+  pointer-events: none;
+  overflow: hidden;
+
+  // Match the scene's mobile zoom so the tourists keep landing on the landmarks
+  // (figures are positioned as a fraction of this container's width at runtime).
+  @media (max-width: #{$bp-md - 1px}) {
+    left: auto;
+    right: 0;
+    width: 166.667%;
+  }
+}
+
+.figure {
+  position: absolute;
+  bottom: 5px;            // stand on top of the 5px glass trim
+  left: 0;
+  width: 10px;
+  height: 18px;
+  opacity: 0;             // revealed once GSAP positions it (avoids a stacked flash)
+  color: rgba($black, 0.78);
+  filter: drop-shadow(0 0 1px rgba($white, 0.7));
+  will-change: transform;
+
+  &__face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transform-origin: center bottom;
+  }
+
+  &__person {
+    position: relative;
+    width: 7px;
+    height: 16px;
+
+    &::before {            // head
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      margin-left: -2.25px;
+      width: 4.5px;
+      height: 4.5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    &::after {             // body
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      margin-left: -2.75px;
+      width: 5.5px;
+      height: 11px;
+      border-radius: 3px 3px 1.5px 1.5px;
+      background: currentColor;
+    }
+  }
+
+  &--walking &__person { animation: fig-bob 0.34s ease-in-out infinite; }
+
+  &__cam {
+    position: absolute;
+    bottom: 9px;
+    left: 50%;
+    margin-left: -3px;
+    width: 6px;
+    height: 4px;
+    border-radius: 1px;
+    background: rgba($black, 0.85);
+    opacity: 0;
+  }
+
+  &__flash {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    margin-left: -7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($white, 0.95) 0%, rgba($white, 0) 70%);
+    opacity: 0;
+  }
+
+  &__bubble {
+    position: absolute;
+    bottom: 17px;
+    left: 50%;
+    margin-left: -7px;
+    width: 14px;
+    height: 9px;
+    border-radius: 5px;
+    background: rgba($white, 0.92);
+    box-shadow: 0 1px 3px rgba($black, 0.25);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    font-weight: 800;
+    line-height: 1;
+    color: #1a1a1a;
+
+    &::after {             // little tail
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 4px;
+      width: 0;
+      height: 0;
+      border-left: 2px solid transparent;
+      border-right: 2px solid transparent;
+      border-top: 3px solid rgba($white, 0.92);
+    }
+  }
+}
+
+@keyframes fig-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+
+// ── Easter-egg town scene (behind the hero copy when active) ────────────────
+.hero__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;                 // below the copy + figures
+  overflow: hidden;
+  background: transparent;    // while loading, the hero's pink→white shows through
+
+  // Once ready, each scene gets its own sky.
+  &--ready.hero__scene--city,
+  &--ready.hero__scene--beach {
+    background: linear-gradient(180deg, #cfe6f2 0%, #eaf4f9 100%);   // light blue sky
+  }
+  &--ready.hero__scene--museum {
+    // Bright Vatican-style gallery: warm cream walls, daylight from the windows.
+    background: linear-gradient(180deg, #efe7d6 0%, #e7ddc8 55%, #ddd1b6 100%);
+  }
+  &--ready.hero__scene--metro {
+    background: linear-gradient(180deg, #0f1320 0%, #1a2034 55%, #28304a 100%);   // night sky
+  }
+  &--ready.hero__scene--desert {
+    background: linear-gradient(180deg, #aacbe6 0%, #cfe4f2 55%, #eaf4fa 100%);   // clear light-blue sky
+  }
+  &--ready.hero__scene--nordic {
+    background: linear-gradient(180deg, #9aa3ad 0%, #b7bfc8 55%, #ccd3da 100%);   // grey overcast snow sky
+  }
+}
+
+// City greenery — mixed greens (CSS fill overrides the inline grays).
+.hero__scene-svg {
+  .tree-foliage ellipse { fill: #8aa86f; }
+  .tree-foliage ellipse:nth-child(2) { fill: #a7c191; }
+  .tree-foliage ellipse:nth-child(3) { fill: #6f9160; }
+  .tree-foliage--b ellipse:nth-child(1) { fill: #7fa46c; }
+
+  .scene-bush ellipse { fill: #8caa72; }
+  .scene-bush ellipse:nth-child(2) { fill: #a4bf8c; }
+  .scene-bush ellipse:nth-child(4) { fill: #98b57f; }
+  .scene-bush ellipse:nth-child(5) { fill: #79965f; }
+
+  .scene-flowers circle:nth-of-type(1) { fill: #d98fa0; }
+  .scene-flowers circle:nth-of-type(2) { fill: #e6c266; }
+  .scene-flowers circle:nth-of-type(3) { fill: #b98ec2; }
+}
+
+.hero__scene-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;            // span the whole hero width; viewBox maps 1:1 to width
+  height: auto;
+  animation: scene-fade 500ms ease both;   // each scene swap fades in
+
+  // On phones the full 1600-wide scene renders tiny — zoom into the right 60%
+  // (where each scene's main landmark sits) by widening to 1/0.6 and anchoring
+  // right; the overflowing left 40% is clipped by .hero__scene's overflow.
+  @media (max-width: #{$bp-md - 1px}) {
+    width: 166.667%;
+    left: auto;
+    right: 0;
+  }
+
+  .tree-foliage {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: tree-sway 4s ease-in-out infinite;
+  }
+  .tree-foliage--b {
+    animation-duration: 5.4s;
+    animation-delay: -1.6s;
+  }
+
+  .fountain-water {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: fountain-flow 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tree-foliage,
+    .fountain-water { animation: none; }
+  }
+}
+
+@keyframes fountain-flow {
+  0%, 100% { transform: scaleY(0.92); opacity: 0.85; }
+  50%      { transform: scaleY(1.06); opacity: 1; }
+}
+
+// Beach scene: drifting sea + floating albatrosses + a sailing boat.
+.hero__scene-svg {
+  .sea-wave { animation: wave-drift 6s linear infinite; }
+  .bird { animation: bird-float 7s ease-in-out infinite; }
+  .bird--2 { animation-duration: 8.5s; animation-delay: -2s; }
+  .bird--3 { animation-duration: 6.2s; animation-delay: -4s; }
+
+  .beach-boat {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: boat-sail 12s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sea-wave, .bird, .beach-boat { animation: none; }
+  }
+}
+
+@keyframes wave-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-200px); }
+}
+@keyframes bird-float {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(26px, -7px); }
+}
+@keyframes boat-sail {
+  0%   { transform: translate(0, 0) rotate(-1.4deg); }
+  50%  { transform: translate(70px, -1px) rotate(1.4deg); }
+  100% { transform: translate(0, 0) rotate(-1.4deg); }
+}
+
+// Night metropolis: taxis pulling up & leaving, twinkling stars, glowing lamps.
+.hero__scene-svg {
+  .metro-taxi--a { animation: metro-taxi-a 13s ease-in-out infinite; }
+  .metro-taxi--b { animation: metro-taxi-b 16s ease-in-out -5s infinite; }
+  .metro-taxi--c { animation: metro-taxi-c 11s ease-in-out -8s infinite; }
+
+  .lamp-glow { animation: lamp-pulse 3.4s ease-in-out infinite; }
+  .metro-stars circle { animation: star-twinkle 3s ease-in-out infinite; }
+  .metro-stars circle:nth-child(2n) { animation-duration: 4.2s; animation-delay: -1.5s; }
+  .metro-beacon   { animation: beacon-blink 1.6s steps(1, end) infinite; }
+  .metro-beacon--b { animation-delay: -0.8s; }
+
+  .metro-sign {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: sign-sway 3.6s ease-in-out infinite;
+  }
+  .metro-sign--b { animation-duration: 4.4s; animation-delay: -1.2s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metro-taxi--a, .metro-taxi--b, .metro-taxi--c,
+    .lamp-glow, .metro-stars circle, .metro-beacon, .metro-sign { animation: none; }
+  }
+}
+
+// Taxi cycles: off-screen → pull up to the stand (translateX 0) → wait → drive off.
+@keyframes metro-taxi-a {
+  0%   { transform: translateX(-760px); }
+  16%  { transform: translateX(0); }
+  40%  { transform: translateX(0); }
+  62%  { transform: translateX(1240px); }
+  100% { transform: translateX(1240px); }
+}
+@keyframes metro-taxi-b {
+  0%   { transform: translateX(-1320px); }
+  20%  { transform: translateX(0); }
+  46%  { transform: translateX(0); }
+  68%  { transform: translateX(760px); }
+  100% { transform: translateX(760px); }
+}
+@keyframes metro-taxi-c {
+  0%   { transform: translateX(-420px); }
+  14%  { transform: translateX(0); }
+  38%  { transform: translateX(0); }
+  60%  { transform: translateX(1520px); }
+  100% { transform: translateX(1520px); }
+}
+@keyframes lamp-pulse {
+  0%, 100% { opacity: 0.78; }
+  50%      { opacity: 0.42; }
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+@keyframes beacon-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+@keyframes sign-sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+// Dawn desert: swaying palms + softly breathing sun halo.
+.hero__scene-svg {
+  .desert-palm {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: palm-sway 4.6s ease-in-out infinite;
+  }
+  .desert-palm:nth-of-type(2n) { animation-duration: 5.8s; animation-delay: -1.4s; }
+  .desert-palm:nth-of-type(3n) { animation-duration: 6.4s; animation-delay: -2.6s; }
+
+  .sun-glow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: sun-breathe 5.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .desert-palm, .sun-glow { animation: none; }
+  }
+}
+@keyframes palm-sway {
+  0%, 100% { transform: rotate(-1.8deg); }
+  50%      { transform: rotate(1.8deg); }
+}
+@keyframes sun-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+// Snowy nordic town: snowflakes drifting down on staggered cadences.
+.hero__scene-svg {
+  .snow-flake { animation: snow-fall 9s linear infinite; }
+  .snow-flake:nth-child(3n)   { animation-duration: 7s; }
+  .snow-flake:nth-child(3n+1) { animation-duration: 11s; }
+  .snow-flake:nth-child(4n)   { animation-delay: -3s; }
+  .snow-flake:nth-child(4n+2) { animation-delay: -6s; }
+  .snow-flake:nth-child(5n)   { animation-delay: -8s; }
+  .snow-flake:nth-child(2n)   { opacity: 0.85; }
+
+  // Bakery chimney smoke — puffs drift up and fade.
+  .bakery-smoke {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: smoke-rise 4s ease-in-out infinite;
+  }
+  .bakery-smoke:nth-of-type(2) { animation-duration: 4.8s; animation-delay: -1.6s; }
+  .bakery-smoke:nth-of-type(3) { animation-duration: 5.6s; animation-delay: -3.2s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snow-flake, .bakery-smoke { animation: none; }
+  }
+}
+@keyframes snow-fall {
+  0%   { transform: translateY(-14px) translateX(0); }
+  100% { transform: translateY(196px) translateX(12px); }
+}
+@keyframes smoke-rise {
+  0%   { transform: translate(0, 0) scale(0.8); opacity: 0.55; }
+  50%  { transform: translate(-3px, -7px) scale(1.1); opacity: 0.3; }
+  100% { transform: translate(2px, -14px) scale(1.4); opacity: 0; }
+}
+
+@keyframes tree-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%      { transform: rotate(2deg); }
+}
+
+@keyframes scene-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

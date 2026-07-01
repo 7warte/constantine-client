@@ -55,6 +55,7 @@ export class AdminLayoutComponent {
         { label: 'Terms & conditions',   icon: 'gavel',        path: '/admin/legal/terms' },
         { label: 'Privacy policy',       icon: 'shield',       path: '/admin/legal/privacy' },
         { label: 'FAQs',                 icon: 'help_outline', path: '/admin/faqs' },
+        { label: 'Hero videos',          icon: 'movie',        path: '/admin/hero-videos' },
       ],
     },
     {

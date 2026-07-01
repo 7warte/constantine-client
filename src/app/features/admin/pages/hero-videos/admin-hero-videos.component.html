@@ -1,0 +1,54 @@
+<section class="hero-videos">
+  <header class="hero-videos__head">
+    <h1>Hero videos</h1>
+    <p>Background videos for the homepage hero. Desktop must be landscape, mobile must be portrait. Max 15&nbsp;MB each. Falls back to the bundled clip when a slot is empty.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="hero-videos__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="hero-videos__error" role="alert">{{ error() }}</div>
+  } @else {
+    <div class="hero-videos__grid">
+      @for (slot of slots; track slot) {
+        <div class="hero-videos__card">
+          <h2 class="hero-videos__slot-title">
+            {{ slot === 'desktop' ? 'Desktop (landscape)' : 'Mobile (portrait)' }}
+          </h2>
+
+          @if (data()[slot]; as v) {
+            <div class="hero-videos__preview" [class.hero-videos__preview--portrait]="slot === 'mobile'">
+              <video [src]="v.url" muted loop autoplay playsinline></video>
+            </div>
+            <p class="hero-videos__meta">{{ v.width }}×{{ v.height }} · {{ formatBytes(v.bytes) }}</p>
+          } @else {
+            <p class="hero-videos__empty">No video set — using the bundled clip.</p>
+          }
+
+          <div class="hero-videos__actions">
+            <label class="hero-videos__file">
+              <input type="file" accept="video/mp4,video/*" (change)="onPick(slot, $event)" />
+              <span>{{ selected()[slot]?.name ?? 'Choose file…' }}</span>
+            </label>
+
+            <button type="button" class="hero-videos__btn hero-videos__btn--primary"
+              [disabled]="!selected()[slot] || uploading()[slot]"
+              (click)="upload(slot)">
+              {{ uploading()[slot] ? 'Uploading…' : 'Upload' }}
+            </button>
+
+            @if (data()[slot]) {
+              <button type="button" class="hero-videos__btn hero-videos__btn--danger"
+                [disabled]="uploading()[slot]"
+                (click)="remove(slot)">Delete</button>
+            }
+          </div>
+
+          @if (slotError()[slot]) {
+            <div class="hero-videos__error" role="alert">{{ slotError()[slot] }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>
