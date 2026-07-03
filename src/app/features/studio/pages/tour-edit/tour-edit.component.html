@@ -760,6 +760,7 @@
                     </ul>
                   }
                 </div>
+                <span class="loc-picker__draw-hint">Click multiple times on the map to define the area of your venue.</span>
                 <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePickerLocating()" (click)="useVenueCurrentLocation()">
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
                   {{ venuePickerLocating() ? 'Locating…' : 'Use my current location' }}
@@ -844,6 +845,13 @@
                 <div class="loc-picker__warning">
                   <mat-icon class="loc-picker__icon">warning_amber</mat-icon>
                   You're currently outside the tour area.
+                </div>
+              }
+
+              @if (outsideVenueArea(); as venueName) {
+                <div class="loc-picker__warning">
+                  <mat-icon class="loc-picker__icon">warning_amber</mat-icon>
+                  This pin is outside “{{ venueName }}”'s area — you can still save it, but double-check it's where you want.
                 </div>
               }
 

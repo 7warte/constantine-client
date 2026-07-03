@@ -1786,6 +1786,17 @@
     &--muted { color: #999999; }
   }
 
+  // Bold, gently flashing prompt telling the creator to click the map to outline
+  // the venue area. Sits on the control row, above the map.
+  &__draw-hint {
+    flex: 0 1 auto;
+    margin-right: auto;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    animation: venue-draw-flash 5s ease-in-out infinite;
+  }
+
   &__error {
     padding: $space-2 $space-5;
     background: rgba($color-error, 0.08);
@@ -1813,6 +1824,19 @@
     min-height: 320px;
     background: #f4f4f4;
   }
+}
+
+// A quick double-blink every 5s draws the eye without being distracting.
+@keyframes venue-draw-flash {
+  0%, 100% { opacity: 1; }
+  6%       { opacity: 0.15; }
+  12%      { opacity: 1; }
+  18%      { opacity: 0.15; }
+  24%      { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loc-picker__draw-hint { animation: none; }
 }
 
 // ── Step 3 redesign: venue bars & rose venue blocks ─────────────────────────

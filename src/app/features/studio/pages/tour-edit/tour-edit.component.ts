@@ -616,6 +616,32 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     return haversineKm(start[0], start[1], lat, lng) > radiusKm;
   });
 
+  // Live soft check for the stop picker: the name of the stop's venue when the
+  // current pin sits OUTSIDE that venue's drawn area, else null. Saving is still
+  // allowed — this is only a heads-up. Null when the venue has no drawn polygon.
+  readonly outsideVenueArea = computed<string | null>(() => {
+    const lat = this.pickerLat();
+    const lng = this.pickerLng();
+    if (lat == null || lng == null) return null;
+
+    const stopId = this.editingStopId();
+    const spaceId = stopId
+      ? this.stops().find(s => s.id === stopId)?.space_id
+      : this.activeSpaceId();
+    if (!spaceId) return null;
+
+    const space = this.spaces().find(sp => sp.id === spaceId);
+    if (!space) return null;
+
+    const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
+    const poly: [number, number][] = Array.isArray(raw)
+      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
+      : [];
+    if (poly.length < 3) return null;   // no drawn area to compare against
+
+    return this.pointInPolygon(lat, lng, poly) ? null : space.name;
+  });
+
 
   // ── Init ───────────────────────────────────────────────────────────────
 
