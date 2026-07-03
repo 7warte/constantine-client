@@ -225,6 +225,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   private startMarker: L.Marker | null = null;
   private endMarker: L.Marker | null = null;
 
+  // Read-only overview map on the Review & publish step (venue areas + stop pins).
+  private reviewMap: L.Map | null = null;
+  private reviewMapRendered = false;
+
   readonly mapHint = computed(() => {
     const sc = this.startCoords();
     const ec = this.endCoords();
@@ -466,38 +470,50 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       maxZoom: 20,
     } as any).addTo(this.venuePickerMap);
 
-    // Show other venues with coords as small static dots for context.
+    // Show the OTHER venues' already-drawn areas (and any point-only venues as
+    // dots) so the creator can see them and avoid overlapping a new area.
     const activeId = this.venuePickerSpace()?.id;
+    const otherAreaPts: L.LatLngExpression[] = [];
     for (const sp of this.spaces()) {
       if (sp.id === activeId) continue;
-      if (sp.latitude == null || sp.longitude == null) continue;
-      L.circleMarker([+sp.latitude, +sp.longitude], {
-        radius: 6, color: '#666', fillColor: '#999', fillOpacity: 0.7, weight: 2,
-      }).addTo(this.venuePickerMap).bindTooltip(sp.name);
-    }
-
-    // Initial view: fit active pin + tour start for context.
-    const lat = this.venuePickerLat();
-    const lng = this.venuePickerLng();
-    const start = this.startCoords();
-    const points: L.LatLngExpression[] = [];
-    if (start) points.push(start);
-    if (lat != null && lng != null) points.push([lat, lng]);
-
-    if (points.length === 0) {
-      this.venuePickerMap.setView([41.9028, 12.4964], 5);
-    } else if (points.length === 1) {
-      this.venuePickerMap.setView(points[0] as any, 16);
-    } else {
-      this.venuePickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
+      const poly = this.getSpacePolygon(sp);
+      if (poly.length >= 3) {
+        L.polygon(poly as any, {
+          color: '#9aa0a6', weight: 1.5, fillColor: '#9aa0a6', fillOpacity: 0.15,
+          dashArray: '5 4', interactive: false,
+        }).addTo(this.venuePickerMap).bindTooltip(sp.name);
+        poly.forEach(p => otherAreaPts.push(p));
+      } else if (sp.latitude != null && sp.longitude != null) {
+        L.circleMarker([+sp.latitude, +sp.longitude], {
+          radius: 6, color: '#666', fillColor: '#999', fillOpacity: 0.7, weight: 2,
+        }).addTo(this.venuePickerMap).bindTooltip(sp.name);
+        otherAreaPts.push([+sp.latitude, +sp.longitude]);
+      }
     }
 
     this.venuePickerMapRendered = true;
-
-    // Draw an existing polygon and fit the view to it.
     this.redrawVenuePolygon();
-    if (this.venuePolygon().length >= 2) {
-      this.venuePickerMap.fitBounds(L.latLngBounds(this.venuePolygon() as any), { padding: [40, 40], maxZoom: 18 });
+
+    // Initial view: fit the venue being edited if it has an area; otherwise frame
+    // the existing venues + tour start so the creator sees what to avoid.
+    const activePoly = this.venuePolygon();
+    if (activePoly.length >= 2) {
+      this.venuePickerMap.fitBounds(L.latLngBounds(activePoly as any), { padding: [40, 40], maxZoom: 18 });
+    } else {
+      const lat = this.venuePickerLat();
+      const lng = this.venuePickerLng();
+      const start = this.startCoords();
+      const points: L.LatLngExpression[] = [...otherAreaPts];
+      if (start) points.push(start);
+      if (lat != null && lng != null) points.push([lat, lng]);
+
+      if (points.length === 0) {
+        this.venuePickerMap.setView([41.9028, 12.4964], 5);
+      } else if (points.length === 1) {
+        this.venuePickerMap.setView(points[0] as any, 16);
+      } else {
+        this.venuePickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
+      }
     }
 
     // Each click drops a vertex; the polygon self-closes once it has 3+ points.
@@ -803,6 +819,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   ngOnDestroy(): void {
     this.geoSub?.unsubscribe();
     this.map?.remove();
+    this.reviewMap?.remove();
     this.pickerMap?.remove();
     this.venuePickerMap?.remove();
     this.clearPendingCover();
@@ -831,12 +848,104 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       this.endMarker = null;
       this.mapRendered = false;
     }
+    if (this.step() === 4 && !this.reviewMapRendered) {
+      setTimeout(() => this.renderReviewMap());
+    }
+    if (this.step() !== 4 && this.reviewMapRendered) {
+      this.reviewMap?.remove();
+      this.reviewMap = null;
+      this.reviewMapRendered = false;
+    }
     if (this.locationPickerOpen() && !this.pickerMapRendered) {
       setTimeout(() => this.renderPickerMap());
     }
     if (this.venuePickerOpen() && !this.venuePickerMapRendered) {
       setTimeout(() => this.renderVenuePickerMap());
     }
+  }
+
+  /** Read-only overview map for the Review step: draws every venue's outlined
+   *  area and every stop's pin, plus the tour start/end for context. */
+  private renderReviewMap(): void {
+    const el = document.getElementById('review-map');
+    if (!el || this.reviewMapRendered) return;
+
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+    });
+
+    this.reviewMap = L.map(el, { scrollWheelZoom: false });
+    this.reviewMap.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
+
+    const theme = this.mapThemes.find(t => t.id === this.activeTheme()) ?? this.mapThemes[0];
+    L.tileLayer(theme.url, {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 20,
+    } as any).addTo(this.reviewMap);
+
+    const bounds: L.LatLngExpression[] = [];
+
+    // Tour start/end context dots.
+    const start = this.startCoords();
+    const end   = this.endCoords();
+    if (start) {
+      L.circleMarker(start, { radius: 6, color: '#1a1a1a', fillColor: '#1a1a1a', fillOpacity: 0.7, weight: 2 })
+        .addTo(this.reviewMap).bindTooltip('Tour start');
+      bounds.push(start);
+    }
+    if (end) {
+      L.circleMarker(end, { radius: 6, color: '#666666', fillColor: '#666666', fillOpacity: 0.7, weight: 2 })
+        .addTo(this.reviewMap).bindTooltip('Tour end');
+      bounds.push(end);
+    }
+
+    // Each venue's area, then its stops' pins.
+    this.spaces().forEach((space, si) => {
+      const poly = this.getSpacePolygon(space);
+      if (poly.length >= 3) {
+        L.polygon(poly as any, { color: '#c98a8c', weight: 2, fillOpacity: 0.18 })
+          .addTo(this.reviewMap!).bindTooltip(`${si + 1}. ${space.name}`);
+        poly.forEach(p => bounds.push(p));
+      }
+
+      this.getStopsForSpace(space.id).forEach((stop, i) => {
+        if (stop.latitude == null || stop.longitude == null) return;
+        const latlng: L.LatLngExpression = [Number(stop.latitude), Number(stop.longitude)];
+        L.marker(latlng).addTo(this.reviewMap!)
+          .bindTooltip(`${si + 1}.${i + 1} ${stop.title}`);
+        bounds.push(latlng);
+      });
+    });
+
+    // Stops with coordinates but no venue (legacy / unassigned).
+    this.getStopsForSpace(null).forEach(stop => {
+      if (stop.latitude == null || stop.longitude == null) return;
+      const latlng: L.LatLngExpression = [Number(stop.latitude), Number(stop.longitude)];
+      L.marker(latlng).addTo(this.reviewMap!).bindTooltip(stop.title);
+      bounds.push(latlng);
+    });
+
+    // Fit to the venues + stops with a little margin. Run once now and again on
+    // the next frame with invalidateSize(), because the tab was just revealed and
+    // the container may still measure 0 at first paint (which would zoom way out).
+    const fit = () => {
+      if (!this.reviewMap) return;
+      this.reviewMap.invalidateSize();
+      if (bounds.length === 1) {
+        this.reviewMap.setView(bounds[0] as any, 16);
+      } else if (bounds.length > 1) {
+        this.reviewMap.fitBounds(L.latLngBounds(bounds as any), { padding: [20, 20], maxZoom: 17 });
+      } else {
+        this.reviewMap.setView([20, 0], 2);
+      }
+    };
+    fit();
+    requestAnimationFrame(fit);
+
+    this.reviewMapRendered = true;
   }
 
   private renderMap(): void {
@@ -1540,20 +1649,34 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.pinningSpaceId.set(poi.space_id);
     this.editingStopId.set(null);
 
-    // Seed the pin at the venue's centroid so it starts inside the area; if the
-    // venue has no drawn polygon, leave it unset and let them click to place.
-    const space = this.spaces().find(sp => sp.id === poi.space_id);
-    const poly = space ? this.getSpacePolygon(space) : [];
-    if (poly.length >= 3) {
-      const c = this.polygonCentroid(poly);
-      this.pickerLat.set(c[0]);
-      this.pickerLng.set(c[1]);
+    // Open with NO pin — each stop gets its own fresh pin. The map is framed on
+    // the venue area (renderPickerMap fits to pinningSpaceId's polygon), and the
+    // creator clicks to drop this stop's single pin.
+    this.pickerLat.set(null);
+    this.pickerLng.set(null);
+
+    this.pinPromptStop.set(null);
+    this.pickerError.set(null);
+    this.pickerLocating.set(false);
+    this.locationPickerOpen.set(true);
+    this.pickerMapRendered = false;
+  }
+
+  /** Add or replace an existing stop's pin. Reuses the direct-save pin flow, and
+   *  seeds the stop's current pin (if any) so it can be dragged/re-placed. */
+  repinStop(stop: any): void {
+    this.pinningStopId.set(stop.id);
+    this.pinningSpaceId.set(stop.space_id);
+    this.editingStopId.set(null);
+
+    if (stop.latitude != null && stop.longitude != null) {
+      this.pickerLat.set(Number(stop.latitude));
+      this.pickerLng.set(Number(stop.longitude));
     } else {
       this.pickerLat.set(null);
       this.pickerLng.set(null);
     }
 
-    this.pinPromptStop.set(null);
     this.pickerError.set(null);
     this.pickerLocating.set(false);
     this.locationPickerOpen.set(true);
@@ -1606,16 +1729,13 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   openLocationPicker(): void {
     const formLat = this.stopForm.value.latitude  ?? null;
     const formLng = this.stopForm.value.longitude ?? null;
-    const tourStart = this.startCoords();
 
-    // Pin starts at the stop's saved coords if it has any, otherwise at the
-    // tour's starting point so the user has a draggable anchor on the tour map.
+    // Only pre-place a pin if THIS stop already has its own coordinates. Otherwise
+    // open with no pin so the creator drops a fresh one — never show another stop's
+    // (or the tour start's) pin as if it belonged here.
     if (formLat != null && formLng != null) {
       this.pickerLat.set(formLat);
       this.pickerLng.set(formLng);
-    } else if (tourStart) {
-      this.pickerLat.set(tourStart[0]);
-      this.pickerLng.set(tourStart[1]);
     } else {
       this.pickerLat.set(null);
       this.pickerLng.set(null);

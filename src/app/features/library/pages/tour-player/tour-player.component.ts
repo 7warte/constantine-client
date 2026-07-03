@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, PLATFORM_ID, inject, signal, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { gsap } from 'gsap';
@@ -17,6 +18,7 @@ import { ApiService } from '../../../../core/services/api.service';
 })
 export class TourPlayerComponent implements OnInit, OnDestroy {
   private readonly api   = inject(ApiService);
+  private readonly http  = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly host  = inject(ElementRef<HTMLElement>);
   private readonly zone  = inject(NgZone);
@@ -195,9 +197,17 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.showMapModal.set(false);
     this.areaMap?.remove();
     this.areaMap = null;
+    this.clearRoute();
+    // Stop the GPS watch we started for the route dot — unless the compass
+    // (which shares userPosition) is currently open.
+    if (!this.compassOpen() && this.geoWatchId != null) {
+      navigator.geolocation.clearWatch(this.geoWatchId);
+      this.geoWatchId = null;
+    }
   }
 
   openMap(): void {
+    this.clearRoute();   // the map button shows the venue overview, not a route
     this.showMapModal.set(true);
     if (this.hasAreaMap()) {
       setTimeout(() => this.renderAreaMap(), 80);
@@ -231,6 +241,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     const el = document.getElementById('player-area-map');
     if (!el) return;
     this.areaMap?.remove();
+    this.routeLayer = null;   // belonged to the old map instance
+    this.userMarker = null;
 
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -300,6 +312,152 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       html: `<span style="background:${color}">${label}</span>`,
       iconSize: [26, 26], iconAnchor: [13, 13],
     });
+  }
+
+  // ── Walking route to the next stop (Stadia routing, keyless/domain auth) ──
+  readonly routeFromTo  = signal<{ from: any; to: any } | null>(null);
+  readonly routeInfo    = signal<{ distanceM: number; durationS: number } | null>(null);
+  readonly routeLoading = signal(false);
+  readonly routeError   = signal<string | null>(null);
+  private  routeGeometry: [number, number][] | null = null;
+  private  routeLayer: L.LayerGroup | null = null;
+  private  userMarker: L.CircleMarker | null = null;
+
+  // Keep the "you are here" dot in sync with the live GPS position while a route
+  // is shown. areaMap isn't a signal, so applyRouteToMap() also calls the updater
+  // once the map exists; this effect handles subsequent position updates.
+  private readonly _userDotEffect = effect(() => {
+    this.userPosition();
+    this.routeFromTo();
+    this.updateUserDot();
+  });
+
+  private updateUserDot(): void {
+    const pos = this.userPosition();
+    const map = this.areaMap;
+    if (!pos || !map || !this.routeFromTo()) return;
+    const ll: L.LatLngExpression = [pos.lat, pos.lng];
+    if (!this.userMarker) {
+      this.userMarker = L.circleMarker(ll, {
+        radius: 8, color: '#ffffff', weight: 3, fillColor: '#2b7fff', fillOpacity: 1,
+      }).addTo(map).bindTooltip('You are here');
+    } else {
+      this.userMarker.setLatLng(ll);
+    }
+  }
+
+  /** Open the map and draw the pedestrian route from the current stop to the next. */
+  navigateToNextStop(): void {
+    const from = this.currentStop();
+    const to   = this.nextStop();
+    if (!from || from.latitude == null || !to || to.latitude == null) return;
+
+    this.routeFromTo.set({ from, to });
+    this.routeInfo.set(null);
+    this.routeError.set(null);
+    this.routeGeometry = null;
+
+    this.startGeoWatch();   // live "you are here" dot on the route
+    this.showMapModal.set(true);
+    setTimeout(() => this.renderAreaMap(), 80);
+    this.fetchWalkingRoute(from, to);
+  }
+
+  private fetchWalkingRoute(from: any, to: any): void {
+    this.routeLoading.set(true);
+    const body = {
+      locations: [
+        { lat: +from.latitude, lon: +from.longitude },
+        { lat: +to.latitude,   lon: +to.longitude },
+      ],
+      costing: 'pedestrian',
+      units: 'kilometers',
+    };
+    // Keyless: the browser's Referer (constantine.tours) authenticates via Stadia's
+    // domain allowlist — same mechanism as the map tiles, no API key needed.
+    this.http.post<any>('https://api.stadiamaps.com/route/v1', body).subscribe({
+      next: (res) => {
+        const leg = res?.trip?.legs?.[0];
+        const summary = res?.trip?.summary;
+        if (!leg?.shape) {
+          this.routeError.set('No walking route found between these stops.');
+          this.routeLoading.set(false);
+          return;
+        }
+        this.routeGeometry = this.decodePolyline(leg.shape, 6);
+        this.routeInfo.set({ distanceM: (summary?.length ?? 0) * 1000, durationS: summary?.time ?? 0 });
+        this.routeLoading.set(false);
+        this.applyRouteToMap();
+      },
+      error: () => {
+        this.routeError.set('Could not load the route. Check your connection and try again.');
+        this.routeLoading.set(false);
+      },
+    });
+  }
+
+  /** Draw the fetched route + endpoints on the area map (retries until it exists). */
+  private applyRouteToMap(attempt = 0): void {
+    const geom = this.routeGeometry;
+    if (!geom || geom.length === 0) return;
+    const map = this.areaMap;
+    if (!map) {
+      if (attempt < 10) setTimeout(() => this.applyRouteToMap(attempt + 1), 80);
+      return;
+    }
+
+    this.routeLayer?.remove();
+    const layer = L.layerGroup();
+    L.polyline(geom as any, { color: '#f57c00', weight: 5, opacity: 0.85 }).addTo(layer);
+
+    const ft = this.routeFromTo();
+    if (ft?.from?.latitude != null) {
+      L.marker([+ft.from.latitude, +ft.from.longitude]).addTo(layer).bindTooltip(`From: ${ft.from.title}`);
+    }
+    if (ft?.to?.latitude != null) {
+      L.marker([+ft.to.latitude, +ft.to.longitude]).addTo(layer).bindTooltip(`To: ${ft.to.title}`);
+    }
+    layer.addTo(map);
+    this.routeLayer = layer;
+
+    map.fitBounds(L.latLngBounds(geom as any), { padding: [40, 40], maxZoom: 18 });
+    setTimeout(() => map.invalidateSize(), 60);
+    this.updateUserDot();   // draw the GPS dot immediately if we already have a fix
+  }
+
+  private clearRoute(): void {
+    this.routeLayer?.remove();
+    this.routeLayer = null;
+    this.userMarker?.remove();
+    this.userMarker = null;
+    this.routeGeometry = null;
+    this.routeFromTo.set(null);
+    this.routeInfo.set(null);
+    this.routeError.set(null);
+    this.routeLoading.set(false);
+  }
+
+  /** Decode a Valhalla/Google encoded polyline (Stadia uses precision 6). */
+  private decodePolyline(str: string, precision = 6): [number, number][] {
+    let index = 0, lat = 0, lng = 0, b: number;
+    const coords: [number, number][] = [];
+    const factor = Math.pow(10, precision);
+    while (index < str.length) {
+      let result = 0, shift = 0;
+      do { b = str.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+      result = 0; shift = 0;
+      do { b = str.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+      coords.push([lat / factor, lng / factor]);
+    }
+    return coords;
+  }
+
+  formatDuration(seconds: number): string {
+    const min = Math.max(1, Math.round(seconds / 60));
+    if (min < 60) return `${min} min walk`;
+    return `${Math.floor(min / 60)} h ${min % 60} min walk`;
   }
 
   // ── Resource helpers ─────────────────────────────────────────────
@@ -392,6 +550,14 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   readonly canShowCompass = computed(() => {
     const next = this.nextStop();
     return !!(next && next.latitude != null && next.longitude != null);
+  });
+
+  // Both the current and next stop need coordinates to draw a route between them.
+  readonly canRouteToNextStop = computed(() => {
+    const cur  = this.currentStop();
+    const next = this.nextStop();
+    return !!(cur && cur.latitude != null && cur.longitude != null &&
+              next && next.latitude != null && next.longitude != null);
   });
 
   readonly distanceMeters = computed<number | null>(() => {

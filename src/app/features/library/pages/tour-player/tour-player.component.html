@@ -97,6 +97,13 @@
                             </div>
                           }
 
+                          @if (canRouteToNextStop()) {
+                            <button type="button" class="player__nav-cta" (click)="navigateToNextStop()">
+                              <mat-icon class="player__nav-cta-icon">directions_walk</mat-icon>
+                              <span class="player__nav-cta-label">Navigate to next stop</span>
+                            </button>
+                          }
+
                           @if (canShowCompass()) {
                             <button type="button" class="player__compass-cta" (click)="openCompass()">
                               <mat-icon class="player__compass-cta-icon">explore</mat-icon>
@@ -154,8 +161,24 @@
         <div class="player__map-frame" #mapFrame (click)="$event.stopPropagation()">
           <button type="button" class="player__map-close" (click)="closeMap()">&times;</button>
 
-          @if (hasAreaMap()) {
-            <!-- Interactive map: venue areas + start/finish -->
+          @if (routeFromTo(); as rt) {
+            <div class="player__route-banner">
+              @if (routeLoading()) {
+                <span class="player__route-banner-text">Finding walking route…</span>
+              } @else if (routeError()) {
+                <span class="player__route-banner-text player__route-banner-text--error">{{ routeError() }}</span>
+              } @else if (routeInfo()) {
+                <mat-icon class="player__route-banner-icon">directions_walk</mat-icon>
+                <span class="player__route-banner-text">
+                  <strong>{{ formatDuration(routeInfo()!.durationS) }}</strong> &middot; {{ formatDistance(routeInfo()!.distanceM) }}
+                  <span class="player__route-banner-dest">to {{ rt.to.title }}</span>
+                </span>
+              }
+            </div>
+          }
+
+          @if (hasAreaMap() || routeFromTo()) {
+            <!-- Interactive map: venue areas + start/finish (+ walking route when navigating) -->
             <div id="player-area-map" class="player__area-map"></div>
           } @else {
             <img [src]="variant()!.map_image_square_url || variant()!.map_image_url || variant()!.cover_image_url" alt="Tour map" />

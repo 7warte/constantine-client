@@ -469,6 +469,16 @@
                             (blur)="updateStopDescription(stop, $event)"></textarea>
                         </label>
 
+                        <div class="stop-card__pin-row">
+                          <button type="button" class="btn btn--ghost btn--sm btn--icon-text" (click)="repinStop(stop)">
+                            <mat-icon>{{ stop.latitude != null ? 'edit_location_alt' : 'add_location_alt' }}</mat-icon>
+                            <span>{{ stop.latitude != null ? 'Move pin' : 'Add pin' }}</span>
+                          </button>
+                          @if (stop.latitude != null && stop.longitude != null) {
+                            <span class="stop-card__coords">{{ +stop.latitude | number:'1.5-5' }}, {{ +stop.longitude | number:'1.5-5' }}</span>
+                          }
+                        </div>
+
                         <div class="stop-card__upload-actions">
                           <span class="stop-card__upload-label">Or add media:</span>
                           <label class="audio-upload">
@@ -940,6 +950,17 @@
             <div class="preview__audio">
               <span class="preview__section-label">Presentation</span>
               <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+            </div>
+          }
+
+          @if (spaces().length > 0 || stops().length > 0) {
+            <div class="preview__map-block">
+              <span class="preview__section-label">Map</span>
+              <div id="review-map" class="preview__map"></div>
+              <div class="preview__map-legend">
+                <span class="preview__map-legend-item"><span class="preview__legend-swatch preview__legend-swatch--venue"></span>Venue area</span>
+                <span class="preview__map-legend-item"><mat-icon class="preview__legend-pin">place</mat-icon>Point of interest</span>
+              </div>
             </div>
           }
 

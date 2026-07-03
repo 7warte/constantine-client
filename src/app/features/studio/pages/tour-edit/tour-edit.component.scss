@@ -1750,6 +1750,19 @@
   margin-left: $space-1;
 }
 
+.stop-card__pin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-3;
+  margin-top: $space-2;
+}
+.stop-card__coords {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  font-variant-numeric: tabular-nums;
+}
+
 // ── Stop GPS location picker ────────────────────────────────────────────────
 .loc-picker {
   &__toolbar {
@@ -2504,6 +2517,28 @@
     font-size: $font-size-xs; font-weight: $font-weight-bold;
     letter-spacing: 0.08em; text-transform: uppercase; color: $text-muted;
   }
+
+  &__map-block { padding: $space-4 $space-5 $space-5; border-top: 1px solid $border-light; }
+  &__map {
+    margin-top: $space-2;
+    height: 320px;
+    width: 100%;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    overflow: hidden;
+    z-index: 0;
+  }
+  &__map-legend {
+    display: flex; flex-wrap: wrap; gap: $space-4;
+    margin-top: $space-2;
+    font-size: $font-size-xs; color: $text-muted;
+  }
+  &__map-legend-item { display: inline-flex; align-items: center; gap: $space-1; }
+  &__legend-swatch {
+    width: 14px; height: 14px; border-radius: 3px;
+    &--venue { background: rgba(#c98a8c, 0.18); border: 1px solid #c98a8c; }
+  }
+  &__legend-pin { font-size: 16px; width: 16px; height: 16px; color: #3b82c4; }
 
   &__outline { padding: $space-4 $space-5 $space-5; border-top: 1px solid $border-light; }
 

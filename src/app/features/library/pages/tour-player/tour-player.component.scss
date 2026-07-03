@@ -767,6 +767,54 @@
   &-icon { font-size: 20px; width: 20px; height: 20px; color: $accent-primary; }
 }
 
+// Primary "Navigate to next stop" action — sits just above the compass CTA.
+.player__nav-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  width: 100%;
+  padding: $space-3 $space-4;
+  margin-bottom: $space-2;
+  background: $accent-primary;
+  border: 1px solid $accent-primary;
+  border-radius: $radius-md;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $text-on-dark;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:hover { opacity: 0.9; }
+
+  &-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+// Route summary overlay pinned to the top of the map modal while navigating.
+.player__route-banner {
+  position: absolute;
+  top: $space-2;
+  left: $space-2;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  max-width: calc(100% - 64px);   // clear the close button (top-right)
+  padding: $space-2 $space-3;
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffffff;
+  border-radius: $radius-md;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  backdrop-filter: blur(4px);
+
+  &-icon { font-size: 18px; width: 18px; height: 18px; color: #f57c00; }
+  &-text { line-height: 1.3; }
+  &-text--error { color: #ffd0cc; }
+  &-dest { opacity: 0.8; }
+}
+
 .player__compass {
   position: fixed;
   inset: 0;
