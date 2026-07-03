@@ -28,10 +28,20 @@ interface DatabaseUsage {
   soft_limit_bytes: number;
 }
 
+interface MapsHealth {
+  ok: boolean;
+  state: 'healthy' | 'quota_exhausted' | 'auth_failed' | 'error' | 'unreachable';
+  hint: string;
+  status: number | null;
+  referer: string;
+  checked_at: string;
+}
+
 interface Resources {
   cloudinary: CloudinaryUsage | null;
   email: EmailUsage | null;
   database: DatabaseUsage | null;
+  maps: MapsHealth | null;
 }
 
 type UsageStatus = 'ok' | 'warn' | 'danger';

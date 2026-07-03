@@ -82,6 +82,40 @@
     line-height: 1.1;
 
     &--warn { color: $color-warning; }
+    &--ok   { color: $color-success; }
+  }
+
+  &__alert {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-4 $space-5;
+    background: $bg-surface;
+    border: 1px solid $color-error;
+    border-left-width: 3px;
+    border-radius: $radius-md;
+  }
+
+  &__alert-title {
+    font-family: $font-family-primary;
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: $color-error;
+  }
+
+  &__alert-hint {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+
+  &__alert-action {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    text-decoration: underline;
+    width: fit-content;
+
+    &:hover { color: $accent-primary; }
   }
 
   &__card-foot {

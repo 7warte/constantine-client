@@ -133,6 +133,39 @@
         <p class="admin-resources__note">Database usage unavailable.</p>
       }
 
+      <!-- ── Maps (Stadia) ────────────────────────────────────────── -->
+      <h2 class="admin-resources__section-title">Maps (Stadia)</h2>
+      @if (d.maps; as m) {
+        @if (!m.ok) {
+          <div class="admin-resources__alert" role="alert">
+            <span class="admin-resources__alert-title">
+              @if (m.state === 'quota_exhausted') {
+                ⚠ Map credits look exhausted — top up now
+              } @else if (m.state === 'auth_failed') {
+                ⚠ Maps are being rejected — domain auth problem
+              } @else {
+                ⚠ Maps are not loading
+              }
+            </span>
+            <span class="admin-resources__alert-hint">{{ m.hint }}</span>
+            <a class="admin-resources__alert-action"
+               href="https://client.stadiamaps.com/dashboard" target="_blank" rel="noopener">
+              Open Stadia dashboard →
+            </a>
+          </div>
+        } @else {
+          <div class="admin-resources__cards">
+            <div class="admin-resources__card">
+              <span class="admin-resources__card-label">Tile status</span>
+              <span class="admin-resources__card-value admin-resources__card-value--ok">Healthy</span>
+              <span class="admin-resources__card-foot">Live probe returned HTTP {{ m.status }}</span>
+            </div>
+          </div>
+        }
+      } @else {
+        <p class="admin-resources__note">Maps health check unavailable.</p>
+      }
+
       <!-- ── Not tracked here ─────────────────────────────────────── -->
       <h2 class="admin-resources__section-title">Not tracked here</h2>
       <p class="admin-resources__note">

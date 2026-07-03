@@ -58,15 +58,11 @@ export class TagInputComponent implements OnInit, OnDestroy {
   onKeydown(event: KeyboardEvent): void {
     const value = this.inputValue().trim();
 
-    if ((event.key === 'Enter' || event.key === ',' || event.key === ' ') && value) {
+    // Enter commits the whole input as one (possibly multi-word) tag.
+    // Space is intentionally NOT a separator so tags can contain spaces.
+    if (event.key === 'Enter' && value) {
       event.preventDefault();
-      // Split by commas and spaces to handle pasted multi-tag strings
-      const parts = value.split(/[,\s]+/).filter(Boolean);
-      for (const part of parts) {
-        this.addTag(part);
-      }
-      this.inputRef.nativeElement.value = '';
-      this.inputValue.set('');
+      this.commitTag();
       return;
     }
 
@@ -75,13 +71,20 @@ export class TagInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  commitTag(): void {
+    const value = this.inputValue().trim();
+    if (!value) return;
+    this.addTag(value);
+    this.inputRef.nativeElement.focus();
+  }
+
   selectSuggestion(name: string): void {
     this.addTag(name);
     this.inputRef.nativeElement.focus();
   }
 
   addTag(name: string): void {
-    const normalised = name.trim().toLowerCase();
+    const normalised = name.trim().replace(/\s+/g, ' ').toLowerCase();
     if (!normalised || this.tags.some(t => t.toLowerCase() === normalised)) return;
 
     this.tags = [...this.tags, normalised];

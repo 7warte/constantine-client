@@ -1,27 +1,40 @@
 <div class="tag-input">
-  <div class="tag-input__tags">
-    @for (tag of tags; track tag; let i = $index) {
-      <span class="tag-chip">
-        {{ tag }}
-        <button type="button" class="tag-chip__remove" (click)="removeTag(i)">&times;</button>
-      </span>
-    }
+  <div class="tag-input__row">
     <input
       #input
       type="text"
       class="tag-input__field"
-      placeholder="{{ tags.length === 0 ? 'Add tags (e.g. history, rome, walking)…' : 'Add more…' }}"
+      placeholder="Add a tag (e.g. ancient history, guided walk)…"
       (input)="onInput($event)"
       (keydown)="onKeydown($event)"
       (blur)="onBlur()"
     />
+    <button
+      type="button"
+      class="tag-input__add"
+      [disabled]="!inputValue().trim()"
+      (click)="commitTag()"
+    >
+      Add tag
+    </button>
+
+    @if (showSuggestions()) {
+      <ul class="tag-input__suggestions">
+        @for (s of suggestions(); track s) {
+          <li (mousedown)="selectSuggestion(s)">{{ s }}</li>
+        }
+      </ul>
+    }
   </div>
 
-  @if (showSuggestions()) {
-    <ul class="tag-input__suggestions">
-      @for (s of suggestions(); track s) {
-        <li (mousedown)="selectSuggestion(s)">{{ s }}</li>
+  @if (tags.length) {
+    <div class="tag-input__tags">
+      @for (tag of tags; track tag; let i = $index) {
+        <span class="tag-chip">
+          {{ tag }}
+          <button type="button" class="tag-chip__remove" (click)="removeTag(i)">&times;</button>
+        </span>
       }
-    </ul>
+    </div>
   }
 </div>

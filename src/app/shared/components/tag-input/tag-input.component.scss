@@ -4,36 +4,59 @@
 .tag-input {
   position: relative;
 
-  &__tags {
+  &__row {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;
     gap: $space-2;
-    padding: $space-2 $space-3;
-    background: $bg-surface-alt;
-    border: 1px solid $border-default;
-    border-radius: $radius-md;
-    min-height: 44px;
-    align-items: center;
-    cursor: text;
-    transition: border-color $transition-fast;
-
-    &:focus-within {
-      border-color: $accent-primary;
-    }
+    align-items: stretch;
   }
 
   &__field {
     flex: 1;
     min-width: 120px;
-    border: none;
+    min-height: 44px;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
     outline: none;
-    background: transparent;
+    background: $bg-surface-alt;
     font-family: $font-family-secondary;
     font-size: $font-size-sm;
     color: $text-primary;
-    padding: $space-1 $space-2;
+    padding: $space-2 $space-3;
+    transition: border-color $transition-fast;
 
+    &:focus { border-color: $accent-primary; }
     &::placeholder { color: $text-muted; }
+  }
+
+  &__add {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 $space-4;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    background: $bg-surface-alt;
+    color: $text-primary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color $transition-fast, opacity $transition-fast;
+
+    &:hover:not(:disabled) { border-color: $accent-primary; }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-top: $space-2;
   }
 
   &__suggestions {

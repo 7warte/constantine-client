@@ -240,6 +240,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     });
 
     const map = L.map(el, { zoomControl: true });
+    map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
     L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; OpenStreetMap',
       maxZoom: 20,

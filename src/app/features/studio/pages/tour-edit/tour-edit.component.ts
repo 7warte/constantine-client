@@ -451,6 +451,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     });
 
     this.venuePickerMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
+    this.venuePickerMap.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
 
     L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -826,6 +827,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       keyboard: false,
       preferCanvas: true,
     });
+    this.map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
 
     const theme = this.mapThemes.find(t => t.id === this.activeTheme()) ?? this.mapThemes[0];
     L.tileLayer(theme.url, {
@@ -1670,6 +1672,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     });
 
     this.pickerMap = L.map(el, { zoomControl: true, scrollWheelZoom: true });
+    this.pickerMap.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
 
     L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
