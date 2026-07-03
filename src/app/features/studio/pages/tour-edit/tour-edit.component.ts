@@ -693,14 +693,10 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
           if (tour.start_address) {
             this.startAddress.set(tour.start_address);
             this.startAddressInput.set(tour.start_address);
-            const t = this.deriveTown(tour.start_address);
-            this.startTown.set(t); this.startTownInput.set(t);
           }
           if (tour.end_address) {
             this.endAddress.set(tour.end_address);
             this.endAddressInput.set(tour.end_address);
-            const t = this.deriveTown(tour.end_address);
-            this.endTown.set(t); this.endTownInput.set(t);
           }
           if (tour.start_address && tour.end_address && tour.start_address === tour.end_address) {
             this.sameAddress.set(true);
@@ -999,15 +995,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     } else if (which === 'venue') {
       this.venuePickerAddress.set(''); this.venuePickerSuggestions.set([]);
     }
-  }
-
-  /** Best-effort city token from a saved address (used only to re-enable/scope
-   *  the street field when editing an existing tour). */
-  private deriveTown(address: string): string {
-    const seg = (address || '').split(',').map(s => s.trim()).filter(Boolean);
-    if (seg.length <= 1) return seg[0] || '';
-    const noCountry = seg.slice(0, -1).filter(s => !/^\d[\d\s-]*$/.test(s));
-    return noCountry[noCountry.length - 1] || seg[0];
   }
 
   selectTown(which: TownKey, suggestion: any): void {
