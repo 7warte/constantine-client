@@ -405,6 +405,14 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     return [sum[0] / n, sum[1] / n];
   }
 
+  /** Parse a space's stored polygon (JSONB array or JSON string) into [lat,lng] pairs. */
+  private getSpacePolygon(space: any): [number, number][] {
+    const raw = typeof space?.polygon === 'string' ? this.safeParse(space.polygon) : space?.polygon;
+    return Array.isArray(raw)
+      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]] as [number, number])
+      : [];
+  }
+
   /** Ray-casting point-in-polygon ([lat,lng] points). */
   private pointInPolygon(lat: number, lng: number, poly: [number, number][]): boolean {
     let inside = false;
@@ -573,6 +581,12 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   });
   readonly activeSpaceId     = signal<string | null>(null); // which space to add stop into
   readonly editingStopId     = signal<string | null>(null);
+  // After naming a new POI we offer to drop a single location pin for it. While
+  // that pin is being placed, these hold the target stop + its venue (so the
+  // picker can draw the venue outline and the save writes straight to the stop).
+  readonly pinPromptStop     = signal<{ id: string; title: string; space_id: string | null } | null>(null);
+  readonly pinningStopId     = signal<string | null>(null);
+  readonly pinningSpaceId    = signal<string | null>(null);
   readonly addingDirectionFor      = signal<string | null>(null); // stop id
   readonly addingSpaceDirectionFor = signal<string | null>(null); // space id
   // Reveal-on-demand inputs: the "new venue" field and per-venue "add point of
@@ -625,18 +639,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (lat == null || lng == null) return null;
 
     const stopId = this.editingStopId();
-    const spaceId = stopId
-      ? this.stops().find(s => s.id === stopId)?.space_id
-      : this.activeSpaceId();
+    const spaceId = this.pinningSpaceId()                 // new-POI pin flow
+      ?? (stopId
+        ? this.stops().find(s => s.id === stopId)?.space_id
+        : this.activeSpaceId());
     if (!spaceId) return null;
 
     const space = this.spaces().find(sp => sp.id === spaceId);
     if (!space) return null;
 
-    const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
-    const poly: [number, number][] = Array.isArray(raw)
-      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
-      : [];
+    const poly = this.getSpacePolygon(space);
     if (poly.length < 3) return null;   // no drawn area to compare against
 
     return this.pointInPolygon(lat, lng, poly) ? null : space.name;
@@ -1506,7 +1518,46 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const vid = this.variantId();
     if (!vid) return;
     this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops`, { title: t, space_id: spaceId })
-      .subscribe(() => { this.loadStops(); this.addingPoiFor.set(null); });
+      .subscribe((created) => {
+        this.loadStops();
+        this.addingPoiFor.set(null);
+        // Offer to drop a single location pin for the POI right after naming it.
+        this.pinPromptStop.set({ id: created.id, title: t, space_id: spaceId });
+      });
+  }
+
+  /** Dismiss the "pin this POI?" prompt without placing a pin. */
+  dismissPinPrompt(): void {
+    this.pinPromptStop.set(null);
+  }
+
+  /** "Yes" on the pin prompt: open the picker seeded on the POI's venue so the
+   *  creator can drop one pin inside the area, then land back on its card. */
+  startStopPin(): void {
+    const poi = this.pinPromptStop();
+    if (!poi) return;
+    this.pinningStopId.set(poi.id);
+    this.pinningSpaceId.set(poi.space_id);
+    this.editingStopId.set(null);
+
+    // Seed the pin at the venue's centroid so it starts inside the area; if the
+    // venue has no drawn polygon, leave it unset and let them click to place.
+    const space = this.spaces().find(sp => sp.id === poi.space_id);
+    const poly = space ? this.getSpacePolygon(space) : [];
+    if (poly.length >= 3) {
+      const c = this.polygonCentroid(poly);
+      this.pickerLat.set(c[0]);
+      this.pickerLng.set(c[1]);
+    } else {
+      this.pickerLat.set(null);
+      this.pickerLng.set(null);
+    }
+
+    this.pinPromptStop.set(null);
+    this.pickerError.set(null);
+    this.pickerLocating.set(false);
+    this.locationPickerOpen.set(true);
+    this.pickerMapRendered = false;
   }
 
   /** Inline-edit a point of interest's text description (saved on blur). */
@@ -1584,6 +1635,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.pickerMapRendered = false;
     this.pickerAddress.set('');
     this.pickerSuggestions.set([]);
+    this.pinningStopId.set(null);
+    this.pinningSpaceId.set(null);
   }
 
   onPickerAddressInput(event: Event): void {
@@ -1611,6 +1664,31 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       this.pickerError.set('Place a pin on the map first.');
       return;
     }
+
+    // New-POI pin flow: persist the pin straight to the stop, then return to its
+    // card so the creator can carry on to media upload.
+    const pinStopId = this.pinningStopId();
+    if (pinStopId) {
+      const vid = this.variantId();
+      if (!vid) return;
+      this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/stops/${pinStopId}`, {
+        latitude:  Number(lat.toFixed(6)),
+        longitude: Number(lng.toFixed(6)),
+      }).subscribe({
+        next: (updated) => {
+          this.stops.update(s => s.map(x => x.id === pinStopId ? { ...x, ...updated } : x));
+          this.closeLocationPicker();
+          // Scroll the POI's card into view — its media upload controls live there.
+          setTimeout(() => {
+            document.getElementById('poi-' + pinStopId)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 120);
+        },
+        error: () => this.pickerError.set('Failed to save the location.'),
+      });
+      return;
+    }
+
     this.stopForm.patchValue({
       latitude:  Number(lat.toFixed(6)),
       longitude: Number(lng.toFixed(6)),
@@ -1627,10 +1705,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const stop = this.stops().find(s => s.id === stopId);
     const space = stop ? this.spaces().find(sp => sp.id === stop.space_id) : null;
     if (!space) return;
-    const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
-    const poly: [number, number][] = Array.isArray(raw)
-      ? raw.filter((p: any) => Array.isArray(p) && p.length === 2).map((p: any) => [+p[0], +p[1]])
-      : [];
+    const poly = this.getSpacePolygon(space);
     if (poly.length >= 3 && !this.pointInPolygon(lat, lng, poly)) {
       this.stopAreaWarning.set(`Heads up — this point sits outside “${space.name}”'s drawn area.`);
     }
@@ -1706,7 +1781,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       }).addTo(this.pickerMap).bindTooltip('Tour end');
     }
 
-    // Initial view: fit the tour endpoints + the pin into a tour-context frame.
+    // When pinning a POI inside a venue, draw that venue's outline so the creator
+    // can see the area they should place the pin within.
+    const pinSpaceId = this.pinningSpaceId();
+    const pinSpace = pinSpaceId ? this.spaces().find(sp => sp.id === pinSpaceId) : null;
+    const venuePoly = pinSpace ? this.getSpacePolygon(pinSpace) : [];
+    if (venuePoly.length >= 3) {
+      L.polygon(venuePoly as any, { color: '#f57c00', weight: 2, fillOpacity: 0.12, dashArray: '4 4' })
+        .addTo(this.pickerMap)
+        .bindTooltip(`${pinSpace!.name} area`);
+    }
+
+    // Initial view: prefer the venue outline when pinning; otherwise fit the tour
+    // endpoints + the pin into a tour-context frame.
     const stopLat = this.pickerLat();
     const stopLng = this.pickerLng();
     const points: L.LatLngExpression[] = [];
@@ -1716,7 +1803,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       points.push([stopLat, stopLng]);
     }
 
-    if (points.length === 0) {
+    if (venuePoly.length >= 3) {
+      this.pickerMap.fitBounds(L.latLngBounds(venuePoly as any), { padding: [40, 40], maxZoom: 18 });
+    } else if (points.length === 0) {
       this.pickerMap.setView([20, 0], 2);
     } else if (points.length === 1) {
       this.pickerMap.setView(points[0] as any, 16);

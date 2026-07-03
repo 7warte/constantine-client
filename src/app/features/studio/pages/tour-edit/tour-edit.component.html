@@ -450,7 +450,7 @@
               <!-- Stops inside this space -->
               <div class="stops-list">
                 @for (stop of getStopsForSpace(space.id); track stop.id; let i = $index; let lastStop = $last) {
-                  <div class="stop-card" [@slideIn]>
+                  <div class="stop-card" [id]="'poi-' + stop.id" [@slideIn]>
                     <div class="stop-card__header">
                       <span class="stop-card__num">{{ i + 1 }}</span>
                       <div class="stop-card__info">
@@ -770,7 +770,7 @@
                   @else { {{ venuePolygon().length }} point{{ venuePolygon().length === 1 ? '' : 's' }} {{ venuePolygon().length < 3 ? '(need 3+)' : '— area defined' }} }
                 </span>
                 <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePolygon().length === 0" (click)="undoVenueVertex()">Undo point</button>
-                <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePolygon().length === 0" (click)="clearVenuePolygon()">Clear</button>
+                <button type="button" class="btn btn--ghost btn--sm" [class.loc-picker__clear--armed]="venuePolygon().length > 0" [disabled]="venuePolygon().length === 0" (click)="clearVenuePolygon()">Clear</button>
               </div>
 
               @if (venuePickerError()) {
@@ -869,6 +869,23 @@
                   <button type="button" class="btn btn--ghost" (click)="closeLocationPicker()">Cancel</button>
                   <button type="button" class="btn btn--primary" [disabled]="pickerLat() == null || pickerLng() == null" (click)="saveStopLocation()">Save location</button>
                 </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- After naming a POI: offer to pin it in the venue area -->
+        @if (pinPromptStop(); as poi) {
+          <div class="confirm-backdrop" (click)="dismissPinPrompt()">
+            <div class="confirm-modal" (click)="$event.stopPropagation()">
+              <h3 class="confirm-modal__title">Pin “{{ poi.title }}” on the map?</h3>
+              <p class="confirm-modal__text">
+                Drop a single location pin for this point of interest inside the venue area.
+                You can always add or change it later.
+              </p>
+              <div class="confirm-modal__actions">
+                <button type="button" class="btn btn--ghost" (click)="dismissPinPrompt()">Skip for now</button>
+                <button type="button" class="btn btn--primary" (click)="startStopPin()">Yes, place a pin</button>
               </div>
             </div>
           </div>

@@ -1793,7 +1793,7 @@
     margin-right: auto;
     font-size: $font-size-sm;
     font-weight: $font-weight-bold;
-    color: $text-primary;
+    color: $orange;
     animation: venue-draw-flash 5s ease-in-out infinite;
   }
 
@@ -1837,6 +1837,28 @@
 
 @media (prefers-reduced-motion: reduce) {
   .loc-picker__draw-hint { animation: none; }
+}
+
+// Bigger, orange target cursor over the venue-drawing map so it's obvious you
+// click to drop points. (Hex mirrors $orange — data-URI can't read the sass var.)
+#venue-picker-map,
+#venue-picker-map .leaflet-interactive {
+  cursor:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="11" fill="rgba(245,124,0,0.15)" stroke="%23f57c00" stroke-width="3"/><circle cx="17" cy="17" r="3" fill="%23f57c00"/></svg>') 17 17,
+    crosshair;
+}
+
+// Once at least one point is placed, the Clear button turns solid red to signal
+// it will wipe the drawn area.
+.btn.loc-picker__clear--armed {
+  background: $color-error;
+  border-color: $color-error;
+  color: $white;
+
+  &:hover:not(:disabled) {
+    background: #d33020;
+    border-color: #d33020;
+  }
 }
 
 // ── Step 3 redesign: venue bars & rose venue blocks ─────────────────────────

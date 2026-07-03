@@ -8,6 +8,7 @@
 
     <!-- Desktop nav -->
     <nav class="navbar__nav" aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="navbar__link">Home</a>
       <a routerLink="/explore"  routerLinkActive="active" class="navbar__link">Explore</a>
       <a routerLink="/tour-requests" routerLinkActive="active" class="navbar__link">Requested tours</a>
       <a routerLink="/badges"   routerLinkActive="active" class="navbar__link">Badges</a>
@@ -48,36 +49,39 @@
 @if (menuOpen()) {
   <div class="navbar__mobile" (click)="closeMenu()">
     <nav class="navbar__mobile-inner">
-      <a routerLink="/explore" class="navbar__mobile-link">
+      <a routerLink="/" (click)="closeMenu()" class="navbar__mobile-link">
+        <mat-icon class="navbar__mobile-icon">home</mat-icon><span class="navbar__mobile-text">Home</span>
+      </a>
+      <a routerLink="/explore" (click)="closeMenu()" class="navbar__mobile-link">
         <mat-icon class="navbar__mobile-icon">travel_explore</mat-icon><span class="navbar__mobile-text">Explore</span>
       </a>
-      <a routerLink="/tour-requests" class="navbar__mobile-link">
+      <a routerLink="/tour-requests" (click)="closeMenu()" class="navbar__mobile-link">
         <mat-icon class="navbar__mobile-icon">lightbulb</mat-icon><span class="navbar__mobile-text">Requested tours</span>
       </a>
-      <a routerLink="/badges" class="navbar__mobile-link">
+      <a routerLink="/badges" (click)="closeMenu()" class="navbar__mobile-link">
         <mat-icon class="navbar__mobile-icon">military_tech</mat-icon><span class="navbar__mobile-text">Badges</span>
       </a>
       @if (auth.isLoggedIn()) {
-        <a routerLink="/library" class="navbar__mobile-link">
+        <a routerLink="/library" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">headphones</mat-icon><span class="navbar__mobile-text">My Library</span>
         </a>
-        <a routerLink="/studio" class="navbar__mobile-link">
+        <a routerLink="/studio" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">edit_note</mat-icon><span class="navbar__mobile-text">Studio</span>
         </a>
-        <a routerLink="/about" class="navbar__mobile-link">
+        <a routerLink="/about" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">info</mat-icon><span class="navbar__mobile-text">About</span>
         </a>
-        <a routerLink="/account/profile" class="navbar__mobile-link">
+        <a routerLink="/account/profile" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">person</mat-icon><span class="navbar__mobile-text">Account</span>
         </a>
         <button class="navbar__mobile-link" (click)="auth.logout()">
           <mat-icon class="navbar__mobile-icon">logout</mat-icon><span class="navbar__mobile-text">Sign out</span>
         </button>
       } @else {
-        <a routerLink="/about" class="navbar__mobile-link">
+        <a routerLink="/about" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">info</mat-icon><span class="navbar__mobile-text">About</span>
         </a>
-        <a routerLink="/auth/login" class="navbar__mobile-link">
+        <a routerLink="/auth/login" (click)="closeMenu()" class="navbar__mobile-link">
           <mat-icon class="navbar__mobile-icon">login</mat-icon><span class="navbar__mobile-text">Sign in</span>
         </a>
       }
