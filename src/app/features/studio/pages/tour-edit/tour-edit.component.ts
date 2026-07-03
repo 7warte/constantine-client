@@ -521,6 +521,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       this.venuePolygon.update(v => [...v, [e.latlng.lat, e.latlng.lng]]);
       this.redrawVenuePolygon();
     });
+
+    setTimeout(() => this.venuePickerMap?.invalidateSize(), 100);
   }
 
   openPinModal(space: any): void {
@@ -1944,6 +1946,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     });
 
     this.pickerMapRendered = true;
+    setTimeout(() => this.pickerMap?.invalidateSize(), 100);
   }
 
   private updatePickerMarker(lat: number, lng: number): void {
