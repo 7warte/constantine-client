@@ -704,13 +704,23 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** How close (metres) the user must be to a stop to count as "here". Sized for
+   *  typical phone-GPS error (±5–20 m) so the badge lands on the right stop. */
+  private readonly HERE_RADIUS_M = 25;
+
   /** Live distance from the user to a stop, in metres (null until located or if
    *  the stop has no coordinates). Works fully offline — GPS needs no network and
    *  the stop coordinates are part of the cached tour data. */
-  stopDistanceMeters(stop: any): number | null {
+  private stopDistanceMeters(stop: any): number | null {
     const pos = this.userPosition();
     if (!pos || stop?.latitude == null || stop?.longitude == null) return null;
     return haversineKm(pos.lat, pos.lng, +stop.latitude, +stop.longitude) * 1000;
+  }
+
+  /** True when the user is standing at this stop — drives the "You are here" badge. */
+  isUserAtStop(stop: any): boolean {
+    const d = this.stopDistanceMeters(stop);
+    return d != null && d <= this.HERE_RADIUS_M;
   }
 
   private acquireGeo(consumer: string): void {

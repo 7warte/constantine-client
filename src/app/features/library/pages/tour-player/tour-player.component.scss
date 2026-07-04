@@ -279,27 +279,31 @@
     margin: 0;
   }
 
-  // Live "X m away" chip — GPS distance to this stop, updated in real time.
-  &__stop-distance {
+  // "You are here" badge — shown on the stop the user is currently standing at
+  // (live GPS, updated in real time). No precise metres, just presence.
+  &__stop-here {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 5px;
     margin-left: auto;              // push to the right edge of the header
     padding: 2px $space-2;
     flex-shrink: 0;
     border-radius: $radius-full;
-    background: rgba($accent-primary, 0.12);
-    color: $accent-primary;
+    background: rgba($color-success, 0.14);
+    color: darken($color-success, 8%);
     font-family: $font-family-secondary;
     font-size: $font-size-xs;
     font-weight: $font-weight-semibold;
     white-space: nowrap;
   }
 
-  &__stop-distance-icon {
-    font-size: 13px;
-    width: 13px;
-    height: 13px;
+  &__stop-here-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: $color-success;
+    flex-shrink: 0;
+    animation: herePulse 1.8s ease-in-out infinite;
   }
 
   &__stop-body {
@@ -820,6 +824,12 @@
     transform: translate(-50%, -50%) scale(1.15);
     box-shadow: 0 0 0 12px rgba($accent-primary, 0), 0 2px 12px rgba(0, 0, 0, 0.5);
   }
+}
+
+// Soft pulse on the "You are here" dot.
+@keyframes herePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba($color-success, 0.5); }
+  50%      { box-shadow: 0 0 0 5px rgba($color-success, 0); }
 }
 
 // ── Compass to next stop ──────────────────────────────────────────────────────
