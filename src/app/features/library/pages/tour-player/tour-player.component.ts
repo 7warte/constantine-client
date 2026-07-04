@@ -7,6 +7,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { gsap } from 'gsap';
 import * as L from 'leaflet';
 import { ApiService } from '../../../../core/services/api.service';
+import { OfflineService } from '../../../../core/offline/offline.service';
 
 @Component({
   selector: 'app-tour-player',
@@ -17,7 +18,8 @@ import { ApiService } from '../../../../core/services/api.service';
   styleUrl: './tour-player.component.scss',
 })
 export class TourPlayerComponent implements OnInit, OnDestroy {
-  private readonly api   = inject(ApiService);
+  private readonly api     = inject(ApiService);
+  private readonly offline = inject(OfflineService);
   private readonly http  = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly host  = inject(ElementRef<HTMLElement>);
@@ -499,17 +501,58 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
         this.variant.set(purchase);
         const { tour_id, tour_variant_id } = purchase;
         this.api.get<any[]>(`/tours/${tour_id}/variants/${tour_variant_id}/stops`).subscribe({
-          next: (stops) => { this.stops.set(stops); this.loading.set(false); this.animateItineraryIn(); },
+          next: (stops) => {
+            this.stops.set(stops);
+            this.loading.set(false);
+            this.animateItineraryIn();
+            this.resolveOfflineMedia();
+          },
           error: ()      => this.loading.set(false),
         });
 
         this.api.get<any>(`/tours/${tour_id}/variants/${tour_variant_id}`).subscribe(detail => {
           this.variant.update(v => ({ ...v, ...detail }));
           if (detail.spaces) this.mapSpaces.set(detail.spaces);
+          this.resolveOfflineMedia();
         });
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  private blobUrls: string[] = [];
+
+  /** For a saved-offline tour, swap remote media URLs for cached blob: URLs so
+   *  audio, images and the map render without a network connection. */
+  private async resolveOfflineMedia(): Promise<void> {
+    if (!this.offline.isSaved(this.purchaseId)) return;
+
+    const swap = async (u: string | null | undefined): Promise<string | null> => {
+      if (!u || u.startsWith('blob:')) return null;
+      const b = await this.offline.getMediaUrl(u);
+      if (b) this.blobUrls.push(b);
+      return b;
+    };
+
+    // Stop media (audio / images / pdf)
+    const stops = this.stops();
+    let changed = false;
+    for (const s of stops) for (const m of (s.media ?? [])) {
+      const b = await swap(m.url);
+      if (b) { m.url = b; changed = true; }
+    }
+    if (changed) this.stops.set([...stops]);
+
+    // Variant-level media (map image, presentation audio, cover)
+    const v = this.variant();
+    if (v) {
+      const patch: any = {};
+      for (const k of ['map_image_url', 'map_image_square_url', 'presentation_audio_url', 'tour_cover_image_url', 'cover_url']) {
+        const b = await swap(v[k]);
+        if (b) patch[k] = b;
+      }
+      if (Object.keys(patch).length) this.variant.update(x => ({ ...x, ...patch }));
+    }
   }
 
   // ── Compass to next stop ─────────────────────────────────────────
@@ -743,6 +786,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.destroyAudioPlayer();
     this.areaMap?.remove();
     this.areaMap = null;
+    this.blobUrls.forEach(u => URL.revokeObjectURL(u));
+    this.blobUrls = [];
   }
 }
 
