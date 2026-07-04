@@ -89,8 +89,16 @@
     padding-top: $space-3;
   }
 
+  // Full-width price band — dotted rule above it, its own subtle background.
+  &__footer {
+    display: flex;
+    align-items: center;
+    padding: $space-3 $space-5;
+    border-top: 1px dotted #c4c4c4;
+    background: $bg-surface-alt;
+  }
+
   &__price {
-    margin-top: $space-1;
     font-size: $font-size-md;
     font-weight: $font-weight-bold;
     color: $text-primary;

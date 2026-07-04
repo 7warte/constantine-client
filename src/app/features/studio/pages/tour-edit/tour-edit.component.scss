@@ -821,10 +821,11 @@
 
   &:hover { border-color: #999999; color: #1a1a1a; }
 
-  &--active {
+  &--active,
+  &--active:hover {
     background: #1a1a1a;
     border-color: #1a1a1a;
-    color: #ffffff;
+    color: #ffffff !important;   // label must stay readable on the dark selected chip
   }
 }
 
