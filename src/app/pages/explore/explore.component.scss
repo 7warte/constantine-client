@@ -69,32 +69,10 @@
     @include xl { grid-template-columns: repeat(4, 1fr); }
   }
 
-  // Mobile: lay each card out horizontally (image left, info right)
-  // so more tours are scannable per screen.
+  // Mobile: keep cards vertical (cover on top, info below, price band at the
+  // bottom on its own row) — just tighten the grid gap.
   @media (max-width: #{$bp-md - 1px}) {
     &__grid { gap: $space-3; }
-
-    ::ng-deep .tour-card {
-      flex-direction: row;
-      align-items: stretch;
-
-      &__cover {
-        flex: 0 0 38%;
-        align-self: flex-start;
-        aspect-ratio: 1 / 1;
-      }
-
-      &__body {
-        flex: 1;
-        min-width: 0;
-        padding: $space-4;          // a little more room to fit the meta chips
-        gap: $space-2;
-      }
-
-      &__title { font-size: $font-size-base; }
-      &__meta  { margin-top: $space-1; }
-      &__rating { padding-top: $space-2; }
-    }
   }
 }
 
