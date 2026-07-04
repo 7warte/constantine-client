@@ -70,9 +70,12 @@
     border: none;
     padding: 0;
     cursor: pointer;
+    // Underlined by default so it reads as clickable (opens the badge's story).
+    text-decoration: underline;
+    text-underline-offset: 2px;
     transition: color $transition-fast;
 
-    &:hover { color: $accent-primary; text-decoration: underline; }
+    &:hover { color: $accent-primary; }
   }
 
   &__hint {
@@ -81,8 +84,10 @@
     line-height: 1.4;
   }
 
+  // The name stays unmuted (link-like) even when the badge isn't earned yet, so
+  // it clearly invites a click; the rest of an unearned card stays subdued.
   &--earned &__name { color: $text-primary; }
-  &:not(.badge-card--earned) &__name { color: $text-muted; }
+  &:not(.badge-card--earned) &__name { color: $accent-primary; }
 
   &__earned-tag {
     margin-top: auto;

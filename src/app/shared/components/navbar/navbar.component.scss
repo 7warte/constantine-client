@@ -156,7 +156,18 @@
     @include container;
     display: flex;
     flex-direction: column;
+  }
+
+  // Each category is separated from the next by a thin white line.
+  &__mobile-group {
+    display: flex;
+    flex-direction: column;
     gap: $space-2;
+    padding-block: $space-2;
+
+    & + & {
+      border-top: 1px solid rgba($white, 0.18);
+    }
   }
 
   &__mobile-link {

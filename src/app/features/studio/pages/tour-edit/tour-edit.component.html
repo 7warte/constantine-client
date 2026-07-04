@@ -374,7 +374,7 @@
           <!-- Venues with their stops -->
           <div class="spaces-timeline">
           @for (space of spaces(); track space.id; let si = $index; let lastSpace = $last) {
-            <div class="space-block space-block--venue" [@slideIn] [style.background-color]="space.color">
+            <div class="space-block space-block--venue" [@slideIn] [style.background-color]="spaceColor(space)">
               <div class="space-block__bar">
                 <div class="space-block__title-box">
                   <span class="space-block__title-text">{{ space.name }}</span>
@@ -385,9 +385,12 @@
                   @if (colorMenuFor() === space.id) {
                     <div class="color-menu">
                       @for (c of venueColors; track c.value) {
-                        <button type="button" class="color-menu__item" (click)="setVenueColor(space, c.value)">
+                        <button type="button" class="color-menu__item"
+                          [class.color-menu__item--active]="spaceColor(space) === c.value"
+                          [disabled]="previousVenueColor(space) === c.value"
+                          (click)="setVenueColor(space, c.value)">
                           <span class="color-menu__swatch" [style.background-color]="c.value"></span>
-                          <span class="color-menu__name">{{ c.name }}</span>
+                          <span class="color-menu__name">{{ c.name }}@if (previousVenueColor(space) === c.value) { <em>· prev.</em> }</span>
                         </button>
                       }
                     </div>
@@ -839,35 +842,30 @@
         <h2 class="edit-card__title">Review &amp; publish</h2>
         <p class="edit-card__desc">This is how travellers will see your tour. Review it, then publish when you're happy.</p>
 
-        <!-- Presentation audio (optional) — an intro visitors hear before buying. -->
+        <!-- Presentation audio (optional) — a short intro visitors hear before buying. -->
         <div class="publish-audio">
-          <span class="form-field__label">Presentation audio <span class="publish-audio__optional">(optional)</span></span>
-          <span class="form-field__hint">Record or upload a 60-second intro in the tour's language. Visitors hear a 30-second preview.</span>
-          <div class="square-box square-box--audio" [class.square-box--filled]="!!presentationAudioUrl()">
-            @if (presentationAudioUrl()) {
-              <div class="audio-preview">
-                <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
-                <div class="audio-preview__actions">
-                  <label class="btn btn--ghost btn--sm">
-                    Replace
-                    <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                  </label>
-                  <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
-                </div>
-              </div>
-            } @else {
-              <div class="audio-center">
-                <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
-                <div class="form-field__or">or</div>
-                <label class="cover-upload">
-                  <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                  <span class="cover-upload__area">
-                    @if (uploadingAudio()) { Uploading… } @else { Click to upload audio (max 60s) }
-                  </span>
-                </label>
-              </div>
-            }
-          </div>
+          @if (presentationAudioUrl()) {
+            <mat-icon class="publish-audio__icon">graphic_eq</mat-icon>
+            <audio class="publish-audio__player" [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+            <label class="btn btn--ghost btn--sm">
+              Replace<input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+            </label>
+            <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
+          } @else if (showPresentationRecorder()) {
+            <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
+            <span class="publish-audio__or">or</span>
+            <label class="btn btn--ghost btn--sm">
+              {{ uploadingAudio() ? 'Uploading…' : 'Upload (max 60s)' }}
+              <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+            </label>
+            <button type="button" class="btn btn--ghost btn--sm" (click)="showPresentationRecorder.set(false)">Cancel</button>
+          } @else {
+            <button type="button" class="publish-audio__add" (click)="showPresentationRecorder.set(true)">
+              <mat-icon>mic</mat-icon>
+              <span>Add presentation audio</span>
+              <span class="publish-audio__optional">optional</span>
+            </button>
+          }
         </div>
 
         <div class="preview">
@@ -909,8 +907,7 @@
               <span class="preview__section-label">Map</span>
               <div id="review-map" class="preview__map"></div>
               <div class="preview__map-legend">
-                <span class="preview__map-legend-item"><span class="preview__legend-swatch preview__legend-swatch--venue"></span>Venue area</span>
-                <span class="preview__map-legend-item"><mat-icon class="preview__legend-pin">place</mat-icon>Point of interest</span>
+                <span class="preview__map-legend-item">Each venue and its points of interest share a colour.</span>
               </div>
             </div>
           }

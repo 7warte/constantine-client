@@ -28,7 +28,6 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-type TownKey = 'start' | 'end' | 'venue' | 'picker';
 
 @Component({
   selector: 'app-tour-edit',
@@ -66,6 +65,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly tourTags     = signal<string[]>([]);
   readonly coverUrl              = signal<string | null>(null);
   readonly presentationAudioUrl  = signal<string | null>(null);
+  readonly showPresentationRecorder = signal(false);
   readonly uploadingAudio        = signal(false);
 
   // ── Cover hero (background gradient/image + overlaid title) ───────────────
@@ -171,34 +171,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     }
   }
 
-  // Every address field has its own town/city (a tour can start in one city and
-  // end in another; a venue/stop can sit anywhere). The town scopes that field's
-  // street search. One set of signals per scope, reached via townSig().
-  readonly startTown            = signal('');
-  readonly startTownViewbox     = signal<string | null>(null);
-  readonly startTownInput       = signal('');
-  readonly startTownSuggestions = signal<any[]>([]);
-  readonly endTown              = signal('');
-  readonly endTownViewbox       = signal<string | null>(null);
-  readonly endTownInput         = signal('');
-  readonly endTownSuggestions   = signal<any[]>([]);
-  readonly venueTown            = signal('');
-  readonly venueTownViewbox     = signal<string | null>(null);
-  readonly venueTownInput       = signal('');
-  readonly venueTownSuggestions = signal<any[]>([]);
-  readonly pickerTown            = signal('');
-  readonly pickerTownViewbox     = signal<string | null>(null);
-  readonly pickerTownInput       = signal('');
-  readonly pickerTownSuggestions = signal<any[]>([]);
-
-  private townSig(which: TownKey) {
-    return {
-      start:  { name: this.startTown,  vb: this.startTownViewbox,  input: this.startTownInput,  sugg: this.startTownSuggestions },
-      end:    { name: this.endTown,    vb: this.endTownViewbox,    input: this.endTownInput,    sugg: this.endTownSuggestions },
-      venue:  { name: this.venueTown,  vb: this.venueTownViewbox,  input: this.venueTownInput,  sugg: this.venueTownSuggestions },
-      picker: { name: this.pickerTown, vb: this.pickerTownViewbox, input: this.pickerTownInput, sugg: this.pickerTownSuggestions },
-    }[which];
-  }
 
   // Shown over the map while the save-time screenshots are captured, so the
   // brief square resize never flashes on screen.
@@ -218,7 +190,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly startNoResults = signal(false);
   readonly endNoResults   = signal(false);
 
-  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' | 'picker' | 'venue' | 'town-start' | 'town-end' | 'town-venue' | 'town-picker' }>();
+  private geocode$ = new Subject<{ query: string; target: 'start' | 'end' }>();
   private geoSub!: Subscription;
   private map: L.Map | null = null;
   private mapRendered = false;
@@ -263,8 +235,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly venuePickerSpace       = signal<any | null>(null);
   readonly venuePickerLat         = signal<number | null>(null);
   readonly venuePickerLng         = signal<number | null>(null);
-  readonly venuePickerAddress     = signal('');
-  readonly venuePickerSuggestions = signal<any[]>([]);
   readonly venuePickerLocating    = signal(false);
   readonly venuePickerError       = signal<string | null>(null);
   // The venue is delineated by a self-closing polygon (a list of [lat,lng] vertices).
@@ -280,8 +250,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.venuePickerSpace.set(space);
     this.venuePickerError.set(null);
     this.venuePickerLocating.set(false);
-    this.venuePickerAddress.set('');
-    this.venuePickerSuggestions.set([]);
 
     // Load any existing polygon (JSONB comes back as a parsed array).
     const raw = typeof space.polygon === 'string' ? this.safeParse(space.polygon) : space.polygon;
@@ -314,8 +282,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.venuePickerMapRendered = false;
     this.venuePickerSpace.set(null);
     this.venuePolygon.set([]);
-    this.venuePickerAddress.set('');
-    this.venuePickerSuggestions.set([]);
   }
 
   private safeParse(s: string): any {
@@ -353,22 +319,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     );
   }
 
-  onVenueAddressInput(event: Event): void {
-    const query = (event.target as HTMLInputElement).value;
-    this.venuePickerAddress.set(query);
-    this.geocode$.next({ query, target: 'venue' });
-  }
-
-  selectVenueSuggestion(suggestion: any): void {
-    this.venuePickerLat.set(suggestion.lat);
-    this.venuePickerLng.set(suggestion.lon);
-    this.venuePickerAddress.set(suggestion.display_name);
-    this.venuePickerSuggestions.set([]);
-    this.venuePickerError.set(null);
-    // Navigate the map to the area; the user then traces the venue's outline.
-    this.venuePickerMap?.setView([suggestion.lat, suggestion.lon], 17);
-  }
-
   // ── Venue polygon drawing ──────────────────────────────────────────────────
   undoVenueVertex(): void {
     this.venuePolygon.update(v => v.slice(0, -1));
@@ -382,16 +332,17 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   private redrawVenuePolygon(): void {
     if (!this.venuePickerMap) return;
     this.clearVenuePolyLayers();
+    const color = this.spaceColor(this.venuePickerSpace());   // the venue being drawn
     const pts = this.venuePolygon();
     if (pts.length >= 3) {
-      this.venuePolyLayer = L.polygon(pts as any, { color: '#c98a8c', weight: 2, fillOpacity: 0.18 })
+      this.venuePolyLayer = L.polygon(pts as any, { color, fillColor: color, weight: 2, fillOpacity: 0.25 })
         .addTo(this.venuePickerMap);
     } else if (pts.length === 2) {
-      this.venuePolyLayer = L.polyline(pts as any, { color: '#c98a8c', weight: 2, dashArray: '4 4' })
+      this.venuePolyLayer = L.polyline(pts as any, { color, weight: 2, dashArray: '4 4' })
         .addTo(this.venuePickerMap);
     }
     pts.forEach((p, i) => {
-      const m = L.circleMarker(p as any, { radius: 6, color: '#c98a8c', fillColor: '#fff', fillOpacity: 1, weight: 2 })
+      const m = L.circleMarker(p as any, { radius: 6, color, fillColor: '#fff', fillOpacity: 1, weight: 2 })
         .addTo(this.venuePickerMap!).bindTooltip(`${i + 1}`);
       this.venueVertexLayers.push(m);
     });
@@ -477,15 +428,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     for (const sp of this.spaces()) {
       if (sp.id === activeId) continue;
       const poly = this.getSpacePolygon(sp);
+      const otherColor = this.spaceColor(sp);
       if (poly.length >= 3) {
         L.polygon(poly as any, {
-          color: '#9aa0a6', weight: 1.5, fillColor: '#9aa0a6', fillOpacity: 0.15,
+          color: otherColor, weight: 1.5, fillColor: otherColor, fillOpacity: 0.15,
           dashArray: '5 4', interactive: false,
         }).addTo(this.venuePickerMap).bindTooltip(sp.name);
         poly.forEach(p => otherAreaPts.push(p));
       } else if (sp.latitude != null && sp.longitude != null) {
         L.circleMarker([+sp.latitude, +sp.longitude], {
-          radius: 6, color: '#666', fillColor: '#999', fillOpacity: 0.7, weight: 2,
+          radius: 6, color: otherColor, fillColor: otherColor, fillOpacity: 0.7, weight: 2,
         }).addTo(this.venuePickerMap).bindTooltip(sp.name);
         otherAreaPts.push([+sp.latitude, +sp.longitude]);
       }
@@ -627,10 +579,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly pickerLng          = signal<number | null>(null);
   readonly pickerLocating     = signal(false);
   readonly pickerError        = signal<string | null>(null);
-  readonly pickerAddress      = signal('');
-  readonly pickerSuggestions  = signal<any[]>([]);
   private pickerMap: L.Map | null = null;
   private pickerMarker: L.Marker | null = null;
+  private pickerPinColor = '#f57c00';   // the POI pin colour (set to the venue's colour when pinning)
   private pickerMapRendered = false;
 
   // True when the picker pin is far enough from the tour's start that it
@@ -676,30 +627,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   // ── Init ───────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
-    // Geocoding with debounce
+    // Geocoding with debounce — the tour start/end address fields (step 2) only.
     this.geoSub = this.geocode$.pipe(
       debounceTime(400),
       switchMap(({ query, target }) => {
         if (query.length < 3) {
-          if (target === 'start')              { this.startSuggestions.set([]); this.startNoResults.set(false); }
-          else if (target === 'end')           { this.endSuggestions.set([]); this.endNoResults.set(false); }
-          else if (target === 'picker')        this.pickerSuggestions.set([]);
-          else if (target === 'venue')         this.venuePickerSuggestions.set([]);
-          else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set([]);
+          if (target === 'start') { this.startSuggestions.set([]); this.startNoResults.set(false); }
+          else                    { this.endSuggestions.set([]);   this.endNoResults.set(false); }
           return of(null);
         }
-
-        // Street searches are scoped to that field's town: we append the town
-        // name and bias results to its bounding box, so Nominatim returns the
-        // right street instead of every match worldwide. Town fields search plainly.
-        let url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=`;
-        if (target.startsWith('town-')) {
-          url += encodeURIComponent(query);
-        } else {
-          const scope = this.townSig(target as TownKey);
-          url += encodeURIComponent(scope.name() ? `${query}, ${scope.name()}` : query);
-          if (scope.vb()) url += `&viewbox=${scope.vb()}&bounded=1`;
-        }
+        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`;
         return this.http.get<any[]>(url).pipe(switchMap(results => of({ target, results })));
       }),
     ).subscribe(data => {
@@ -710,13 +647,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         lon: +r.lon,
         boundingbox: r.boundingbox,
       }));
-      const target = data.target;
       const empty = suggestions.length === 0;
-      if (target === 'start')              { this.startSuggestions.set(suggestions); this.startNoResults.set(empty); }
-      else if (target === 'end')           { this.endSuggestions.set(suggestions); this.endNoResults.set(empty); }
-      else if (target === 'picker')        this.pickerSuggestions.set(suggestions);
-      else if (target === 'venue')         this.venuePickerSuggestions.set(suggestions);
-      else if (target.startsWith('town-')) this.townSig(target.slice(5) as TownKey).sugg.set(suggestions);
+      if (data.target === 'start') { this.startSuggestions.set(suggestions); this.startNoResults.set(empty); }
+      else                         { this.endSuggestions.set(suggestions);   this.endNoResults.set(empty); }
     });
 
     const id = this.routeTourId;
@@ -904,11 +837,12 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       bounds.push(end);
     }
 
-    // Each venue's area, then its stops' pins.
+    // Each venue's area (in its own colour), then its stops' pins (matching colour).
     this.spaces().forEach((space, si) => {
+      const color = this.spaceColor(space);
       const poly = this.getSpacePolygon(space);
       if (poly.length >= 3) {
-        L.polygon(poly as any, { color: '#c98a8c', weight: 2, fillOpacity: 0.18 })
+        L.polygon(poly as any, { color, fillColor: color, weight: 2, fillOpacity: 0.22 })
           .addTo(this.reviewMap!).bindTooltip(`${si + 1}. ${space.name}`);
         poly.forEach(p => bounds.push(p));
       }
@@ -916,7 +850,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       this.getStopsForSpace(space.id).forEach((stop, i) => {
         if (stop.latitude == null || stop.longitude == null) return;
         const latlng: L.LatLngExpression = [Number(stop.latitude), Number(stop.longitude)];
-        L.marker(latlng).addTo(this.reviewMap!)
+        L.marker(latlng, { icon: this.colorPinIcon(color) }).addTo(this.reviewMap!)
           .bindTooltip(`${si + 1}.${i + 1} ${stop.title}`);
         bounds.push(latlng);
       });
@@ -1137,55 +1071,6 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   }
 
   // ── Step 2: location ────────────────────────────────────────────────────
-
-  onTownInput(which: TownKey, event: Event): void {
-    const query = (event.target as HTMLInputElement).value;
-    const s = this.townSig(which);
-    s.input.set(query);
-    s.name.set('');          // editing invalidates the chosen scope
-    s.vb.set(null);
-    // Changing the city resets that scope's street — it belonged to the old city.
-    this.resetAddressFor(which);
-    this.geocode$.next({ query, target: `town-${which}` as any });
-  }
-
-  /** Clear the street/address tied to a given city scope. */
-  private resetAddressFor(which: TownKey): void {
-    if (which === 'start') {
-      this.startAddressInput.set(''); this.startAddress.set(''); this.startCoords.set(null);
-      this.startSuggestions.set([]); this.startNoResults.set(false);
-      if (this.startMarker) { this.startMarker.remove(); this.startMarker = null; }
-    } else if (which === 'end') {
-      this.endAddressInput.set(''); this.endAddress.set(''); this.endCoords.set(null);
-      this.endSuggestions.set([]); this.endNoResults.set(false);
-      if (this.endMarker) { this.endMarker.remove(); this.endMarker = null; }
-    } else if (which === 'venue') {
-      this.venuePickerAddress.set(''); this.venuePickerSuggestions.set([]);
-    }
-  }
-
-  selectTown(which: TownKey, suggestion: any): void {
-    // Keep just the town's primary name to append to street queries, and turn its
-    // boundingbox [minLat,maxLat,minLon,maxLon] into a viewbox minLon,minLat,maxLon,maxLat.
-    const townName = (suggestion.display_name as string).split(',')[0].trim();
-    const bb = suggestion.boundingbox;
-    const viewbox = (Array.isArray(bb) && bb.length === 4) ? `${bb[2]},${bb[0]},${bb[3]},${bb[1]}` : null;
-    const s = this.townSig(which);
-    s.name.set(townName);
-    s.input.set(suggestion.display_name);
-    s.sugg.set([]);
-    s.vb.set(viewbox);
-
-    // In the venue picker, jump the map to the chosen city right away so the
-    // creator can start tracing the area without entering a street first.
-    if (which === 'venue' && this.venuePickerMap) {
-      if (Array.isArray(bb) && bb.length === 4) {
-        this.venuePickerMap.fitBounds(L.latLngBounds([+bb[0], +bb[2]], [+bb[1], +bb[3]]), { padding: [20, 20] });
-      } else if (suggestion.lat != null && suggestion.lon != null) {
-        this.venuePickerMap.setView([suggestion.lat, suggestion.lon], 13);
-      }
-    }
-  }
 
   onAddressInput(target: 'start' | 'end', event: Event): void {
     const query = (event.target as HTMLInputElement).value;
@@ -1558,12 +1443,36 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly colorMenuFor    = signal<string | null>(null);
   readonly collapsedSpaces = signal<Set<string>>(new Set());
 
+  /** The colour a newly-created venue gets — sequential through the palette so
+   *  it's distinct from (and never matches) the previous venue. */
+  private defaultVenueColor(): string {
+    const idx = this.spaces().length;
+    return this.venueColors[idx % this.venueColors.length].value;
+  }
+
+  /** A venue's colour for drawing (falls back to its palette slot if unset). */
+  spaceColor(space: any): string {
+    if (space?.color) return space.color;
+    const idx = this.spaces().findIndex(s => s.id === space?.id);
+    return this.venueColors[(idx >= 0 ? idx : 0) % this.venueColors.length].value;
+  }
+
+  /** The colour of the venue immediately before this one (for the "can't match
+   *  the previous venue" rule), or null if it's the first venue. */
+  previousVenueColor(space: any): string | null {
+    const list = this.spaces();
+    const idx = list.findIndex(s => s.id === space?.id);
+    return idx > 0 ? this.spaceColor(list[idx - 1]) : null;
+  }
+
   toggleColorMenu(spaceId: string): void {
     this.colorMenuFor.update(v => v === spaceId ? null : spaceId);
   }
 
   setVenueColor(space: any, color: string): void {
     const vid = this.variantId();
+    // A venue can't take the same colour as the one before it.
+    if (color === this.previousVenueColor(space)) return;
     this.colorMenuFor.set(null);
     if (!vid) return;
     this.api.patch<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces/${space.id}`, { color })
@@ -1597,7 +1506,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (!n) return;
     const vid = this.variantId();
     if (!vid) return;
-    this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces`, { name: n, description: '' })
+    this.api.post<any>(`/studio/tours/${this.tour()!.id}/variants/${vid}/spaces`, { name: n, description: '', color: this.defaultVenueColor() })
       .subscribe(space => this.spaces.update(s => [...s, space]));
   }
 
@@ -1773,28 +1682,8 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.pickerMap = null;
     this.pickerMarker = null;
     this.pickerMapRendered = false;
-    this.pickerAddress.set('');
-    this.pickerSuggestions.set([]);
     this.pinningStopId.set(null);
     this.pinningSpaceId.set(null);
-  }
-
-  onPickerAddressInput(event: Event): void {
-    const query = (event.target as HTMLInputElement).value;
-    this.pickerAddress.set(query);
-    this.geocode$.next({ query, target: 'picker' });
-  }
-
-  selectPickerSuggestion(suggestion: any): void {
-    this.pickerLat.set(suggestion.lat);
-    this.pickerLng.set(suggestion.lon);
-    this.pickerAddress.set(suggestion.display_name);
-    this.pickerSuggestions.set([]);
-    this.pickerError.set(null);
-    if (this.pickerMap) {
-      this.updatePickerMarker(suggestion.lat, suggestion.lon);
-      this.pickerMap.panTo([suggestion.lat, suggestion.lon]);
-    }
   }
 
   saveStopLocation(): void {
@@ -1925,12 +1814,14 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     // can see the area they should place the pin within.
     const pinSpaceId = this.pinningSpaceId();
     const pinSpace = pinSpaceId ? this.spaces().find(sp => sp.id === pinSpaceId) : null;
+    const venueColor = pinSpace ? this.spaceColor(pinSpace) : '#f57c00';
     const venuePoly = pinSpace ? this.getSpacePolygon(pinSpace) : [];
     if (venuePoly.length >= 3) {
-      L.polygon(venuePoly as any, { color: '#f57c00', weight: 2, fillOpacity: 0.12, dashArray: '4 4' })
+      L.polygon(venuePoly as any, { color: venueColor, fillColor: venueColor, weight: 2, fillOpacity: 0.18, dashArray: '4 4' })
         .addTo(this.pickerMap)
         .bindTooltip(`${pinSpace!.name} area`);
     }
+    this.pickerPinColor = venueColor;   // the POI pin takes the venue's colour
 
     // Initial view: venue outline if it has one, else the stop's own pin, else
     // the tour start (there's no address search anymore, so start is the anchor).
@@ -1966,7 +1857,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   private updatePickerMarker(lat: number, lng: number): void {
     if (!this.pickerMap) return;
     if (!this.pickerMarker) {
-      this.pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(this.pickerMap);
+      this.pickerMarker = L.marker([lat, lng], { draggable: true, icon: this.colorPinIcon(this.pickerPinColor) }).addTo(this.pickerMap);
       this.pickerMarker.on('drag', (e: L.LeafletEvent) => {
         const ll = (e.target as L.Marker).getLatLng();
         this.pickerLat.set(ll.lat);

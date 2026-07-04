@@ -1,6 +1,15 @@
 @use '../../../styles/variables' as *;
 @use '../../../styles/mixins' as *;
 
+// Inline links inside body copy — underlined + accent so they read as clickable.
+.ah-link {
+  color: $accent-primary;
+  font-weight: $font-weight-semibold;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover { opacity: 0.8; }
+}
+
 // ── Eyebrow (mirrors homepage) ──────────────────────────────────────────────
 .eyebrow {
   font-family: $font-family-secondary;

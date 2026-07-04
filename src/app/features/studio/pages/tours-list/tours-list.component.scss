@@ -99,6 +99,18 @@
   &__filters {
     display: flex;
     gap: $space-2;
+
+    // Slightly smaller All / Published / Drafts chips on mobile to save space.
+    @media (max-width: #{$bp-md - 1px}) {
+      button {
+        height: 30px;
+        min-height: 30px;
+        --mdc-outlined-button-container-height: 30px;
+        padding: 0 $space-3;
+        min-width: 0;
+        font-size: $font-size-xs;
+      }
+    }
   }
 
   &__loading {
@@ -139,6 +151,11 @@
 
   // Hide secondary columns on mobile — language and status move to badges on the cover
   @media (max-width: #{$bp-md - 1px}) {
+    // On mobile the only visible header would be "Title"; drop the whole header
+    // row (and the table's top line) so tours sit right under the filter chips.
+    border-top: none;
+    .mat-mdc-header-row { display: none; }
+
     .mat-column-downloads,
     .mat-column-price,
     .mat-column-language,

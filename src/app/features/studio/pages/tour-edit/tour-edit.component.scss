@@ -295,14 +295,40 @@
 }
 
 .publish-audio {
-  margin: $space-4 0 $space-6;
   display: flex;
-  flex-direction: column;
-  gap: $space-1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-2;
+  margin: $space-3 0 $space-5;
 
-  &__optional { color: $text-muted; font-weight: $font-weight-regular; }
+  &__icon { color: $accent-primary; }
+  &__player { height: 34px; max-width: 260px; }
+  &__or { font-size: $font-size-xs; color: $text-muted; }
 
-  .square-box { margin-top: $space-2; }
+  &__add {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    background: $bg-surface-alt;
+    border: 1px dashed $border-default;
+    border-radius: $radius-full;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+
+    &:hover { border-color: $accent-primary; }
+    mat-icon { font-size: 18px; width: 18px; height: 18px; color: $accent-primary; }
+  }
+
+  &__optional {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
 }
 
 .square-field { gap: $space-1; }
@@ -2188,6 +2214,14 @@
     transition: background $transition-fast;
 
     &:hover { background: $bg-surface-alt; }
+
+    &--active { background: $bg-surface-alt; font-weight: $font-weight-semibold; }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      &:hover { background: none; }
+    }
   }
 
   &__swatch {
@@ -2198,7 +2232,11 @@
     border: 1px solid rgba($black, 0.1);
   }
 
-  &__name { font-size: $font-size-sm; color: $text-primary; }
+  &__name {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    em { font-style: normal; color: $text-muted; font-size: $font-size-xs; }
+  }
 }
 
 // Uploaded files — one full-width row each, with an editable caption.
