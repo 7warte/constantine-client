@@ -41,7 +41,10 @@ export class AuthService {
     if (this._token()) {
       this.api.get<PublicUser>('/users/me').subscribe({
         next:  u => this._user.set(u),
-        error: () => this.logout(),   // token expired or invalid
+        // Only a real 401/403 means the token is invalid — log out then. A network
+        // failure (offline) must NOT clear the session; the user may be about to
+        // play a tour they saved offline.
+        error: (err) => { if (err?.status === 401 || err?.status === 403) this.logout(); },
       });
     }
   }

@@ -1,10 +1,22 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { OfflineService } from '../offline/offline.service';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (_route, state) => {
   const auth   = inject(AuthService);
   const router = inject(Router);
+  const offline = inject(OfflineService);
+
+  // The saved offline tour's player never needs a live auth check — it's already
+  // paid for, and requiring sign-in would strand the user when they're offline.
+  // Match the URL directly so this holds even if navigator.onLine is unreliable
+  // or the token was cleared in a previous offline session.
+  const rec = offline.saved();
+  if (rec && state.url.startsWith(`/library/${rec.purchaseId}/play`)) return true;
+
+  // Any offline route while a tour is saved: allow (nothing to authenticate against).
+  if (offline.offlineMode()) return true;
 
   if (auth.isLoggedIn() && auth.user()) return true;
 
