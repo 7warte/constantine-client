@@ -147,8 +147,10 @@
     padding-block: $space-6;
     z-index: $z-nav;
     border-top: 1px solid rgba($white, 0.2);
-    animation: slide-down $transition-normal;
     overflow-y: auto;
+    // Starts off-screen (up); GSAP slides it down on open / up on close.
+    transform: translateY(-100%);
+    will-change: transform;
   }
 
   // Items line up with the navbar content (same container max-width + padding).

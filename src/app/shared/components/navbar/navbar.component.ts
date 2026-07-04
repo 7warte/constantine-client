@@ -22,37 +22,66 @@ export class NavbarComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly zone = inject(NgZone);
   readonly menuOpen = signal(false);
+  private closing = false;
 
   constructor() {
     // Always close the menu once a navigation actually completes, so its open
-    // state can never get stuck out of sync with the route.
+    // state can never get stuck out of sync with the route. (Snap, no animation —
+    // the page is changing anyway.)
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       takeUntilDestroyed(),
-    ).subscribe(() => this.menuOpen.set(false));
+    ).subscribe(() => { this.closing = false; this.menuOpen.set(false); });
   }
 
   toggleMenu(): void {
-    const willOpen = !this.menuOpen();
-    this.menuOpen.set(willOpen);
-    if (willOpen) this.animateMenuItems();
+    if (this.menuOpen()) { this.closeMenu(); return; }
+    this.menuOpen.set(true);
+    // Wait for the overlay to render, then slide the panel down as items pop in.
+    this.zone.runOutsideAngular(() => setTimeout(() => this.animateOpen(), 20));
   }
 
-  closeMenu(): void { this.menuOpen.set(false); }
-
-  /** Pop the menu items in one after another when the overlay opens. */
-  private animateMenuItems(): void {
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      const items = this.host.nativeElement.querySelectorAll('.navbar__mobile-link');
-      if (!items.length) return;
-      gsap.from(items, {
-        y: 14,
-        opacity: 0,
-        duration: 0.32,
-        stagger: 0.05,
-        ease: 'back.out(1.6)',
-        clearProps: 'transform,opacity',
+  /** Slide the panel up while the items disappear, then remove the overlay. */
+  closeMenu(): void {
+    if (!this.menuOpen() || this.closing) return;
+    const panel = this.overlayEl();
+    if (!panel) { this.menuOpen.set(false); return; }
+    const items = this.host.nativeElement.querySelectorAll('.navbar__mobile-link');
+    this.closing = true;
+    this.zone.runOutsideAngular(() => {
+      const tl = gsap.timeline({
+        onComplete: () => this.zone.run(() => { this.closing = false; this.menuOpen.set(false); }),
       });
-    }, 20));
+      if (items.length) {
+        tl.to(items, {
+          y: 14, opacity: 0, duration: 0.2,
+          stagger: { each: 0.04, from: 'end' },   // last item leaves first
+          ease: 'power2.in',
+        }, 0);
+      }
+      // Panel slides up as the items are leaving. `y` (px) matches the CSS
+      // translateY(-100%) start state — gsap reads that as pixels, not percent.
+      tl.to(panel, { y: -panel.offsetHeight, duration: 0.32, ease: 'power3.in' }, '<0.05');
+    });
+  }
+
+  private overlayEl(): HTMLElement | null {
+    return this.host.nativeElement.querySelector('.navbar__mobile');
+  }
+
+  /** Slide the panel down into place while the items pop in one after another. */
+  private animateOpen(): void {
+    const panel = this.overlayEl();
+    if (!panel) return;
+    const items = this.host.nativeElement.querySelectorAll('.navbar__mobile-link');
+    const tl = gsap.timeline();
+    // The panel starts at CSS translateY(-100%) (read as -height px); slide to 0.
+    tl.to(panel, { y: 0, duration: 0.4, ease: 'power3.out' }, 0);
+    if (items.length) {
+      tl.from(items, {
+        y: 14, opacity: 0, duration: 0.32, stagger: 0.05,
+        ease: 'back.out(1.6)', clearProps: 'transform,opacity',
+      }, 0.06);
+    }
   }
 }
