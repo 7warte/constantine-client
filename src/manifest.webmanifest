@@ -1,0 +1,18 @@
+{
+  "name": "Constantine",
+  "short_name": "Constantine",
+  "description": "Audio-guided tours, told by people who live there.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16294d",
+  "theme_color": "#16294d",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

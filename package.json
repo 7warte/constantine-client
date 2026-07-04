@@ -24,6 +24,7 @@
     "@angular/platform-browser": "^18.0.0",
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
+    "@angular/service-worker": "^18.2.14",
     "@stripe/stripe-js": "^9.1.0",
     "@types/qrcode": "^1.5.6",
     "altcha": "^3.0.8",

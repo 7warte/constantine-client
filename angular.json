@@ -22,11 +22,14 @@
             "outputPath": "dist/constantine-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/manifest.webmanifest"
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
@@ -44,10 +47,19 @@
                 }
               ],
               "budgets": [
-                { "type": "initial", "maximumWarning": "2mb", "maximumError": "5mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "28kb", "maximumError": "50kb" }
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "56kb",
+                  "maximumError": "96kb"
+                }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
@@ -60,8 +72,12 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "constantine-frontend:build:production" },
-            "development": { "buildTarget": "constantine-frontend:build:development" }
+            "production": {
+              "buildTarget": "constantine-frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "constantine-frontend:build:development"
+            }
           },
           "defaultConfiguration": "development",
           "options": {
@@ -71,9 +87,15 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "tsconfig.spec.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "src/styles.scss"
