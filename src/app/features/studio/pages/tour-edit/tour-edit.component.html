@@ -115,42 +115,6 @@
           <div class="basics-split">
           <div class="square-row">
             <div class="form-field square-field">
-              <label class="form-field__label">Presentation audio</label>
-              <span class="form-field__hint">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
-              <div class="square-box square-box--audio" [class.square-box--filled]="!!presentationAudioUrl()">
-                @if (presentationAudioUrl()) {
-                  <div class="audio-preview">
-                    <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
-                    <div class="audio-preview__actions">
-                      <label class="btn btn--ghost btn--sm">
-                        Replace
-                        <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                      </label>
-                      <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
-                    </div>
-                  </div>
-                } @else if (!isNew()) {
-                  <div class="audio-center">
-                    <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
-                    <div class="form-field__or">or</div>
-                    <label class="cover-upload">
-                      <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
-                      <span class="cover-upload__area">
-                        @if (uploadingAudio()) {
-                          Uploading…
-                        } @else {
-                          Click to upload audio (max 60s)
-                        }
-                      </span>
-                    </label>
-                  </div>
-                } @else {
-                  <span class="square-box__hint">Save the tour first, then you can record or upload a presentation audio.</span>
-                }
-              </div>
-            </div>
-
-            <div class="form-field square-field">
               <label for="tour-price" class="form-field__label">Price (EUR)</label>
               <span class="form-field__hint square-field__spacer" aria-hidden="true">Record a 60-second intro in the tour's language. Visitors will hear a 30-second preview.</span>
               <div class="square-box price-square" [class.square-box--filled]="priceNum() > 0">
@@ -215,15 +179,16 @@
         <h2 class="edit-card__title">Tour location</h2>
         <p class="edit-card__desc">Search each address and pick it from the list — start and end can be in different towns.</p>
 
-        <div class="form-field address-field">
-          <label class="form-field__label">Start address</label>
+        <div class="form-field address-field address-field--start">
+          <label class="form-field__label"><span class="address-field__dot"></span> Start address</label>
           <span class="form-field__hint">
-            @if (startAddress()) { &#10003; Selected — search again to change it. }
+            @if (startAddress()) { &#10003; Selected — edit to change it. }
             @else { Type the full address (street and town), then pick it from the list. }
           </span>
-          <input type="text" class="form-field__input"
+          <textarea class="form-field__input form-field__input--address" rows="2"
             placeholder="e.g. Via dei Fori Imperiali, Rome"
-            [value]="startAddressInput()" (input)="onAddressInput('start', $event)" />
+            [value]="startAddressInput()" (input)="onAddressInput('start', $event)"
+            (keydown.enter)="$event.preventDefault()"></textarea>
           @if (startSuggestions().length > 0) {
             <ul class="address-suggestions">
               @for (s of startSuggestions(); track s.display_name) {
@@ -241,15 +206,16 @@
         </label>
 
         @if (!sameAddress()) {
-          <div class="form-field address-field">
-            <label class="form-field__label">End address</label>
+          <div class="form-field address-field address-field--end">
+            <label class="form-field__label"><span class="address-field__dot"></span> End address</label>
             <span class="form-field__hint">
-              @if (endAddress()) { &#10003; Selected — search again to change it. }
+              @if (endAddress()) { &#10003; Selected — edit to change it. }
               @else { Type the full address (street and town), then pick it from the list. }
             </span>
-            <input type="text" class="form-field__input"
+            <textarea class="form-field__input form-field__input--address" rows="2"
               placeholder="e.g. Piazza del Duomo, Florence"
-              [value]="endAddressInput()" (input)="onAddressInput('end', $event)" />
+              [value]="endAddressInput()" (input)="onAddressInput('end', $event)"
+              (keydown.enter)="$event.preventDefault()"></textarea>
             @if (endSuggestions().length > 0) {
               <ul class="address-suggestions">
                 @for (s of endSuggestions(); track s.display_name) {
@@ -265,7 +231,7 @@
         <!-- Map preview -->
         <div class="map-wrapper">
           <div class="map-hint-row">
-            <p class="map-hint">{{ mapHint() }}</p>
+            @if (mapHint()) { <p class="map-hint">{{ mapHint() }}</p> } @else { <span></span> }
             <button type="button" class="btn btn--ghost btn--sm" (click)="useCurrentLocationForTour()">
               <mat-icon class="loc-picker__icon">my_location</mat-icon>
               Use my current location
@@ -747,29 +713,6 @@
               </div>
 
               <div class="loc-picker__toolbar">
-                <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input" placeholder="Town / city first…"
-                    [value]="venueTownInput()" (input)="onTownInput('venue', $event)" />
-                  @if (venueTownSuggestions().length > 0) {
-                    <ul class="address-suggestions">
-                      @for (s of venueTownSuggestions(); track s.display_name) {
-                        <li (mousedown)="selectTown('venue', s)">{{ s.display_name }}</li>
-                      }
-                    </ul>
-                  }
-                </div>
-                <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input"
-                    [placeholder]="venueTown() ? 'Street / address in ' + venueTown() + '…' : 'Then the street / address…'"
-                    [value]="venuePickerAddress()" (input)="onVenueAddressInput($event)" />
-                  @if (venuePickerSuggestions().length > 0) {
-                    <ul class="address-suggestions">
-                      @for (s of venuePickerSuggestions(); track s.display_name) {
-                        <li (mousedown)="selectVenueSuggestion(s)">{{ s.display_name }}</li>
-                      }
-                    </ul>
-                  }
-                </div>
                 <span class="loc-picker__draw-hint">Click multiple times on the map to define the area of your venue.</span>
                 <button type="button" class="btn btn--ghost btn--sm" [disabled]="venuePickerLocating()" (click)="useVenueCurrentLocation()">
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
@@ -813,29 +756,6 @@
               </div>
 
               <div class="loc-picker__toolbar">
-                <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input" placeholder="Town / city first…"
-                    [value]="pickerTownInput()" (input)="onTownInput('picker', $event)" />
-                  @if (pickerTownSuggestions().length > 0) {
-                    <ul class="address-suggestions">
-                      @for (s of pickerTownSuggestions(); track s.display_name) {
-                        <li (mousedown)="selectTown('picker', s)">{{ s.display_name }}</li>
-                      }
-                    </ul>
-                  }
-                </div>
-                <div class="loc-picker__address address-field">
-                  <input type="text" class="form-field__input"
-                    [placeholder]="pickerTown() ? 'Street / address in ' + pickerTown() + '…' : 'Then the street / address…'"
-                    [value]="pickerAddress()" (input)="onPickerAddressInput($event)" />
-                  @if (pickerSuggestions().length > 0) {
-                    <ul class="address-suggestions">
-                      @for (s of pickerSuggestions(); track s.display_name) {
-                        <li (mousedown)="selectPickerSuggestion(s)">{{ s.display_name }}</li>
-                      }
-                    </ul>
-                  }
-                </div>
                 <button type="button" class="btn btn--ghost btn--sm" [disabled]="pickerLocating()" (click)="useCurrentLocation()">
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
                   {{ pickerLocating() ? 'Locating…' : 'Use my current location' }}
@@ -843,7 +763,7 @@
                 @if (pickerLat() != null && pickerLng() != null) {
                   <span class="loc-picker__coords">{{ pickerLat() | number:'1.5-5' }}, {{ pickerLng() | number:'1.5-5' }}</span>
                 } @else {
-                  <span class="loc-picker__coords loc-picker__coords--muted">Drag the pin, search an address, or use your location</span>
+                  <span class="loc-picker__coords loc-picker__coords--muted">Tap the map to drop a pin, or use your location</span>
                 }
               </div>
 
@@ -918,6 +838,37 @@
       <div class="edit-card">
         <h2 class="edit-card__title">Review &amp; publish</h2>
         <p class="edit-card__desc">This is how travellers will see your tour. Review it, then publish when you're happy.</p>
+
+        <!-- Presentation audio (optional) — an intro visitors hear before buying. -->
+        <div class="publish-audio">
+          <span class="form-field__label">Presentation audio <span class="publish-audio__optional">(optional)</span></span>
+          <span class="form-field__hint">Record or upload a 60-second intro in the tour's language. Visitors hear a 30-second preview.</span>
+          <div class="square-box square-box--audio" [class.square-box--filled]="!!presentationAudioUrl()">
+            @if (presentationAudioUrl()) {
+              <div class="audio-preview">
+                <audio [src]="presentationAudioUrl()!" controls controlsList="nodownload"></audio>
+                <div class="audio-preview__actions">
+                  <label class="btn btn--ghost btn--sm">
+                    Replace
+                    <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                  </label>
+                  <button type="button" class="btn btn--ghost btn--sm btn--danger-text" (click)="deletePresentationAudio()">Remove</button>
+                </div>
+              </div>
+            } @else {
+              <div class="audio-center">
+                <app-audio-recorder [maxDuration]="60" (recorded)="uploadRecordedPresentation($event)" />
+                <div class="form-field__or">or</div>
+                <label class="cover-upload">
+                  <input type="file" accept="audio/*" (change)="onPresentationAudioSelect($event)" hidden />
+                  <span class="cover-upload__area">
+                    @if (uploadingAudio()) { Uploading… } @else { Click to upload audio (max 60s) }
+                  </span>
+                </label>
+              </div>
+            }
+          </div>
+        </div>
 
         <div class="preview">
           <div class="preview__hero" [ngClass]="'cover-grad--' + coverGradient()">

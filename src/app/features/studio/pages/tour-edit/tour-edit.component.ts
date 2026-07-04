@@ -234,9 +234,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const ec = this.endCoords();
     const same = this.sameAddress();
     if (!sc) return 'Type the start address above and choose it to drop the start pin.';
-    if (same) return 'The pin is set from the start address above.';
+    if (same) return '';
     if (!ec) return 'Now type the end address above and choose it to drop the finish pin.';
-    return 'Both pins are set from the addresses above.';
+    return '';
   });
 
   readonly mapThemes: { id: string; label: string; url: string; ext: string }[] = [
@@ -1002,12 +1002,30 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.mapRendered = true;
   }
 
+  // Start/end pin colours, paired with the address inputs' accents so the
+  // creator can tell which pin belongs to which address.
+  private readonly START_PIN_COLOR = '#2b7fff';
+  private readonly END_PIN_COLOR   = '#f57c00';
+
+  private colorPinIcon(color: string): L.DivIcon {
+    return L.divIcon({
+      className: 'color-pin',
+      html: `<svg width="26" height="34" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 0C5.8 0 0 5.8 0 13c0 9 13 21 13 21s13-12 13-21C26 5.8 20.2 0 13 0z" fill="${color}" stroke="#ffffff" stroke-width="2"/>
+        <circle cx="13" cy="13" r="4.5" fill="#ffffff"/>
+      </svg>`,
+      iconSize: [26, 34],
+      iconAnchor: [13, 34],
+      popupAnchor: [0, -30],
+    });
+  }
+
   private placeStartMarker(lat: number, lng: number): void {
     if (!this.map) return;
     if (this.startMarker) {
       this.startMarker.setLatLng([lat, lng]);
     } else {
-      this.startMarker = L.marker([lat, lng], { draggable: false })
+      this.startMarker = L.marker([lat, lng], { draggable: false, icon: this.colorPinIcon(this.START_PIN_COLOR) })
         .addTo(this.map)
         .bindPopup('Start');
     }
@@ -1018,7 +1036,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (this.endMarker) {
       this.endMarker.setLatLng([lat, lng]);
     } else {
-      this.endMarker = L.marker([lat, lng], { draggable: false })
+      this.endMarker = L.marker([lat, lng], { draggable: false, icon: this.colorPinIcon(this.END_PIN_COLOR) })
         .addTo(this.map)
         .bindPopup('End');
     }
@@ -1914,25 +1932,21 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         .bindTooltip(`${pinSpace!.name} area`);
     }
 
-    // Initial view: prefer the venue outline when pinning; otherwise fit the tour
-    // endpoints + the pin into a tour-context frame.
+    // Initial view: venue outline if it has one, else the stop's own pin, else
+    // the tour start (there's no address search anymore, so start is the anchor).
     const stopLat = this.pickerLat();
     const stopLng = this.pickerLng();
-    const points: L.LatLngExpression[] = [];
-    if (start) points.push(start);
-    if (end)   points.push(end);
-    if (stopLat != null && stopLng != null && (!start || stopLat !== start[0] || stopLng !== start[1])) {
-      points.push([stopLat, stopLng]);
-    }
 
     if (venuePoly.length >= 3) {
       this.pickerMap.fitBounds(L.latLngBounds(venuePoly as any), { padding: [40, 40], maxZoom: 18 });
-    } else if (points.length === 0) {
-      this.pickerMap.setView([20, 0], 2);
-    } else if (points.length === 1) {
-      this.pickerMap.setView(points[0] as any, 16);
+    } else if (stopLat != null && stopLng != null) {
+      this.pickerMap.setView([stopLat, stopLng], 16);
+    } else if (start) {
+      this.pickerMap.setView(start, 16);
+    } else if (end) {
+      this.pickerMap.setView(end, 16);
     } else {
-      this.pickerMap.fitBounds(L.latLngBounds(points as any), { padding: [40, 40], maxZoom: 17 });
+      this.pickerMap.setView([20, 0], 2);
     }
 
     if (stopLat != null && stopLng != null) {

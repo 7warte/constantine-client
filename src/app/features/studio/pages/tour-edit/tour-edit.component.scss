@@ -290,13 +290,19 @@
 .square-row {
   display: grid;
   gap: $space-4;
-  grid-template-columns: 1fr 1fr;   // the two squares sit side by side on desktop
+  grid-template-columns: 1fr;   // now holds just the price square (audio moved to Publish)
   align-items: start;
+}
 
-  // On mobile they're too cramped side by side — stack them full-width instead.
-  @media (max-width: #{$bp-md - 1px}) {
-    grid-template-columns: 1fr;
-  }
+.publish-audio {
+  margin: $space-4 0 $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+
+  &__optional { color: $text-muted; font-weight: $font-weight-regular; }
+
+  .square-box { margin-top: $space-2; }
 }
 
 .square-field { gap: $space-1; }
@@ -685,6 +691,32 @@
 .location-inputs { margin-bottom: $space-5; }
 
 .address-field { position: relative; }
+
+// Start/end are colour-paired with their map pins (blue = start, orange = end).
+.address-field--start { --pin-color: #2b7fff; }
+.address-field--end   { --pin-color: #f57c00; }
+.address-field__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--pin-color, #{$accent-primary});
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+// Address inputs are textareas so a long full address wraps and stays visible
+// (single-line inputs truncated it on mobile). Slightly smaller to save space.
+.form-field__input--address {
+  border-left: 3px solid var(--pin-color, #{$border-default});
+  resize: none;
+  font-size: $font-size-sm;
+  line-height: 1.35;
+  min-height: 2.6em;
+  field-sizing: content;   // auto-grow to the content where supported
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 // Soft "outside the venue area" notice on a stop's location.
 .stop-area-warning {
