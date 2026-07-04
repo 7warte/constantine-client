@@ -36,7 +36,11 @@
     gap: $space-4;
 
     @media (max-width: #{$bp-md - 1px}) {
-      padding-block: $space-6;
+      // Extra top gap so a long title always clears the sticky navbar, even when
+      // the content grows taller than the hero.
+      padding-top: $space-8;
+      padding-bottom: $space-6;
+      gap: $space-3;
     }
   }
 
@@ -52,6 +56,7 @@
     font-size: $font-size-2xl;
     color: $white;
     line-height: $line-height-tight;
+    overflow-wrap: anywhere;   // never clip — always show the whole title
 
     @include sm { font-size: $font-size-3xl; }
     @include md { font-size: $font-size-4xl; }
@@ -75,6 +80,14 @@
     display: flex;
     align-items: center;
     gap: $space-5;
+
+    // The hero review stars were oversized — bring them down.
+    ::ng-deep .stars__star { font-size: $font-size-base; }
+
+    @media (max-width: #{$bp-md - 1px}) {
+      gap: $space-4;
+      ::ng-deep .stars__star { font-size: $font-size-sm; }
+    }
   }
 
   &__price {
@@ -86,6 +99,27 @@
   &__cta {
     margin-top: $space-2;
     color: rgba($white, 0.8);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-3;
+
+    .detail__error { flex-basis: 100%; margin: 0; }
+
+    // On mobile the Buy / Gift buttons share the row equally with a small gap,
+    // and shrink so a big title stays fully visible above them.
+    @media (max-width: #{$bp-md - 1px}) {
+      gap: $space-2;
+
+      app-button { flex: 1 1 0; min-width: 0; }
+
+      ::ng-deep .btn {
+        width: 100%;
+        padding: $space-3 $space-3;
+        font-size: $font-size-sm;
+        min-height: 44px;
+      }
+    }
   }
 
   // ── Tour details + map, sharing one row 50/50 on desktop ────────────────────
