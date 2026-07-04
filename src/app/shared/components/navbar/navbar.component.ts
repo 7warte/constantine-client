@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { OfflineService } from '../../../core/offline/offline.service';
 import { ButtonComponent } from '../button/button.component';
 
 @Component({
@@ -18,6 +19,7 @@ import { ButtonComponent } from '../button/button.component';
 })
 export class NavbarComponent {
   readonly auth     = inject(AuthService);
+  readonly offline  = inject(OfflineService);
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly zone = inject(NgZone);

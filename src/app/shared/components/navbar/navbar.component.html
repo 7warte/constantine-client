@@ -38,15 +38,17 @@
       }
     </div>
 
-    <!-- Mobile hamburger -->
-    <button class="navbar__hamburger" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
+    <!-- Mobile hamburger (hidden offline — there's nowhere else to go) -->
+    @if (!offline.offlineMode()) {
+      <button class="navbar__hamburger" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    }
   </div>
 </header>
 
 <!-- Menu overlay (used at every breakpoint; opened via the hamburger) -->
-@if (menuOpen()) {
+@if (menuOpen() && !offline.offlineMode()) {
   <div class="navbar__mobile" (click)="closeMenu()">
     <nav class="navbar__mobile-inner">
       <!-- 1 · Home -->

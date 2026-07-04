@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -35,6 +35,18 @@ export class OfflineService {
   readonly saved = signal<OfflineRecord | null>(this.loadRecord());
   /** Download progress for the tour being saved right now. */
   readonly progress = signal<{ purchaseId: string; pct: number } | null>(null);
+
+  /** Live network state. */
+  readonly online = signal(this.browser ? navigator.onLine : true);
+  /** True when the device is offline AND a tour is available to fall back to. */
+  readonly offlineMode = computed(() => !this.online() && !!this.saved());
+
+  constructor() {
+    if (this.browser) {
+      window.addEventListener('online',  () => this.online.set(true));
+      window.addEventListener('offline', () => this.online.set(false));
+    }
+  }
 
   isSaved(purchaseId: string): boolean {
     return this.saved()?.purchaseId === purchaseId;
