@@ -78,7 +78,7 @@
                         <div class="player__stop-body">
                           @if (getAudio(stop); as audioMedia) {
                             <div class="player__audio">
-                              <audio class="player__audio-el" [src]="audioMedia.url" preload="metadata" controls controlsList="nodownload"></audio>
+                              <audio class="player__audio-el" [src]="audioMedia.url" preload="auto" controlsList="nodownload"></audio>
                             </div>
                           }
 

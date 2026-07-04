@@ -100,31 +100,53 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // professional player: seekable bar with buffered range, playback-speed
   // menu, and a loading state. Browser-only (skipped during SSR).
   private player: any = null;
+  private plyrModule?: Promise<any>;
+
+  /** Load (and memoise) the Plyr module. Kicked off early in ngOnInit so the
+   *  first stop's player is ready the instant its <audio> renders. */
+  private loadPlyr(): Promise<any> {
+    return (this.plyrModule ??= import('plyr').then(m => (m as any).default ?? m));
+  }
 
   private initAudioPlayer(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      const el = this.host.nativeElement.querySelector(
-        '.player__stop-panel.mat-expanded .player__audio-el',
-      ) as HTMLAudioElement | null;
-      this.destroyAudioPlayer();
-      if (!el) return;
-      import('plyr').then((mod) => {
-        const Plyr = (mod as any).default ?? mod;
-        this.player = new Plyr(el, {
-          controls: ['play', 'rewind', 'progress', 'current-time', 'duration', 'fast-forward', 'settings'],
-          settings: ['speed'],
-          speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 1.75, 2] },
-          seekTime: 10,
-          keyboard: { focused: true, global: false },
-          tooltips: { controls: false, seek: true },
-          // Serve the icon sprite from assets/offline (precached by the service
-          // worker) so the player works offline / on the LAN — Plyr otherwise
-          // fetches it from cdn.plyr.io.
-          iconUrl: 'assets/offline/plyr.svg',
-        });
-      }).catch(() => {});
-    }, 130));
+    this.destroyAudioPlayer();
+    const stopId = this.expandedStopId();
+
+    // The panel renders its <audio> lazily and animates open, so the element
+    // isn't in the DOM the instant this runs. Wait for it per animation frame
+    // (instead of guessing a fixed delay) and wrap it in Plyr the moment it
+    // appears. Because the raw element has no `controls`, there's no window in
+    // which the user can start native playback that Plyr then interrupts — the
+    // bug that left a clip "playing" silently until a second click.
+    this.zone.runOutsideAngular(() => {
+      let tries = 0;
+      const attach = () => {
+        if (this.expandedStopId() !== stopId) return;   // user moved on — abort
+        const el = this.host.nativeElement.querySelector(
+          '.player__stop-panel.mat-expanded .player__audio-el',
+        ) as HTMLAudioElement | null;
+        if (!el) { if (tries++ < 90) requestAnimationFrame(attach); return; }
+
+        this.loadPlyr().then((Plyr) => {
+          if (this.expandedStopId() !== stopId || !el.isConnected) return;
+          this.destroyAudioPlayer();
+          this.player = new Plyr(el, {
+            controls: ['play', 'rewind', 'progress', 'current-time', 'duration', 'fast-forward', 'settings'],
+            settings: ['speed'],
+            speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 1.75, 2] },
+            seekTime: 10,
+            keyboard: { focused: true, global: false },
+            tooltips: { controls: false, seek: true },
+            // Serve the icon sprite from assets/offline (precached by the service
+            // worker) so the player works offline / on the LAN — Plyr otherwise
+            // fetches it from cdn.plyr.io.
+            iconUrl: 'assets/offline/plyr.svg',
+          });
+        }).catch(() => { el.controls = true; });   // Plyr unavailable → native fallback
+      };
+      requestAnimationFrame(attach);
+    });
   }
 
   private destroyAudioPlayer(): void {
@@ -499,6 +521,9 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Warm the Plyr chunk while the tour data loads so the first play is instant.
+    if (isPlatformBrowser(this.platformId)) this.loadPlyr().catch(() => {});
+
     this.api.get<any>(`/purchases/${this.purchaseId}`).subscribe({
       next: (purchase) => {
         this.variant.set(purchase);
