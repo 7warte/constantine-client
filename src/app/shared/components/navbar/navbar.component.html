@@ -52,21 +52,29 @@
       <!-- 1 · Home -->
       <div class="navbar__mobile-group">
         <a routerLink="/" (click)="closeMenu()" class="navbar__mobile-link">
-          <mat-icon class="navbar__mobile-icon">home</mat-icon><span class="navbar__mobile-text">Home</span>
+          <mat-icon class="navbar__mobile-icon">home</mat-icon>
+          <span class="navbar__mobile-text">Home</span>
+          <span class="navbar__mobile-sub">Back to the landing page</span>
         </a>
       </div>
 
       <!-- 2 · Explore / Studio / My Library -->
       <div class="navbar__mobile-group">
         <a routerLink="/explore" (click)="closeMenu()" class="navbar__mobile-link">
-          <mat-icon class="navbar__mobile-icon">travel_explore</mat-icon><span class="navbar__mobile-text">Explore</span>
+          <mat-icon class="navbar__mobile-icon">travel_explore</mat-icon>
+          <span class="navbar__mobile-text">Explore</span>
+          <span class="navbar__mobile-sub">Browse all audio tours</span>
         </a>
         @if (auth.isLoggedIn()) {
           <a routerLink="/studio" (click)="closeMenu()" class="navbar__mobile-link">
-            <mat-icon class="navbar__mobile-icon">edit_note</mat-icon><span class="navbar__mobile-text">Studio</span>
+            <mat-icon class="navbar__mobile-icon">edit_note</mat-icon>
+            <span class="navbar__mobile-text">Studio</span>
+            <span class="navbar__mobile-sub">Create &amp; manage your tours</span>
           </a>
           <a routerLink="/library" (click)="closeMenu()" class="navbar__mobile-link">
-            <mat-icon class="navbar__mobile-icon">headphones</mat-icon><span class="navbar__mobile-text">My Library</span>
+            <mat-icon class="navbar__mobile-icon">headphones</mat-icon>
+            <span class="navbar__mobile-text">My Library</span>
+            <span class="navbar__mobile-sub">Tours you've purchased</span>
           </a>
         }
       </div>
@@ -74,17 +82,23 @@
       <!-- 3 · About / Badges -->
       <div class="navbar__mobile-group">
         <a routerLink="/about" (click)="closeMenu()" class="navbar__mobile-link">
-          <mat-icon class="navbar__mobile-icon">info</mat-icon><span class="navbar__mobile-text">About</span>
+          <mat-icon class="navbar__mobile-icon">info</mat-icon>
+          <span class="navbar__mobile-text">About</span>
+          <span class="navbar__mobile-sub">How Constantine works</span>
         </a>
         <a routerLink="/badges" (click)="closeMenu()" class="navbar__mobile-link">
-          <mat-icon class="navbar__mobile-icon">military_tech</mat-icon><span class="navbar__mobile-text">Badges</span>
+          <mat-icon class="navbar__mobile-icon">military_tech</mat-icon>
+          <span class="navbar__mobile-text">Badges</span>
+          <span class="navbar__mobile-sub">Rewards you can unlock</span>
         </a>
       </div>
 
       <!-- 4 · Requested tours -->
       <div class="navbar__mobile-group">
         <a routerLink="/tour-requests" (click)="closeMenu()" class="navbar__mobile-link">
-          <mat-icon class="navbar__mobile-icon">lightbulb</mat-icon><span class="navbar__mobile-text">Requested tours</span>
+          <mat-icon class="navbar__mobile-icon">lightbulb</mat-icon>
+          <span class="navbar__mobile-text">Requested tours</span>
+          <span class="navbar__mobile-sub">Tours travellers are asking for</span>
         </a>
       </div>
 
@@ -92,14 +106,20 @@
       <div class="navbar__mobile-group">
         @if (auth.isLoggedIn()) {
           <a routerLink="/account/profile" (click)="closeMenu()" class="navbar__mobile-link">
-            <mat-icon class="navbar__mobile-icon">person</mat-icon><span class="navbar__mobile-text">Account</span>
+            <mat-icon class="navbar__mobile-icon">person</mat-icon>
+            <span class="navbar__mobile-text">Account</span>
+            <span class="navbar__mobile-sub">Your profile &amp; settings</span>
           </a>
           <button class="navbar__mobile-link" (click)="auth.logout()">
-            <mat-icon class="navbar__mobile-icon">logout</mat-icon><span class="navbar__mobile-text">Sign out</span>
+            <mat-icon class="navbar__mobile-icon">logout</mat-icon>
+            <span class="navbar__mobile-text">Sign out</span>
+            <span class="navbar__mobile-sub">Log out of your account</span>
           </button>
         } @else {
           <a routerLink="/auth/login" (click)="closeMenu()" class="navbar__mobile-link">
-            <mat-icon class="navbar__mobile-icon">login</mat-icon><span class="navbar__mobile-text">Sign in</span>
+            <mat-icon class="navbar__mobile-icon">login</mat-icon>
+            <span class="navbar__mobile-text">Sign in</span>
+            <span class="navbar__mobile-sub">Log in to your account</span>
           </a>
         }
       </div>

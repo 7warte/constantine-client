@@ -1,7 +1,8 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, ElementRef, NgZone } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
+import { gsap } from 'gsap';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
@@ -18,6 +19,8 @@ import { ButtonComponent } from '../button/button.component';
 export class NavbarComponent {
   readonly auth     = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly zone = inject(NgZone);
   readonly menuOpen = signal(false);
 
   constructor() {
@@ -29,6 +32,27 @@ export class NavbarComponent {
     ).subscribe(() => this.menuOpen.set(false));
   }
 
-  toggleMenu(): void { this.menuOpen.update(v => !v); }
-  closeMenu():  void { this.menuOpen.set(false); }
+  toggleMenu(): void {
+    const willOpen = !this.menuOpen();
+    this.menuOpen.set(willOpen);
+    if (willOpen) this.animateMenuItems();
+  }
+
+  closeMenu(): void { this.menuOpen.set(false); }
+
+  /** Pop the menu items in one after another when the overlay opens. */
+  private animateMenuItems(): void {
+    this.zone.runOutsideAngular(() => setTimeout(() => {
+      const items = this.host.nativeElement.querySelectorAll('.navbar__mobile-link');
+      if (!items.length) return;
+      gsap.from(items, {
+        y: 14,
+        opacity: 0,
+        duration: 0.32,
+        stagger: 0.05,
+        ease: 'back.out(1.6)',
+        clearProps: 'transform,opacity',
+      });
+    }, 20));
+  }
 }
