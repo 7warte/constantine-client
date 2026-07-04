@@ -53,6 +53,14 @@
               </mat-expansion-panel-header>
 
               <ng-template matExpansionPanelContent>
+                @if (variant()?.map_image_url || hasAreaMap()) {
+                  <div class="player__venue-map-row">
+                    <button type="button" class="player__venue-map-btn" (click)="openMap()" aria-label="Open tour map">
+                      <mat-icon class="player__venue-map-btn-icon">map</mat-icon>
+                      <span>Map</span>
+                    </button>
+                  </div>
+                }
                 <mat-accordion class="player__stops" displayMode="flat">
                   @for (stop of group.stops; track stop.id) {
                     <mat-expansion-panel class="player__stop-panel"
@@ -145,16 +153,6 @@
         </div>
       }
     </section>
-
-    @if (variant()?.map_image_url || hasAreaMap()) {
-      <button type="button"
-        class="player__mobile-map-btn"
-        [class.player__mobile-map-btn--lifted]="!started()"
-        (click)="openMap()"
-        aria-label="Open tour map">
-        <mat-icon>map</mat-icon>
-      </button>
-    }
 
     @if (showMapModal()) {
       <div class="player__map-backdrop" (click)="closeMap()">

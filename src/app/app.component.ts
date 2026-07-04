@@ -1,6 +1,6 @@
 import { Component, effect, inject, signal, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, NavigationStart, RouterOutlet } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { filter } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
@@ -112,13 +112,29 @@ export class AppComponent implements OnInit {
 
   constructor() {
     // When the device goes offline, the only thing available is the saved tour —
-    // so send the user straight to it (it becomes their "home").
+    // so send the user straight to it (it becomes their "home"). This effect
+    // covers the moment the connection drops while sitting on a page.
     effect(() => {
       if (!this.offline.offlineMode()) return;
       const rec = this.offline.saved();
       if (!rec) return;
       const target = `/library/${rec.purchaseId}/play`;
       if (!this.router.url.startsWith(target)) this.router.navigateByUrl(target);
+    });
+
+    // While already offline, any navigation away from the saved tour — the back
+    // button, the brand logo, a stray link — would land on a page that needs the
+    // network. Reroute every such navigation back to the player. Caught on
+    // NavigationStart so the target page never activates.
+    this.router.events.pipe(
+      filter((e): e is NavigationStart => e instanceof NavigationStart),
+      takeUntilDestroyed(),
+    ).subscribe(e => {
+      if (!this.offline.offlineMode()) return;
+      const rec = this.offline.saved();
+      if (!rec) return;
+      const target = `/library/${rec.purchaseId}/play`;
+      if (!e.url.startsWith(target)) this.router.navigateByUrl(target);
     });
 
     // Surface a "reload for the new version" prompt when the SW has one ready.

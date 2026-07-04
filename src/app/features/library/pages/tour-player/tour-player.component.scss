@@ -293,31 +293,32 @@
   }
 
   // ── Map FAB ─────────────────────────────────────────────────────────────────
-  &__mobile-map-btn {
+  // Small "Map" button at the top of each expanded venue (replaces the old
+  // fixed floating map FAB). Opens the same tour-map modal via openMap().
+  &__venue-map-row {
     display: flex;
-    position: fixed;
-    bottom: $space-5;
-    right: $space-5;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: $text-primary;
-    color: $white;
-    border: none;
+    justify-content: flex-end;
+    padding: $space-2 $space-2 0;
+  }
+
+  &__venue-map-btn {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+    background: $bg-surface-alt;
+    border: 1px solid $border-default;
+    border-radius: $radius-full;
+    font-family: $font-family-secondary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
     cursor: pointer;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
-    z-index: 110;
-    transition: background $transition-fast, transform $transition-fast, bottom $transition-normal;
+    transition: background $transition-fast, border-color $transition-fast;
 
-    .mat-icon { font-size: 28px; width: 28px; height: 28px; }
-    &:hover { background: $accent-primary; transform: scale(1.05); }
+    &:hover { background: $bg-surface; border-color: $border-strong; }
 
-    /* Bump above the "Start from..." sticky CTA so it isn't hidden pre-tour. */
-    &--lifted {
-      bottom: calc(96px + #{$space-5} + env(safe-area-inset-bottom));
-    }
+    &-icon { font-size: 15px; width: 15px; height: 15px; color: $accent-primary; }
   }
 
   // ── Audio player (Plyr) ─────────────────────────────────────────────────────

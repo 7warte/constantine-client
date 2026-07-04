@@ -65,8 +65,45 @@ export class OfflineService {
     try {
       const db = await this.openDb();
       const blob = await this.getBlob(db, url);
-      return blob ? URL.createObjectURL(blob) : null;
+      return blob ? URL.createObjectURL(this.withMime(blob, url)) : null;
     } catch { return null; }
+  }
+
+  /**
+   * Guarantee the blob carries a usable Content-Type. Many CDNs / signed S3
+   * URLs return `application/octet-stream`, which iOS Safari refuses to decode
+   * for audio — the clip "plays" but is silent. Re-wrap such blobs with a MIME
+   * type inferred from the file extension so the player works on every browser.
+   */
+  private withMime(blob: Blob, url: string): Blob {
+    const mime = this.mimeForUrl(url);
+    if (!mime) return blob;
+    const t = blob.type.toLowerCase();
+    if (t && t !== 'application/octet-stream' && t !== 'binary/octet-stream') return blob;
+    return new Blob([blob], { type: mime });
+  }
+
+  private mimeForUrl(url: string): string {
+    const ext = url.split(/[?#]/)[0].split('.').pop()?.toLowerCase() ?? '';
+    switch (ext) {
+      case 'mp3':  return 'audio/mpeg';
+      case 'm4a':
+      case 'm4b':  return 'audio/mp4';
+      case 'aac':  return 'audio/aac';
+      case 'oga':
+      case 'ogg':  return 'audio/ogg';
+      case 'opus': return 'audio/ogg';
+      case 'wav':  return 'audio/wav';
+      case 'weba': return 'audio/webm';
+      case 'jpg':
+      case 'jpeg': return 'image/jpeg';
+      case 'png':  return 'image/png';
+      case 'webp': return 'image/webp';
+      case 'gif':  return 'image/gif';
+      case 'svg':  return 'image/svg+xml';
+      case 'pdf':  return 'application/pdf';
+      default:     return '';
+    }
   }
 
   /** Download everything a tour needs to play offline. Replaces any saved tour. */
@@ -107,7 +144,7 @@ export class OfflineService {
     for (const u of list) {
       try {
         const res = await fetch(u);
-        const blob = await res.blob();
+        const blob = this.withMime(await res.blob(), u);
         await this.putBlob(db, u, blob);
         size += blob.size;
       } catch { /* a failed asset is skipped — the rest of the tour still works */ }
