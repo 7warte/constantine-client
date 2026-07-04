@@ -71,6 +71,12 @@
                         <mat-panel-title class="player__stop-title-bar">
                           <span class="player__stop-num">{{ getRomanNumeral(gi) }}</span>
                           <span class="player__stop-name">{{ stop.title }}</span>
+                          @if (stopDistanceMeters(stop) !== null) {
+                            <span class="player__stop-distance">
+                              <mat-icon class="player__stop-distance-icon">near_me</mat-icon>
+                              {{ formatDistance(stopDistanceMeters(stop)) }} away
+                            </span>
+                          }
                         </mat-panel-title>
                       </mat-expansion-panel-header>
 

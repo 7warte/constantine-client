@@ -163,6 +163,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // ── Accordion state handlers ─────────────────────────────────────
   onVenueOpen(idx: number): void {
     this.expandedVenueIdx.set(idx);
+    this.acquireGeo('venue');   // live distance to each stop in the open venue
   }
 
   onVenueClose(idx: number): void {
@@ -170,6 +171,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       this.expandedVenueIdx.set(null);
       this.expandedStopId.set(null);
       this.resetAudioState();
+      this.releaseGeo('venue');
     }
   }
 
@@ -223,12 +225,9 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.areaMap?.remove();
     this.areaMap = null;
     this.clearRoute();
-    // Stop the GPS watch we started for the route dot — unless the compass
-    // (which shares userPosition) is currently open.
-    if (!this.compassOpen() && this.geoWatchId != null) {
-      navigator.geolocation.clearWatch(this.geoWatchId);
-      this.geoWatchId = null;
-    }
+    // Release the route's claim on the GPS watch; it keeps running if the compass
+    // or an open venue still need it.
+    this.releaseGeo('route');
   }
 
   openMap(): void {
@@ -384,7 +383,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.routeError.set(null);
     this.routeGeometry = null;
 
-    this.startGeoWatch();   // live "you are here" dot on the route
+    this.acquireGeo('route');   // live "you are here" dot on the route
     this.showMapModal.set(true);
     setTimeout(() => this.renderAreaMap(), 80);
     this.fetchWalkingRoute(from, to);
@@ -591,6 +590,10 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   readonly compassPermissionDenied = signal(false);
 
   private geoWatchId: number | null = null;
+  // A single GPS watch is shared between the live stop distances, the compass and
+  // the on-route "you are here" dot. Each acquires/releases by name; the watch
+  // runs while at least one consumer needs it.
+  private readonly geoConsumers = new Set<string>();
   private orientationListener: ((e: any) => void) | null = null;
 
   get isIOS(): boolean {
@@ -689,7 +692,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.lastArrowAngle = 0;
     this.arrowDisplayAngle.set(0);
 
-    this.startGeoWatch();
+    this.acquireGeo('compass');
 
     const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
     if (typeof reqPermFn === 'function') {
@@ -698,6 +701,32 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       }).catch(() => {});
     } else {
       this.attachOrientationListener();
+    }
+  }
+
+  /** Live distance from the user to a stop, in metres (null until located or if
+   *  the stop has no coordinates). Works fully offline — GPS needs no network and
+   *  the stop coordinates are part of the cached tour data. */
+  stopDistanceMeters(stop: any): number | null {
+    const pos = this.userPosition();
+    if (!pos || stop?.latitude == null || stop?.longitude == null) return null;
+    return haversineKm(pos.lat, pos.lng, +stop.latitude, +stop.longitude) * 1000;
+  }
+
+  private acquireGeo(consumer: string): void {
+    this.geoConsumers.add(consumer);
+    if (this.geoWatchId == null) this.startGeoWatch();
+  }
+
+  private releaseGeo(consumer: string): void {
+    this.geoConsumers.delete(consumer);
+    if (this.geoConsumers.size === 0) this.stopGeoWatch();
+  }
+
+  private stopGeoWatch(): void {
+    if (this.geoWatchId != null) {
+      navigator.geolocation.clearWatch(this.geoWatchId);
+      this.geoWatchId = null;
     }
   }
 
@@ -786,10 +815,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   closeCompass(): void {
     this.compassOpen.set(false);
-    if (this.geoWatchId != null) {
-      navigator.geolocation.clearWatch(this.geoWatchId);
-      this.geoWatchId = null;
-    }
+    this.releaseGeo('compass');
     if (this.orientationListener) {
       window.removeEventListener('deviceorientationabsolute', this.orientationListener as any, true);
       window.removeEventListener('deviceorientation', this.orientationListener as any, true);
@@ -811,6 +837,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeCompass();
+    this.geoConsumers.clear();
+    this.stopGeoWatch();
     this.destroyAudioPlayer();
     this.areaMap?.remove();
     this.areaMap = null;

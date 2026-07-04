@@ -279,6 +279,29 @@
     margin: 0;
   }
 
+  // Live "X m away" chip — GPS distance to this stop, updated in real time.
+  &__stop-distance {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;              // push to the right edge of the header
+    padding: 2px $space-2;
+    flex-shrink: 0;
+    border-radius: $radius-full;
+    background: rgba($accent-primary, 0.12);
+    color: $accent-primary;
+    font-family: $font-family-secondary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    white-space: nowrap;
+  }
+
+  &__stop-distance-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+
   &__stop-body {
     display: flex;
     flex-direction: column;
@@ -683,6 +706,60 @@
 }
 
 // ── Material accordion overrides (sober B&W look) ─────────────────────────────
+// ── Audio player — mobile layout ─────────────────────────────────────────────
+// On phones the player becomes two rows: the play/pause + progress row, and a
+// second full-width row with the 10s rewind / forward buttons at 50% each. The
+// playback-speed menu is dropped (rarely wanted on the go). Plyr renders its own
+// DOM, so we reshape it here. Desktop keeps the compact single-row pill.
+@media (max-width: #{$bp-md - 1px}) {
+  :host ::ng-deep .player__audio {
+    border-radius: $radius-md;               // no longer a single-row pill
+    padding: $space-2 $space-3 $space-3;
+
+    .plyr__menu { display: none; }           // drop the playback-speed control
+
+    // Let `gap` own all spacing so the wrap onto a second row is predictable.
+    .plyr__controls {
+      flex-wrap: wrap;
+      align-items: center;
+      gap: $space-3 $space-2;                 // row gap · button gap
+      > * { margin: 0; }
+    }
+
+    // Row 1 — a bigger, solid, centred play/pause button.
+    .plyr__control[data-plyr='play'] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      color: #ffffff;
+      svg { width: 18px; height: 18px; }
+    }
+
+    // Row 2 — 10s rewind / forward as two equal, full-width buttons. `order`
+    // pushes them past the progress row (which fills row 1) so they wrap below.
+    .plyr__control[data-plyr='rewind'],
+    .plyr__control[data-plyr='fast-forward'] {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 44px;
+      border-radius: $radius-md;
+      background: $bg-surface-alt;
+      color: $text-primary;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      svg { width: 20px; height: 20px; }
+      &:hover { background: #1a1a1a; color: #ffffff; }
+    }
+    .plyr__control[data-plyr='rewind']       { order: 4; }
+    .plyr__control[data-plyr='fast-forward'] { order: 5; }
+  }
+}
+
 :host ::ng-deep .player__venue-panel.mat-expansion-panel {
   background: $bg-surface;
   border: 1px solid $border-default;
