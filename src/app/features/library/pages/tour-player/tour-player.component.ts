@@ -118,9 +118,10 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
           seekTime: 10,
           keyboard: { focused: true, global: false },
           tooltips: { controls: false, seek: true },
-          // Serve the icon sprite locally so the player works offline / on the LAN
-          // (Plyr otherwise fetches it from cdn.plyr.io).
-          iconUrl: 'assets/plyr/plyr.svg',
+          // Serve the icon sprite from assets/offline (precached by the service
+          // worker) so the player works offline / on the LAN — Plyr otherwise
+          // fetches it from cdn.plyr.io.
+          iconUrl: 'assets/offline/plyr.svg',
         });
       }).catch(() => {});
     }, 130));
@@ -246,11 +247,13 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.routeLayer = null;   // belonged to the old map instance
     this.userMarker = null;
 
+    // Markers live under assets/offline (precached by the service worker) so the
+    // area map still renders its pins when the tour is played offline.
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
-      iconUrl: 'assets/leaflet/marker-icon.png',
-      shadowUrl: 'assets/leaflet/marker-shadow.png',
+      iconRetinaUrl: 'assets/offline/marker-icon-2x.png',
+      iconUrl: 'assets/offline/marker-icon.png',
+      shadowUrl: 'assets/offline/marker-shadow.png',
     });
 
     const map = L.map(el, { zoomControl: true });
