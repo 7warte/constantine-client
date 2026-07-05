@@ -142,6 +142,16 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
             // worker) so the player works offline / on the LAN — Plyr otherwise
             // fetches it from cdn.plyr.io.
             iconUrl: 'assets/offline/plyr.svg',
+            // Start audible every time. Plyr otherwise restores a persisted
+            // volume/muted state from localStorage, which can silently mute every
+            // clip on a browser that once stored muted/zero-volume.
+            volume: 1,
+            muted: false,
+            storage: { enabled: false },
+          });
+          // Belt-and-suspenders: force audible state once the media is wired up.
+          this.player.on('ready', () => {
+            try { this.player.muted = false; if (this.player.volume === 0) this.player.volume = 1; } catch { /* noop */ }
           });
         }).catch(() => { el.controls = true; });   // Plyr unavailable → native fallback
       };
@@ -163,7 +173,20 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // ── Accordion state handlers ─────────────────────────────────────
   onVenueOpen(idx: number): void {
     this.expandedVenueIdx.set(idx);
-    this.acquireGeo('venue');   // live distance to each stop in the open venue
+    this.acquireGeo('venue');   // live "you are here" for stops in the open venue
+    // Once the panel has rendered/animated open, reveal its first stop.
+    this.scrollIntoViewLater('.player__venue-panel.mat-expanded .player__stop-panel', 'start', 320);
+  }
+
+  /** Smooth-scroll the first element matching `selector` into view after `delay`
+   *  (waits out the expansion animation / lazy content render). Runs outside
+   *  Angular so it never schedules change detection. */
+  private scrollIntoViewLater(selector: string, block: ScrollLogicalPosition, delay: number): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.zone.runOutsideAngular(() => setTimeout(() => {
+      this.host.nativeElement.querySelector(selector)
+        ?.scrollIntoView({ behavior: 'smooth', block });
+    }, delay));
   }
 
   onVenueClose(idx: number): void {
@@ -180,6 +203,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.resetAudioState();
     this.animateStopBody();
     this.initAudioPlayer();
+    // Bring the newly-opened stop into view.
+    this.scrollIntoViewLater('.player__stop-panel.mat-expanded', 'nearest', 260);
   }
 
   onStopClose(stopId: string): void {
@@ -277,7 +302,16 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       shadowUrl: 'assets/offline/marker-shadow.png',
     });
 
-    const map = L.map(el, { zoomControl: true });
+    // Offline the map tiles can't load, so zooming just reveals blank tiles —
+    // lock zoom (keep panning) and hide the zoom control when there's no network.
+    const zoomable = this.offline.online();
+    const map = L.map(el, {
+      zoomControl: zoomable,
+      scrollWheelZoom: zoomable,
+      doubleClickZoom: zoomable,
+      touchZoom: zoomable,
+      boxZoom: zoomable,
+    });
     map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
     L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; OpenStreetMap',

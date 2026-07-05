@@ -155,7 +155,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: $font-weight-bold;
-    margin: 0;
+    margin: 0 0 $space-4;
   }
 
   &__welcome-cta {
@@ -286,6 +286,7 @@
     align-items: center;
     gap: 5px;
     margin-left: auto;              // push to the right edge of the header
+    margin-right: $space-3;         // breathing room before the expand chevron
     padding: 2px $space-2;
     flex-shrink: 0;
     border-radius: $radius-full;
@@ -565,7 +566,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
+    z-index: 1100;                 // above Leaflet's panes/controls and the route banner
     transition: background $transition-fast;
 
     &:hover { background: rgba(0, 0, 0, 0.8); }
@@ -743,24 +744,35 @@
       svg { width: 18px; height: 18px; }
     }
 
-    // Row 2 — 10s rewind / forward as two equal, full-width buttons. `order`
-    // pushes them past the progress row (which fills row 1) so they wrap below.
+    // Row 2 — 10s rewind / forward as two equal, full-width buttons, each with a
+    // tiny label under the icon. `order` pushes them past the progress row (which
+    // fills row 1) so they wrap below.
     .plyr__control[data-plyr='rewind'],
     .plyr__control[data-plyr='fast-forward'] {
       flex: 1 1 0;
       min-width: 0;
-      height: 44px;
+      height: 50px;
       border-radius: $radius-md;
       background: $bg-surface-alt;
       color: $text-primary;
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      svg { width: 20px; height: 20px; }
+      gap: 1px;
+      svg { width: 18px; height: 18px; }
+      &::after {
+        font-family: $font-family-secondary;
+        font-size: 9px;
+        font-weight: $font-weight-semibold;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        opacity: 0.7;
+      }
       &:hover { background: #1a1a1a; color: #ffffff; }
     }
-    .plyr__control[data-plyr='rewind']       { order: 4; }
-    .plyr__control[data-plyr='fast-forward'] { order: 5; }
+    .plyr__control[data-plyr='rewind']       { order: 4; &::after { content: '-10 sec'; } }
+    .plyr__control[data-plyr='fast-forward'] { order: 5; &::after { content: '+10 sec'; } }
   }
 }
 
@@ -769,6 +781,7 @@
   border: 1px solid $border-default;
   border-radius: $radius-md !important;
   box-shadow: none;
+  scroll-margin-top: 96px;        // clear the sticky navbar (+ offline bar) when scrolled to
 
   .mat-expansion-panel-header {
     padding: 0 $space-4;
@@ -792,6 +805,7 @@
   border: 1px solid $border-light;
   border-radius: $radius-sm !important;
   box-shadow: none;
+  scroll-margin-top: 96px;        // clear the sticky navbar (+ offline bar) when scrolled to
 
   .mat-expansion-panel-header {
     padding: 0 $space-3;
@@ -1042,6 +1056,8 @@
   width: 100%;
   height: 80vh;
   max-height: 760px;
+  position: relative;
+  z-index: 0;          // keep Leaflet's internal panes below the close button
 }
 
 // Leaflet builds these markers outside Angular's view encapsulation.
