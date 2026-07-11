@@ -68,6 +68,13 @@ export class AuthService {
     );
   }
 
+  /** Exchange a one-time app→web handoff token for a session. */
+  exchangeHandoff(token: string) {
+    return this.api.post<AuthResponse>('/auth/web-handoff/exchange', { token }).pipe(
+      tap(res => this.saveSession(res))
+    );
+  }
+
   logout(redirect = true): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);

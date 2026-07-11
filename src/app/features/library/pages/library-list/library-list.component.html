@@ -12,23 +12,8 @@
   } @else if (purchases().length === 0) {
     <app-empty-state text="Your library is empty"></app-empty-state>
   } @else {
-    <!-- Tabs: all tours vs the one saved for offline -->
-    <div class="library-tabs" role="tablist">
-      <button type="button" class="library-tabs__tab" [class.library-tabs__tab--active]="tab() === 'all'"
-        (click)="tab.set('all')" role="tab">All tours</button>
-      <button type="button" class="library-tabs__tab" [class.library-tabs__tab--active]="tab() === 'offline'"
-        (click)="tab.set('offline')" role="tab">
-        Offline
-        @if (offline.saved()) { <span class="library-tabs__dot" aria-hidden="true"></span> }
-      </button>
-    </div>
-
-    @if (tab() === 'offline' && offlineTours().length === 0) {
-      <app-empty-state text="No tour saved offline yet. Open “All tours” and tap “Save offline” on one to take it with you."></app-empty-state>
-    }
-
     <div class="purchase-grid">
-      @for (purchase of (tab() === 'all' ? purchases() : offlineTours()); track purchase.id) {
+      @for (purchase of purchases(); track purchase.id) {
         <div class="purchase-card">
           @if (purchase.cover_url) {
             <img
@@ -41,9 +26,6 @@
             <div class="purchase-card__cover purchase-card__cover--placeholder" aria-hidden="true">
               &#127911;
             </div>
-          }
-          @if (offline.isSaved(purchase.id)) {
-            <span class="purchase-card__offline-badge">&#10003; Offline</span>
           }
           <div class="purchase-card__body">
             <h2 class="purchase-card__title">{{ purchase.tour_title }}</h2>
@@ -70,23 +52,6 @@
             <button type="button" class="btn btn--ghost btn--block" (click)="detailsFor.set(purchase)">
               Details
             </button>
-
-            <!-- Offline control -->
-            @if (offline.isSaved(purchase.id)) {
-              <div class="offline-row offline-row--saved">
-                <span class="offline-row__status">&#10003; Saved offline @if (offline.saved()?.sizeBytes) { · {{ fmtSize(offline.saved()?.sizeBytes) }} }</span>
-                <button type="button" class="offline-row__remove" (click)="removeOffline()">Remove</button>
-              </div>
-            } @else if (isDownloading(purchase)) {
-              <div class="offline-row">
-                <span class="offline-row__status">Saving… {{ offline.progress()?.pct }}%</span>
-                <div class="offline-row__bar"><span class="offline-row__bar-fill" [style.width.%]="offline.progress()?.pct"></span></div>
-              </div>
-            } @else {
-              <button type="button" class="btn btn--ghost btn--block offline-row__save" [disabled]="!!offline.progress()" (click)="download(purchase)">
-                &#8681; Save offline
-              </button>
-            }
           </div>
         </div>
       }

@@ -37,6 +37,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/health/health.component').then(m => m.HealthComponent),
   },
 
+  // ── App → web sign-in handoff (public; consumes a one-time token) ──────────
+  {
+    path: 'auth/handoff',
+    loadComponent: () => import('./pages/handoff/handoff.component').then(m => m.HandoffComponent),
+  },
+
   // ── Accept translation invite (public — user may not be logged in) ─────────
   {
     path: 'auth/accept-invite/:token',
