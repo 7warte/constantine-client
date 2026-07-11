@@ -145,3 +145,36 @@
   font-size: 0.78rem;
   color: var(--color-text-muted);
 }
+
+// Sharing-tier selector
+.checkout-card__share {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1rem 0;
+}
+.checkout-card__share-title { font-weight: 600; }
+.checkout-card__share-hint { font-size: 0.85rem; color: var(--text-secondary, #666); }
+.checkout-card__share-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+.share-tier {
+  flex: 1 1 30%;
+  min-width: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.55rem 0.4rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.share-tier--active { border-color: #c98a8c; background: rgba(201, 138, 140, 0.12); }
+.share-tier__pct { color: #a06466; font-weight: 600; }
+.share-tier__price { color: var(--text-secondary, #666); font-size: 0.8rem; }

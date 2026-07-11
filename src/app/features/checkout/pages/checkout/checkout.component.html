@@ -23,11 +23,35 @@
         </div>
       </div>
 
+      @if (!isGift() && !clientSecret() && variant()!.price_cents > 0) {
+        <div class="checkout-card__share">
+          <span class="checkout-card__share-title">Share access with friends</span>
+          <span class="checkout-card__share-hint">
+            Pay a little more so friends can use this tour too — they just need a free account.
+          </span>
+          <div class="checkout-card__share-tiers">
+            @for (slots of SHARE_TIERS; track slots) {
+              <button type="button" class="share-tier"
+                [class.share-tier--active]="shareSlots() === slots"
+                (click)="shareSlots.set(slots)">
+                @if (slots === 0) {
+                  <strong>Just me</strong>
+                } @else {
+                  <strong>{{ slots }} people</strong>
+                  <span class="share-tier__pct">+{{ surplusPct(slots) }}%</span>
+                  <span class="share-tier__price">{{ tierCents(slots) / 100 | currency:'EUR' }}</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
       <div class="checkout-card__price">
         <span>Total</span>
         <strong>
-          @if (variant()!.price_cents === 0) { Free }
-          @else { {{ variant()!.price_cents / 100 | currency:'EUR' }} }
+          @if (totalCents() === 0) { Free }
+          @else { {{ totalCents() / 100 | currency:'EUR' }} }
         </strong>
       </div>
 

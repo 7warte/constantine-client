@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, signal, ElementRef, ViewChild,
+  inject, signal, computed, ElementRef, ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -37,6 +37,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   readonly isGift         = signal(false);
   readonly recipientEmail = signal('');
 
+  // Paid sharing tier: +10% per 5 people (5→+15%, 10→+25% … 25→+55%).
+  readonly SHARE_TIERS = [0, 5, 10, 15, 20, 25];
+  readonly shareSlots  = signal(0);
+  surplusPct(slots: number): number { return slots > 0 ? slots * 2 + 5 : 0; }
+  tierCents(slots: number): number {
+    const base = this.variant()?.price_cents ?? 0;
+    return slots > 0 && base > 0 ? Math.round(base * (1 + this.surplusPct(slots) / 100)) : base;
+  }
+  readonly totalCents = computed(() => this.tierCents(this.shareSlots()));
+
   @ViewChild('paymentElementRef') paymentElementRef!: ElementRef<HTMLDivElement>;
 
   ngOnInit(): void {
@@ -54,7 +64,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   /** Step 1: Create a PaymentIntent (or record free purchase) */
   purchase(): void {
-    const body: any = { variant_id: this.variantId };
+    const body: any = { variant_id: this.variantId, share_slots: this.shareSlots() };
     if (this.isGift()) {
       const email = this.recipientEmail().trim();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
