@@ -80,8 +80,14 @@
     line-height: $line-height-tight;
     color: $text-primary;
     margin-bottom: $space-3;
+    overflow-wrap: anywhere;   // long, unbroken place names wrap instead of overflowing
 
-    @media (max-width: #{$bp-md - 1px}) { font-size: $font-size-base; }
+    // Narrow viewports: a smaller title so long names wrap onto a second line
+    // rather than getting clipped by the card.
+    @media (max-width: #{$bp-md - 1px}) {
+      font-size: 0.9rem;                 // between $font-size-sm and $font-size-base
+      line-height: $line-height-normal;
+    }
   }
 
   &__meta {

@@ -4,6 +4,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -18,6 +19,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 })
 export class ExploreComponent implements OnInit {
   private readonly api    = inject(ApiService);
+  private readonly auth   = inject(AuthService);
   private readonly route  = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb     = inject(FormBuilder);
@@ -28,6 +30,10 @@ export class ExploreComponent implements OnInit {
   readonly tours      = signal<any[]>([]);
   readonly loading    = signal(true);
 
+  // Variant ids the signed-in user already owns — cards for these show an
+  // "In your library" marker instead of a price.
+  readonly ownedVariantIds = signal<Set<string>>(new Set());
+
   readonly filters = this.fb.nonNullable.group({
     search:   [''],
     tag:      [''],
@@ -36,6 +42,8 @@ export class ExploreComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loadOwned();
+
     this.route.queryParamMap.subscribe(p => {
       this.filters.patchValue({
         tag:      p.get('tag')      ?? '',
@@ -60,6 +68,19 @@ export class ExploreComponent implements OnInit {
     this.api.get<any[]>('/tours', params).subscribe({
       next:  t  => { this.tours.set(t); this.loading.set(false); this.animateGridIn(); },
       error: () => this.loading.set(false),
+    });
+  }
+
+  // Signed-in users get their purchases once, so owned tours can be marked in
+  // the grid. Logged out — or on failure — we simply show no markers.
+  private loadOwned(): void {
+    if (!this.auth.isLoggedIn()) return;
+
+    this.api.get<any[]>('/purchases').subscribe({
+      next:  purchases => this.ownedVariantIds.set(
+        new Set(purchases.map((p: any) => p.tour_variant_id)),
+      ),
+      error: () => this.ownedVariantIds.set(new Set()),
     });
   }
 

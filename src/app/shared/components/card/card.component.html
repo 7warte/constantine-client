@@ -8,7 +8,9 @@
         <span class="font-decorative" aria-hidden="true">&#x10980;</span>
       </div>
     }
-    @if (tour.price_cents === 0) {
+    @if (owned) {
+      <span class="tour-card__badge tour-card__badge--owned">Owned</span>
+    } @else if (tour.price_cents === 0) {
       <span class="tour-card__badge tour-card__badge--free">Free</span>
     }
   </div>
@@ -42,11 +44,16 @@
     </div>
   </div>
 
-  <!-- Price footer: a dotted rule + its own background band anchors the price. -->
+  <!-- Price footer: a dotted rule + its own background band anchors the price.
+       Owned tours show a library marker here instead — nothing left to buy. -->
   <div class="tour-card__footer">
-    <span class="tour-card__price">
-      @if (tour.price_cents === 0) { Free }
-      @else { {{ tour.price_cents / 100 | currency:'EUR' }} }
-    </span>
+    @if (owned) {
+      <span class="tour-card__owned">&#x2713; In your library</span>
+    } @else {
+      <span class="tour-card__price">
+        @if (tour.price_cents === 0) { Free }
+        @else { {{ tour.price_cents / 100 | currency:'EUR' }} }
+      </span>
+    }
   </div>
 </article>

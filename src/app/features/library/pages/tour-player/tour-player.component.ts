@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, PLATFORM_ID, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, PLATFORM_ID, inject, signal, computed, effect, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { gsap } from 'gsap';
 import * as L from 'leaflet';
 import { ApiService } from '../../../../core/services/api.service';
@@ -13,7 +12,7 @@ import { OfflineService } from '../../../../core/offline/offline.service';
   selector: 'app-tour-player',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatExpansionModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './tour-player.component.html',
   styleUrl: './tour-player.component.scss',
 })
@@ -30,19 +29,10 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // Itinerary venues slide up in a stagger when the tour loads.
   private animateItineraryIn(): void {
     this.zone.runOutsideAngular(() => setTimeout(() => {
-      const panels = this.host.nativeElement.querySelectorAll('.player__venue-panel');
-      if (!panels.length) return;
-      gsap.from(panels, { y: 28, opacity: 0, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'transform,opacity' });
+      const rows = this.host.nativeElement.querySelectorAll('.tourp__itinerary-venue');
+      if (!rows.length) return;
+      gsap.from(rows, { y: 28, opacity: 0, duration: 0.55, stagger: 0.08, ease: 'power3.out', clearProps: 'transform,opacity' });
     }, 60));
-  }
-
-  // A stop's contents (audio, text, photos…) stagger in when it opens.
-  private animateStopBody(): void {
-    this.zone.runOutsideAngular(() => setTimeout(() => {
-      const body = this.host.nativeElement.querySelector('.player__stop-panel.mat-expanded .player__stop-body');
-      if (!body || !body.children.length) return;
-      gsap.from(body.children, { y: 18, opacity: 0, duration: 0.45, stagger: 0.07, ease: 'power2.out', clearProps: 'transform,opacity' });
-    }, 120));
   }
 
   readonly loading = signal(true);
@@ -95,92 +85,128 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     return this.groupedStops()[idx]?.spaceId ?? null;
   });
 
-  // ── Audio (Plyr — one expanded stop at a time) ───────────────────
-  // Plyr enhances the lazily-rendered <audio> of the open stop into a
-  // professional player: seekable bar with buffered range, playback-speed
-  // menu, and a loading state. Browser-only (skipped during SSR).
-  private player: any = null;
-  private plyrModule?: Promise<any>;
+  // ── Audio (one element + custom transport — same model as the phone app) ──
+  // A single <audio> for the whole tour, not a player per stop: the transport
+  // lives at the top of the screen and the source swaps as you move between
+  // stops. Browser-only (skipped during SSR).
+  @ViewChild('audioEl') private audioRef?: ElementRef<HTMLAudioElement>;
 
-  /** Load (and memoise) the Plyr module. Kicked off early in ngOnInit so the
-   *  first stop's player is ready the instant its <audio> renders. */
-  private loadPlyr(): Promise<any> {
-    return (this.plyrModule ??= import('plyr').then(m => (m as any).default ?? m));
+  readonly playing     = signal(false);
+  readonly currentTime = signal(0);
+  readonly duration    = signal(0);
+  readonly audioError  = signal<string | null>(null);
+
+  /** The stop loaded into the transport. */
+  readonly playingStop = computed(() => {
+    const id = this.expandedStopId();
+    if (!id) return null;
+    for (const g of this.groupedStops()) {
+      const found = g.stops.find((s: any) => s.id === id);
+      if (found) return found;
+    }
+    return null;
+  });
+
+  /** Its 1-based position across the whole tour — the "STOP 3" label. */
+  readonly playingStopNumber = computed(() => {
+    const id = this.expandedStopId();
+    if (!id) return null;
+    let n = 0;
+    for (const g of this.groupedStops()) {
+      for (const s of g.stops) {
+        n++;
+        if (s.id === id) return n;
+      }
+    }
+    return null;
+  });
+
+  readonly hasAudio = computed(() => !!this.getAudio(this.playingStop()));
+
+  readonly progressPct = computed(() => {
+    const d = this.duration();
+    return d > 0 ? Math.min(100, (this.currentTime() / d) * 100) : 0;
+  });
+
+  private get audio(): HTMLAudioElement | null {
+    return this.audioRef?.nativeElement ?? null;
   }
 
-  private initAudioPlayer(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    this.destroyAudioPlayer();
-    const stopId = this.expandedStopId();
+  /** Select a stop and play it. */
+  playStop(stop: any): void {
+    if (!stop) return;
+    this.expandedStopId.set(stop.id);
+    this.audioError.set(null);
+    this.currentTime.set(0);
+    this.duration.set(0);
 
-    // The panel renders its <audio> lazily and animates open, so the element
-    // isn't in the DOM the instant this runs. Wait for it per animation frame
-    // (instead of guessing a fixed delay) and wrap it in Plyr the moment it
-    // appears. Because the raw element has no `controls`, there's no window in
-    // which the user can start native playback that Plyr then interrupts — the
-    // bug that left a clip "playing" silently until a second click.
-    this.zone.runOutsideAngular(() => {
-      let tries = 0;
-      const attach = () => {
-        if (this.expandedStopId() !== stopId) return;   // user moved on — abort
-        const el = this.host.nativeElement.querySelector(
-          '.player__stop-panel.mat-expanded .player__audio-el',
-        ) as HTMLAudioElement | null;
-        if (!el) { if (tries++ < 90) requestAnimationFrame(attach); return; }
+    if (!this.getAudio(stop)) { this.playing.set(false); return; }
 
-        this.loadPlyr().then((Plyr) => {
-          if (this.expandedStopId() !== stopId || !el.isConnected) return;
-          this.destroyAudioPlayer();
-          this.player = new Plyr(el, {
-            controls: ['play', 'rewind', 'progress', 'current-time', 'duration', 'fast-forward', 'settings'],
-            settings: ['speed'],
-            speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 1.75, 2] },
-            seekTime: 10,
-            keyboard: { focused: true, global: false },
-            tooltips: { controls: false, seek: true },
-            // Serve the icon sprite from assets/offline (precached by the service
-            // worker) so the player works offline / on the LAN — Plyr otherwise
-            // fetches it from cdn.plyr.io.
-            iconUrl: 'assets/offline/plyr.svg',
-            // Start audible every time. Plyr otherwise restores a persisted
-            // volume/muted state from localStorage, which can silently mute every
-            // clip on a browser that once stored muted/zero-volume.
-            volume: 1,
-            muted: false,
-            storage: { enabled: false },
-          });
-          // Belt-and-suspenders: force audible state once the media is wired up.
-          this.player.on('ready', () => {
-            try { this.player.muted = false; if (this.player.volume === 0) this.player.volume = 1; } catch { /* noop */ }
-          });
-        }).catch(() => { el.controls = true; });   // Plyr unavailable → native fallback
-      };
-      requestAnimationFrame(attach);
+    // The [src] binding lands on the next tick, so load/play after it.
+    setTimeout(() => {
+      const el = this.audio;
+      if (!el) return;
+      el.load();
+      el.play().then(() => this.playing.set(true)).catch(() => this.playing.set(false));
     });
   }
 
-  private destroyAudioPlayer(): void {
-    if (this.player) {
-      try { this.player.destroy(); } catch { /* already gone */ }
-      this.player = null;
-    }
+  togglePlay(): void {
+    const el = this.audio;
+    if (!el || !this.hasAudio()) return;
+    if (el.paused) el.play().then(() => this.playing.set(true)).catch(() => { /* blocked */ });
+    else { el.pause(); this.playing.set(false); }
+  }
+
+  seekBy(delta: number): void {
+    const el = this.audio;
+    if (!el || !this.hasAudio()) return;
+    el.currentTime = Math.max(0, Math.min(el.duration || 0, el.currentTime + delta));
+  }
+
+  /** Click anywhere on the progress track to scrub. */
+  onSeekBarClick(event: MouseEvent): void {
+    const el = this.audio;
+    if (!el || !this.hasAudio() || !el.duration) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    if (!rect.width) return;
+    const fraction = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    el.currentTime = fraction * el.duration;
+  }
+
+  onTimeUpdate(): void      { this.currentTime.set(this.audio?.currentTime ?? 0); }
+  onLoadedMetadata(): void  { this.duration.set(this.audio?.duration || 0); }
+  onEnded(): void           { this.playing.set(false); }
+
+  /** A media URL that 404s or times out used to fail silently. Say so. */
+  onAudioError(): void {
+    this.playing.set(false);
+    this.audioError.set('This clip could not be loaded. Check your connection and try again.');
+  }
+
+  formatTime(seconds: number): string {
+    if (!isFinite(seconds) || seconds < 0) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   private resetAudioState(): void {
-    this.destroyAudioPlayer();
+    const el = this.audio;
+    if (el) { try { el.pause(); } catch { /* noop */ } }
+    this.playing.set(false);
+    this.currentTime.set(0);
+    this.duration.set(0);
+    this.audioError.set(null);
   }
 
-  // ── Accordion state handlers ─────────────────────────────────────
-  onVenueOpen(idx: number): void {
-    this.expandedVenueIdx.set(idx);
-    this.acquireGeo('venue');   // live "you are here" for stops in the open venue
-    // Once the panel has rendered/animated open, reveal its first stop.
-    this.scrollIntoViewLater('.player__venue-panel.mat-expanded .player__stop-panel', 'start', 320);
-  }
+  // ── Tour session ─────────────────────────────────────────────────
+  /** List of stops, or the map — the two views of a running tour. */
+  readonly viewMode = signal<'list' | 'map'>('list');
 
   /** Smooth-scroll the first element matching `selector` into view after `delay`
-   *  (waits out the expansion animation / lazy content render). Runs outside
-   *  Angular so it never schedules change detection. */
+   *  (waits out any render/animation). Runs outside Angular so it never
+   *  schedules change detection. */
   private scrollIntoViewLater(selector: string, block: ScrollLogicalPosition, delay: number): void {
     if (!isPlatformBrowser(this.platformId)) return;
     this.zone.runOutsideAngular(() => setTimeout(() => {
@@ -189,46 +215,76 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     }, delay));
   }
 
-  onVenueClose(idx: number): void {
-    if (this.expandedVenueIdx() === idx) {
-      this.expandedVenueIdx.set(null);
-      this.expandedStopId.set(null);
-      this.resetAudioState();
-      this.releaseGeo('venue');
-    }
-  }
-
-  onStopOpen(stopId: string): void {
-    this.expandedStopId.set(stopId);
-    this.resetAudioState();
-    this.animateStopBody();
-    this.initAudioPlayer();
-    // Bring the newly-opened stop into view.
-    this.scrollIntoViewLater('.player__stop-panel.mat-expanded', 'nearest', 260);
-  }
-
-  onStopClose(stopId: string): void {
-    if (this.expandedStopId() === stopId) {
-      this.expandedStopId.set(null);
-      this.resetAudioState();
-    }
-  }
-
   startTour(): void {
     this.started.set(true);
+    this.viewMode.set('list');
+    // Live distances to every stop, exactly as the app shows them.
+    this.acquireGeo('tour');
+
     const groups = this.groupedStops();
     if (!groups.length) return;
     this.expandedVenueIdx.set(0);
+
     const firstStop = groups[0].stops[0];
-    if (firstStop) this.expandedStopId.set(firstStop.id);
+    if (firstStop) {
+      // Select it, but don't auto-start playback: browsers block audio that the
+      // user didn't ask for, and a silent "playing" state is worse than none.
+      this.expandedStopId.set(firstStop.id);
+    }
+    this.scrollIntoViewLater('.player__now', 'start', 100);
+  }
 
-    this.animateStopBody();
-    this.initAudioPlayer();
+  endTour(): void {
+    this.resetAudioState();
+    this.started.set(false);
+    this.expandedStopId.set(null);
+    this.expandedVenueIdx.set(null);
+    this.autoPlayNear.set(false);
+    this.autoPlayed.clear();
+    this.viewMode.set('list');
+    this.releaseGeo('tour');
+    this.releaseGeo('autoplay');
+    this.releaseGeo('inline-map');
+  }
 
-    setTimeout(() => {
-      const el = document.querySelector('.player__venue-panel');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+  /** Tap a stop in the list: load it into the transport and play. */
+  selectStop(stop: any): void {
+    this.playStop(stop);
+    const venueIdx = this.groupedStops().findIndex(g => g.stops.some((s: any) => s.id === stop.id));
+    if (venueIdx >= 0) this.expandedVenueIdx.set(venueIdx);
+  }
+
+  setViewMode(mode: 'list' | 'map'): void {
+    this.viewMode.set(mode);
+    if (mode !== 'map') {
+      this.releaseGeo('inline-map');
+      this.inlineMap?.remove();
+      this.inlineMap = null;
+      return;
+    }
+    // The compass row needs a position + heading.
+    this.acquireGeo('inline-map');
+    this.attachOrientationListener();
+    // Render once the container exists.
+    setTimeout(() => this.renderInlineMap(), 60);
+  }
+
+  /** Live distance to a stop, formatted — the "· 120 m" on each list row. */
+  stopDistanceLabel(stop: any): string | null {
+    const d = this.stopDistanceMeters(stop);
+    return d == null ? null : this.formatDistance(d);
+  }
+
+  /** 1-based position of a stop across the whole tour (the numbered disc). */
+  stopNumber(stop: any): number {
+    let n = 0;
+    for (const group of this.groupedStops()) {
+      for (const s of group.stops) {
+        n++;
+        if (s.id === stop.id) return n;
+      }
+    }
+    return 0;
   }
 
   // ── Map modal ────────────────────────────────────────────────────
@@ -282,6 +338,90 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   getRomanNumeral(idx: number): string {
     const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return numerals[idx] ?? String(idx + 1);
+  }
+
+  // ── Inline map (the running tour's Map view) ─────────────────────────────
+  // Separate instance from the modal's `areaMap` — both can't own the same
+  // container, and this one plots every *stop*, not just the venues, which is
+  // what the app's map shows.
+  private inlineMap: L.Map | null = null;
+  private inlineUserMarker: L.CircleMarker | null = null;
+
+  private renderInlineMap(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const el = document.getElementById('player-inline-map');
+    if (!el) return;
+
+    this.inlineMap?.remove();
+    this.inlineUserMarker = null;
+
+    const zoomable = this.offline.online();
+    const map = L.map(el, {
+      zoomControl: zoomable,
+      scrollWheelZoom: zoomable,
+      doubleClickZoom: zoomable,
+      touchZoom: zoomable,
+      boxZoom: zoomable,
+    });
+    map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://stamen.com/">Stamen Design</a> &copy; OpenStreetMap',
+      maxZoom: 20,
+    } as any).addTo(map);
+
+    const all: L.LatLngExpression[] = [];
+
+    // Venue areas, tinted with the venue's own colour.
+    this.mapSpaces().forEach((sp) => {
+      const poly = this.parsePolygon(sp.polygon);
+      const color = sp.color || '#c98a8c';
+      if (poly.length >= 3) {
+        L.polygon(poly as any, { color: '#1a1a1a', weight: 1, fillColor: color, fillOpacity: 0.18 })
+          .addTo(map).bindTooltip(sp.name);
+        poly.forEach(p => all.push(p));
+      }
+    });
+
+    // A numbered pin per stop, tapping one plays it.
+    let n = 0;
+    for (const group of this.groupedStops()) {
+      for (const stop of group.stops) {
+        n++;
+        if (stop.latitude == null || stop.longitude == null) continue;
+        const ll: L.LatLngExpression = [+stop.latitude, +stop.longitude];
+        L.marker(ll, { icon: this.numberIcon(String(n), group.spaceColor || '#c98a8c') })
+          .addTo(map)
+          .bindTooltip(`${n}. ${stop.title}`)
+          .on('click', () => this.zone.run(() => this.selectStop(stop)));
+        all.push(ll);
+      }
+    }
+
+    if (all.length) map.fitBounds(L.latLngBounds(all), { padding: [30, 30], maxZoom: 17 });
+    else map.setView([41.9028, 12.4964], 5);
+    setTimeout(() => map.invalidateSize(), 60);
+    this.inlineMap = map;
+    this.updateInlineUserDot();
+  }
+
+  /** "You are here" dot on the inline map, following the GPS watch. */
+  private readonly _inlineUserDotEffect = effect(() => {
+    this.userPosition();               // tracked
+    untracked(() => this.updateInlineUserDot());
+  });
+
+  private updateInlineUserDot(): void {
+    const map = this.inlineMap;
+    const pos = this.userPosition();
+    if (!map || !pos) return;
+    const ll: L.LatLngExpression = [pos.lat, pos.lng];
+    if (!this.inlineUserMarker) {
+      this.inlineUserMarker = L.circleMarker(ll, {
+        radius: 8, color: '#ffffff', weight: 3, fillColor: '#2b7fff', fillOpacity: 1,
+      }).addTo(map).bindTooltip('You are here');
+    } else {
+      this.inlineUserMarker.setLatLng(ll);
+    }
   }
 
   // ── Interactive area map (venue polygons + start/finish) ─────────────────
@@ -554,9 +694,6 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Warm the Plyr chunk while the tour data loads so the first play is instant.
-    if (isPlatformBrowser(this.platformId)) this.loadPlyr().catch(() => {});
-
     this.api.get<any>(`/purchases/${this.purchaseId}`).subscribe({
       next: (purchase) => {
         this.variant.set(purchase);
@@ -757,6 +894,74 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     return d != null && d <= this.HERE_RADIUS_M;
   }
 
+  // ── Auto-play on arrival ─────────────────────────────────────────
+  /** Walk into a stop and its clip opens and plays itself — the same behaviour
+   *  as the phone app. Wider than HERE_RADIUS_M so playback starts as you walk
+   *  up to a stop rather than once you're on top of it. */
+  private readonly AUTOPLAY_RADIUS_M = 40;
+
+  readonly autoPlayNear = signal(false);
+  readonly autoPlayError = signal<string | null>(null);
+  /** Stops already auto-played, so walking back past one doesn't restart it. */
+  private readonly autoPlayed = new Set<string>();
+
+  toggleAutoPlayNear(on: boolean): void {
+    this.autoPlayError.set(null);
+    if (!on) {
+      this.autoPlayNear.set(false);
+      this.releaseGeo('autoplay');
+      return;
+    }
+    if (!isPlatformBrowser(this.platformId) || !navigator.geolocation) {
+      this.autoPlayError.set('This browser cannot share your location.');
+      return;
+    }
+    this.acquireGeo('autoplay');
+    this.autoPlayNear.set(true);
+  }
+
+  private readonly _autoPlayEffect = effect(() => {
+    if (!this.autoPlayNear() || !this.started()) return;
+    if (!this.userPosition()) return;   // tracked: re-runs on every fix
+
+    let best: any = null;
+    let bestDist = Infinity;
+    for (const group of this.groupedStops()) {
+      for (const stop of group.stops) {
+        if (this.autoPlayed.has(stop.id) || !this.getAudio(stop)) continue;
+        const d = this.stopDistanceMeters(stop);
+        if (d != null && d <= this.AUTOPLAY_RADIUS_M && d < bestDist) {
+          bestDist = d;
+          best = stop;
+        }
+      }
+    }
+    if (!best || best.id === this.expandedStopId()) return;
+
+    this.autoPlayed.add(best.id);
+    untracked(() => this.selectStop(best));
+  }, { allowSignalWrites: true });
+
+  // ── "Open in the app" nudge ──────────────────────────────────────
+  private readonly APP_NUDGE_KEY = 'constantine.appNudgeDismissed';
+
+  readonly appNudgeDismissed = signal(
+    isPlatformBrowser(this.platformId) && localStorage.getItem(this.APP_NUDGE_KEY) === '1',
+  );
+
+  /** Deep link into the phone app's Tour tab. Does nothing if it isn't installed
+   *  — which is every public visitor until the app ships, hence "dismissible". */
+  get appDeepLink(): string {
+    return 'constantine://tour';
+  }
+
+  dismissAppNudge(): void {
+    this.appNudgeDismissed.set(true);
+    if (isPlatformBrowser(this.platformId)) {
+      try { localStorage.setItem(this.APP_NUDGE_KEY, '1'); } catch { /* private mode */ }
+    }
+  }
+
   private acquireGeo(consumer: string): void {
     this.geoConsumers.add(consumer);
     if (this.geoWatchId == null) this.startGeoWatch();
@@ -883,9 +1088,11 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.closeCompass();
     this.geoConsumers.clear();
     this.stopGeoWatch();
-    this.destroyAudioPlayer();
+    this.resetAudioState();
     this.areaMap?.remove();
     this.areaMap = null;
+    this.inlineMap?.remove();
+    this.inlineMap = null;
     this.blobUrls.forEach(u => URL.revokeObjectURL(u));
     this.blobUrls = [];
   }

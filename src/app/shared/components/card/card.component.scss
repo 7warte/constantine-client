@@ -59,6 +59,11 @@
       background: $color-success;
       color: white;
     }
+
+    &--owned {
+      background: $accent-primary;
+      color: $text-on-dark;
+    }
   }
 
   // ── Body ──────────────────────────────────────────────────────────────────
@@ -104,12 +109,26 @@
     color: $text-primary;
   }
 
+  // Owned tours take the price slot — same weight, "already yours" colour.
+  &__owned {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: $color-success;
+  }
+
   // Rating stars are oversized for a card — shrink them (more so on mobile).
   ::ng-deep .stars__star { font-size: $font-size-base; }
   ::ng-deep .stars__count { font-size: $font-size-xs; }
 
+  // Phones (and the 2-column band below $bp-md) leave the title very little
+  // room: shrink the type a step further so a long title wraps across its two
+  // lines instead of being clipped mid-word.
   @media (max-width: #{$bp-md - 1px}) {
-    &__title { font-size: $font-size-base; }
+    &__title {
+      font-size: 0.9rem;                 // between $font-size-sm and $font-size-base
+      line-height: $line-height-normal;
+    }
+    &__owned { font-size: $font-size-sm; }
     ::ng-deep .stars__star { font-size: 13px; }
   }
 }

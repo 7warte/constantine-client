@@ -1074,3 +1074,503 @@
   border: 2px solid #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
+
+/* ── "Open in the app" nudge ─────────────────────────────────────── */
+.player__app-nudge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid $accent-muted;
+  border-radius: 6px;
+  background: $accent-muted;
+}
+
+.player__app-nudge-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+
+  strong { font-size: 0.9rem; color: $text-primary; }
+  span   { font-size: 0.8rem; color: $text-secondary; }
+}
+
+.player__app-nudge-open {
+  flex-shrink: 0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  background: $accent-primary;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover { background: $accent-hover; }
+}
+
+.player__app-nudge-close {
+  flex-shrink: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: $text-secondary;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* ── Auto-play on arrival ────────────────────────────────────────── */
+.player__autoplay {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid $border-default;
+  border-radius: 6px;
+}
+
+.player__autoplay-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $text-primary;
+
+  input { accent-color: $accent-primary; }
+}
+
+.player__autoplay-hint {
+  font-size: 0.75rem;
+  color: $text-secondary;
+  padding-left: 1.6rem;
+}
+
+/* ── Audio load failure ──────────────────────────────────────────── */
+.player__audio-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: $color-error;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Running tour — mirrors the phone app's player.
+   Tight vertical rhythm, one-line stop header, small round transport,
+   venue-grouped list with live distances, List/Map toggle.
+   ═══════════════════════════════════════════════════════════════════ */
+.tourp {
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+/* ── Header: "Now touring" / title / End tour ── */
+.tourp__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0 0.5rem;
+}
+
+.tourp__head-text { flex: 1; min-width: 0; }
+
+.tourp__eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $text-secondary;
+}
+
+.tourp__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourp__end {
+  flex-shrink: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $color-error;
+}
+
+/* ── Now playing ── */
+.tourp__now {
+  padding: 0.6rem 0 0.75rem;
+  border-bottom: 1px solid $border-default;
+}
+
+.tourp__audio-el { display: none; }   /* the transport below drives it */
+
+/* "STOP 3 — Piazza del Duomo" on one compact line. */
+.tourp__now-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.tourp__now-label {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $text-secondary;
+}
+
+.tourp__now-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Progress: times flush left/right so the rows line up as columns. */
+.tourp__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.tourp__time {
+  width: 40px;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: $text-secondary;
+  font-variant-numeric: tabular-nums;
+
+  &--start { text-align: left; }
+  &--end   { text-align: right; }
+}
+
+.tourp__track {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: $border-light;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tourp__track-fill {
+  height: 100%;
+  background: $accent-primary;
+}
+
+.tourp__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.tourp__ctrl {
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: $border-light;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $text-secondary;
+
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.tourp__play {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: $accent-primary;
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: $accent-hover; }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+/* ── Auto-play switch ── */
+.tourp__auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.tourp__auto-label {
+  font-size: 0.75rem;
+  color: $text-secondary;
+}
+
+.tourp__switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  cursor: pointer;
+
+  input { position: absolute; opacity: 0; width: 0; height: 0; }
+}
+
+.tourp__switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  /* Visible when off — a near-white track disappears on a white page. */
+  background: #b8b2ad;
+  transition: background 0.15s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.15s ease;
+  }
+}
+
+.tourp__switch input:checked + .tourp__switch-track {
+  background: $accent-primary;
+
+  &::before { transform: translateX(20px); }
+}
+
+/* ── List / Map toggle ── */
+.tourp__toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0;
+}
+
+.tourp__pill {
+  padding: 0.25rem 1.25rem;
+  border: 1px solid $border-default;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-secondary;
+
+  &--on {
+    background: $accent-primary;
+    border-color: $accent-primary;
+    color: #ffffff;
+  }
+}
+
+/* ── Stop list, grouped by venue ── */
+.tourp__list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.tourp__venue,
+.tourp__itinerary-venue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tourp__venue-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tourp__venue-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: $text-primary;
+}
+
+.tourp__stop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid $border-default;
+  border-radius: 4px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+
+  &:disabled { cursor: default; opacity: 0.6; }
+
+  &--current {
+    border-color: $accent-primary;
+    background: $accent-muted;
+  }
+}
+
+.tourp__stop-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: $border-light;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $text-secondary;
+}
+
+.tourp__stop-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.tourp__stop-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $text-primary;
+  overflow-wrap: anywhere;
+}
+
+.tourp__stop-meta {
+  font-size: 0.7rem;
+  color: $text-secondary;
+}
+
+.tourp__stop-here {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: $color-success;
+}
+
+.tourp__stop-here-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $color-success;
+}
+
+/* Extras of the selected stop (description, photos, PDFs, directions). */
+.tourp__extras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem 0.25rem 2.4rem;
+}
+
+/* ── Map view + compass row ── */
+.tourp__mapwrap { display: flex; flex-direction: column; }
+
+.tourp__map {
+  width: 100%;
+  height: 55vh;
+  min-height: 320px;
+  border: 1px solid $border-default;
+  border-radius: 4px;
+}
+
+.tourp__compass-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+  padding: 0.75rem;
+  border: 1px solid $border-default;
+  border-radius: 4px;
+}
+
+.tourp__compass-dial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 2px solid $accent-primary;
+  border-radius: 50%;
+}
+
+.tourp__compass-arrow {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: $accent-primary;
+  line-height: 1;
+}
+
+.tourp__compass-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.tourp__compass-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $text-secondary;
+}
+
+.tourp__compass-stop {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourp__compass-dist {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $accent-primary;
+}
+
+/* ── Pre-start itinerary (plain list) ── */
+.tourp__itinerary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tourp__itinerary-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.tourp__itinerary-count {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: $text-secondary;
+}

@@ -14,6 +14,11 @@ import { StarRatingComponent } from '../star-rating/star-rating.component';
 })
 export class CardComponent {
   @Input({ required: true }) tour!: any;
+
+  // The signed-in user already owns this tour: the card reads as "in your
+  // library" instead of showing a price. It stays clickable either way.
+  @Input() owned = false;
+
   private readonly zone = inject(NgZone);
 
   // Sober GSAP hover: a gentle lift + soft shadow.

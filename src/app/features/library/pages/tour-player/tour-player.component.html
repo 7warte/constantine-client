@@ -5,160 +5,272 @@
       <p>Loading tour…</p>
     </div>
   } @else if (variant()) {
-    <section class="player__welcome" [class.player__welcome--has-cta]="!started()">
-      @if (variant()!.map_image_url) {
-        <div class="player__welcome-map">
-          <img [src]="variant()!.map_image_url" alt="Tour map" />
-          @for (sp of mapSpaces(); track sp.id; let i = $index) {
-            @if (sp.map_x != null) {
-              <span class="player__welcome-map-dot"
-                [style.left.%]="sp.map_x"
-                [style.top.%]="sp.map_y">
-                {{ getRomanNumeral(i) }}
-              </span>
+
+    <!-- ── Before you set off ─────────────────────────────────────── -->
+    @if (!started()) {
+      <section class="player__welcome player__welcome--has-cta">
+        @if (variant()!.map_image_url) {
+          <div class="player__welcome-map">
+            <img [src]="variant()!.map_image_url" alt="Tour map" />
+            @for (sp of mapSpaces(); track sp.id; let i = $index) {
+              @if (sp.map_x != null) {
+                <span class="player__welcome-map-dot"
+                  [style.left.%]="sp.map_x"
+                  [style.top.%]="sp.map_y">
+                  {{ getRomanNumeral(i) }}
+                </span>
+              }
             }
-          }
-        </div>
-      }
-
-      <div class="player__welcome-content">
-        <h1 class="player__welcome-title">{{ variant()!.tour_title || variant()!.title }}</h1>
-
-        @if (variant()!.start_address) {
-          <div class="player__welcome-address">
-            <mat-icon class="player__welcome-address-icon">place</mat-icon>
-            <div class="player__welcome-address-body">
-              <span class="player__welcome-address-label">Start point</span>
-              <strong class="player__welcome-address-value">{{ variant()!.start_address }}</strong>
-            </div>
           </div>
         }
-      </div>
 
-      <div class="player__welcome-itinerary">
-        <h2 class="player__welcome-section-title">Itinerary</h2>
+        <div class="player__welcome-content">
+          <h1 class="player__welcome-title">{{ variant()!.tour_title || variant()!.title }}</h1>
 
-        <mat-accordion class="player__venues" displayMode="flat">
-          @for (group of groupedStops(); track group.spaceId; let gi = $index) {
-            <mat-expansion-panel class="player__venue-panel"
-              [style.background-color]="group.spaceColor"
-              [expanded]="expandedVenueIdx() === gi"
-              (opened)="onVenueOpen(gi)"
-              (closed)="onVenueClose(gi)">
-              <mat-expansion-panel-header class="player__venue-header" collapsedHeight="64px" expandedHeight="64px">
-                <mat-panel-title class="player__venue-title">
-                  <span class="player__venue-num">{{ getRomanNumeral(gi) }}</span>
-                  <span class="player__venue-name">{{ group.spaceName ?? 'Unnamed venue' }}</span>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-
-              <ng-template matExpansionPanelContent>
-                @if (variant()?.map_image_url || hasAreaMap()) {
-                  <div class="player__venue-map-row">
-                    <button type="button" class="player__venue-map-btn" (click)="openMap()" aria-label="Open tour map">
-                      <mat-icon class="player__venue-map-btn-icon">map</mat-icon>
-                      <span>Map</span>
-                    </button>
-                  </div>
-                }
-                <mat-accordion class="player__stops" displayMode="flat">
-                  @for (stop of group.stops; track stop.id) {
-                    <mat-expansion-panel class="player__stop-panel"
-                      [expanded]="expandedStopId() === stop.id"
-                      (opened)="onStopOpen(stop.id)"
-                      (closed)="onStopClose(stop.id)">
-                      <mat-expansion-panel-header class="player__stop-header-bar" collapsedHeight="48px" expandedHeight="48px">
-                        <mat-panel-title class="player__stop-title-bar">
-                          <span class="player__stop-num">{{ getRomanNumeral(gi) }}</span>
-                          <span class="player__stop-name">{{ stop.title }}</span>
-                          @if (isUserAtStop(stop)) {
-                            <span class="player__stop-here">
-                              <span class="player__stop-here-dot"></span>
-                              You are here
-                            </span>
-                          }
-                        </mat-panel-title>
-                      </mat-expansion-panel-header>
-
-                      <ng-template matExpansionPanelContent>
-                        <div class="player__stop-body">
-                          @if (getAudio(stop); as audioMedia) {
-                            <div class="player__audio">
-                              <audio class="player__audio-el" [src]="audioMedia.url" preload="auto" controlsList="nodownload"></audio>
-                            </div>
-                          }
-
-                          @if (stop.description) {
-                            <p class="player__stop-desc">{{ stop.description }}</p>
-                          }
-
-                          @if (getImages(stop).length > 0 || getPdfs(stop).length > 0) {
-                            <div class="player__attachments">
-                              <h3 class="player__attachments-title">Attachments</h3>
-                              <div class="player__attachments-grid">
-                                @for (img of getImages(stop); track img.id; let i = $index) {
-                                  <button type="button" class="player__thumb" (click)="openImageModal(getImages(stop), i)">
-                                    <img [src]="img.url" [alt]="stop.title" />
-                                  </button>
-                                }
-                                @for (pdf of getPdfs(stop); track pdf.id) {
-                                  <a [href]="pdf.url" target="_blank" class="player__thumb player__thumb--pdf">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                    <span>PDF</span>
-                                  </a>
-                                }
-                              </div>
-                            </div>
-                          }
-
-                          @if (canRouteToNextStop()) {
-                            <button type="button" class="player__nav-cta" (click)="navigateToNextStop()">
-                              <mat-icon class="player__nav-cta-icon">directions_walk</mat-icon>
-                              <span class="player__nav-cta-label">Navigate to next stop</span>
-                            </button>
-                          }
-
-                          @if (canShowCompass()) {
-                            <button type="button" class="player__compass-cta" (click)="openCompass()">
-                              <mat-icon class="player__compass-cta-icon">explore</mat-icon>
-                              <span class="player__compass-cta-label">Open compass to next stop</span>
-                            </button>
-                          }
-
-                          @if (stop.transition_duration || stop.transition_description) {
-                            <div class="player__transition">
-                              <mat-icon class="player__transition-icon">directions_walk</mat-icon>
-                              <div class="player__transition-info">
-                                <strong>Directions to next stop</strong>
-                                @if (stop.transition_duration) {
-                                  <span class="player__transition-duration">{{ stop.transition_duration }} min walk</span>
-                                }
-                                @if (stop.transition_description) {
-                                  <p class="player__transition-desc">{{ stop.transition_description }}</p>
-                                }
-                              </div>
-                            </div>
-                          }
-                        </div>
-                      </ng-template>
-                    </mat-expansion-panel>
-                  }
-                </mat-accordion>
-              </ng-template>
-            </mat-expansion-panel>
+          @if (variant()!.start_address) {
+            <div class="player__welcome-address">
+              <mat-icon class="player__welcome-address-icon">place</mat-icon>
+              <div class="player__welcome-address-body">
+                <span class="player__welcome-address-label">Start point</span>
+                <strong class="player__welcome-address-value">{{ variant()!.start_address }}</strong>
+              </div>
+            </div>
           }
-        </mat-accordion>
-      </div>
+        </div>
 
-      @if (!started()) {
+        <div class="player__welcome-itinerary">
+          <h2 class="player__welcome-section-title">Itinerary</h2>
+
+          <ol class="tourp__itinerary">
+            @for (group of groupedStops(); track group.spaceId) {
+              <li class="tourp__itinerary-venue">
+                <span class="tourp__venue-dot" [style.background-color]="group.spaceColor"></span>
+                <span class="tourp__itinerary-name">{{ group.spaceName ?? 'Unnamed venue' }}</span>
+                <span class="tourp__itinerary-count">
+                  {{ group.stops.length }} {{ group.stops.length === 1 ? 'stop' : 'stops' }}
+                </span>
+              </li>
+            }
+          </ol>
+        </div>
+
         <div class="player__welcome-cta">
           <button type="button" class="player__welcome-start-btn" (click)="startTour()">
             <span class="player__welcome-start-label">Start from</span>
             <strong class="player__welcome-start-name">{{ firstSpaceName() }}</strong>
           </button>
         </div>
-      }
-    </section>
+      </section>
+    }
+
+    <!-- ── Running tour — mirrors the phone app ───────────────────── -->
+    @else {
+      <section class="tourp">
+        <header class="tourp__head">
+          <div class="tourp__head-text">
+            <span class="tourp__eyebrow">Now touring</span>
+            <h1 class="tourp__title">{{ variant()!.tour_title || variant()!.title }}</h1>
+          </div>
+          <button type="button" class="tourp__end" (click)="endTour()">End tour</button>
+        </header>
+
+        <!-- Now playing -->
+        <div class="tourp__now player__now">
+          <div class="tourp__now-line">
+            <span class="tourp__now-label">
+              @if (playingStopNumber()) { Stop {{ playingStopNumber() }} } @else { Select a stop to begin }
+            </span>
+            @if (playingStop(); as cur) {
+              <span class="tourp__now-title">{{ cur.title }}</span>
+            }
+          </div>
+
+          <!-- Only rendered when there's something to play: an empty [src] makes
+               browsers fire `error`, which would show a bogus load failure. -->
+          @if (getAudio(playingStop()); as media) {
+            <audio #audioEl class="tourp__audio-el"
+                   [src]="media.url"
+                   preload="auto" controlsList="nodownload"
+                   (timeupdate)="onTimeUpdate()"
+                   (loadedmetadata)="onLoadedMetadata()"
+                   (play)="playing.set(true)"
+                   (pause)="playing.set(false)"
+                   (ended)="onEnded()"
+                   (error)="onAudioError()"></audio>
+          }
+
+          <div class="tourp__progress">
+            <span class="tourp__time tourp__time--start">{{ formatTime(currentTime()) }}</span>
+            <div class="tourp__track" (click)="onSeekBarClick($event)">
+              <div class="tourp__track-fill" [style.width.%]="progressPct()"></div>
+            </div>
+            <span class="tourp__time tourp__time--end">{{ formatTime(duration()) }}</span>
+          </div>
+
+          <div class="tourp__controls">
+            <button type="button" class="tourp__ctrl" [disabled]="!hasAudio()" (click)="seekBy(-15)">&#8630; 15</button>
+            <button type="button" class="tourp__play" [disabled]="!hasAudio()" (click)="togglePlay()"
+                    [attr.aria-label]="playing() ? 'Pause' : 'Play'">
+              @if (playing()) { &#10074;&#10074; } @else { &#9654; }
+            </button>
+            <button type="button" class="tourp__ctrl" [disabled]="!hasAudio()" (click)="seekBy(15)">15 &#8631;</button>
+          </div>
+
+          @if (audioError()) {
+            <p class="player__audio-error">{{ audioError() }}</p>
+          }
+
+          <div class="tourp__auto">
+            <span class="tourp__auto-label">
+              Auto-play at stops
+              @if (autoPlayNear()) {
+                @if (userPosition()) { (GPS on) } @else { (locating…) }
+              }
+            </span>
+            <label class="tourp__switch">
+              <input type="checkbox" [checked]="autoPlayNear()"
+                     (change)="toggleAutoPlayNear($any($event.target).checked)" />
+              <span class="tourp__switch-track"></span>
+            </label>
+          </div>
+          @if (autoPlayError()) {
+            <p class="player__audio-error">{{ autoPlayError() }}</p>
+          }
+        </div>
+
+        @if (!appNudgeDismissed()) {
+          <div class="player__app-nudge">
+            <div class="player__app-nudge-text">
+              <strong>Better in the Constantine app</strong>
+              <span>Offline audio, background playback and hands-free auto-play as you walk.</span>
+            </div>
+            <a class="player__app-nudge-open" [href]="appDeepLink">Open in app</a>
+            <button type="button" class="player__app-nudge-close" aria-label="Dismiss"
+                    (click)="dismissAppNudge()">&times;</button>
+          </div>
+        }
+
+        <!-- List / Map -->
+        <div class="tourp__toggle">
+          <button type="button" class="tourp__pill" [class.tourp__pill--on]="viewMode() === 'list'"
+                  (click)="setViewMode('list')">List</button>
+          <button type="button" class="tourp__pill" [class.tourp__pill--on]="viewMode() === 'map'"
+                  (click)="setViewMode('map')">Map</button>
+        </div>
+
+        @if (viewMode() === 'list') {
+          <div class="tourp__list">
+            @for (group of groupedStops(); track group.spaceId) {
+              <div class="tourp__venue">
+                <span class="tourp__venue-dot" [style.background-color]="group.spaceColor"></span>
+                <span class="tourp__venue-name">{{ group.spaceName ?? 'Unnamed venue' }}</span>
+              </div>
+
+              @for (stop of group.stops; track stop.id) {
+                <button type="button" class="tourp__stop"
+                        [class.tourp__stop--current]="expandedStopId() === stop.id"
+                        [disabled]="!getAudio(stop)"
+                        (click)="selectStop(stop)">
+                  <span class="tourp__stop-num">{{ stopNumber(stop) }}</span>
+                  <span class="tourp__stop-body">
+                    <span class="tourp__stop-title">{{ stop.title }}</span>
+                    <span class="tourp__stop-meta">
+                      @if (getAudio(stop)) {
+                        @if (expandedStopId() === stop.id && playing()) { &#9654; Playing } @else { Tap to play }
+                      } @else { No audio }
+                      @if (stopDistanceLabel(stop); as dist) { &middot; {{ dist }} }
+                    </span>
+                  </span>
+                  @if (isUserAtStop(stop)) {
+                    <span class="tourp__stop-here">
+                      <span class="tourp__stop-here-dot"></span>
+                      Here
+                    </span>
+                  }
+                </button>
+
+                <!-- The selected stop opens its extras (web-only content). -->
+                @if (expandedStopId() === stop.id) {
+                  <div class="tourp__extras">
+                    @if (stop.description) {
+                      <p class="player__stop-desc">{{ stop.description }}</p>
+                    }
+
+                    @if (getImages(stop).length > 0 || getPdfs(stop).length > 0) {
+                      <div class="player__attachments">
+                        <h3 class="player__attachments-title">Attachments</h3>
+                        <div class="player__attachments-grid">
+                          @for (img of getImages(stop); track img.id; let i = $index) {
+                            <button type="button" class="player__thumb" (click)="openImageModal(getImages(stop), i)">
+                              <img [src]="img.url" [alt]="stop.title" />
+                            </button>
+                          }
+                          @for (pdf of getPdfs(stop); track pdf.id) {
+                            <a [href]="pdf.url" target="_blank" class="player__thumb player__thumb--pdf">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                              <span>PDF</span>
+                            </a>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    @if (canRouteToNextStop()) {
+                      <button type="button" class="player__nav-cta" (click)="navigateToNextStop()">
+                        <mat-icon class="player__nav-cta-icon">directions_walk</mat-icon>
+                        <span class="player__nav-cta-label">Navigate to next stop</span>
+                      </button>
+                    }
+
+                    @if (canShowCompass()) {
+                      <button type="button" class="player__compass-cta" (click)="openCompass()">
+                        <mat-icon class="player__compass-cta-icon">explore</mat-icon>
+                        <span class="player__compass-cta-label">Open compass to next stop</span>
+                      </button>
+                    }
+
+                    @if (stop.transition_duration || stop.transition_description) {
+                      <div class="player__transition">
+                        <mat-icon class="player__transition-icon">directions_walk</mat-icon>
+                        <div class="player__transition-info">
+                          <strong>Directions to next stop</strong>
+                          @if (stop.transition_duration) {
+                            <span class="player__transition-duration">{{ stop.transition_duration }} min walk</span>
+                          }
+                          @if (stop.transition_description) {
+                            <p class="player__transition-desc">{{ stop.transition_description }}</p>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            }
+          </div>
+        } @else {
+          <div class="tourp__mapwrap">
+            <div id="player-inline-map" class="tourp__map"></div>
+
+            @if (nextStop(); as ns) {
+              <div class="tourp__compass-row">
+                <div class="tourp__compass-dial">
+                  <span class="tourp__compass-arrow"
+                        [style.transform]="'rotate(' + arrowDisplayAngle() + 'deg)'">&#8593;</span>
+                </div>
+                <div class="tourp__compass-body">
+                  <span class="tourp__compass-label">Next stop</span>
+                  <span class="tourp__compass-stop">{{ ns.title }}</span>
+                </div>
+                <span class="tourp__compass-dist">
+                  {{ userPosition() ? formatDistance(distanceMeters()) : '—' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
 
     @if (showMapModal()) {
       <div class="player__map-backdrop" (click)="closeMap()">
