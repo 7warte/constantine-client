@@ -1574,3 +1574,83 @@
   font-size: 0.75rem;
   color: $text-secondary;
 }
+
+/* ── Keep the running tour inside the viewport ─────────────────────
+   Flex items default to `min-width: auto`, so a long stop title or venue
+   name refuses to shrink below its content and shoves the whole row past
+   the screen edge. Clearing that floor lets every row shrink to fit. */
+.tourp,
+.tourp * {
+  min-width: 0;
+}
+
+.tourp {
+  width: 100%;
+  max-width: 720px;
+}
+
+.tourp__auto,
+.player__app-nudge {
+  flex-wrap: wrap;
+}
+
+/* Long words (place names, URLs) break instead of widening their row. */
+.tourp__now-title,
+.tourp__venue-name,
+.tourp__compass-stop,
+.tourp__itinerary-name {
+  overflow-wrap: anywhere;
+}
+
+/* ── Phone ──────────────────────────────────────────────────────── */
+@media (max-width: #{$bp-md - 1px}) {
+  .tourp {
+    padding: 0 0.75rem 2.5rem;
+  }
+
+  .tourp__head { padding: 0.5rem 0 0.35rem; }
+  .tourp__title { font-size: 1rem; }
+  .tourp__end   { font-size: 0.8rem; }
+
+  .tourp__controls { gap: 0.9rem; }
+  .tourp__ctrl     { padding: 0.25rem 0.4rem; }
+
+  .tourp__auto-label { flex: 1; }
+
+  .tourp__pill { padding: 0.25rem 1rem; }
+
+  .tourp__stop       { padding: 0.45rem; gap: 0.4rem; }
+  .tourp__stop-num   { width: 24px; height: 24px; font-size: 0.65rem; }
+  .tourp__stop-title { font-size: 0.85rem; }
+
+  /* The old accordion indent is far too deep on a phone. */
+  .tourp__extras {
+    padding: 0.6rem 0 0.25rem 0.5rem;
+  }
+
+  .tourp__map {
+    height: 45vh;
+    min-height: 240px;
+  }
+
+  .tourp__compass-row  { padding: 0.6rem; gap: 0.5rem; }
+  .tourp__compass-dial { width: 38px; height: 38px; }
+
+  /* Stack the app banner: text on its own line, then the actions. */
+  .player__app-nudge {
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+  .player__app-nudge-text { flex-basis: 100%; }
+
+  /* Legacy stop-body blocks were sized for the wider accordion panel. */
+  .player__nav-cta,
+  .player__compass-cta {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .player__thumb {
+    width: 64px;
+    height: 64px;
+  }
+}
