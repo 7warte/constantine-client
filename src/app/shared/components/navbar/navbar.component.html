@@ -12,6 +12,7 @@
       <a routerLink="/explore"  routerLinkActive="active" class="navbar__link">Explore</a>
       <a routerLink="/tour-requests" routerLinkActive="active" class="navbar__link">Requested tours</a>
       <a routerLink="/badges"   routerLinkActive="active" class="navbar__link">Badges</a>
+      <a routerLink="/downloads" routerLinkActive="active" class="navbar__link">Downloads</a>
       @if (auth.isLoggedIn()) {
         <a routerLink="/library"  routerLinkActive="active" class="navbar__link">My Library</a>
         <a routerLink="/studio"   routerLinkActive="active" class="navbar__link">Studio</a>
@@ -92,6 +93,11 @@
           <mat-icon class="navbar__mobile-icon">military_tech</mat-icon>
           <span class="navbar__mobile-text">Badges</span>
           <span class="navbar__mobile-sub">Rewards you can unlock</span>
+        </a>
+        <a routerLink="/downloads" (click)="closeMenu()" class="navbar__mobile-link">
+          <mat-icon class="navbar__mobile-icon">phone_iphone</mat-icon>
+          <span class="navbar__mobile-text">Downloads</span>
+          <span class="navbar__mobile-sub">Get the iPhone &amp; iPad app</span>
         </a>
       </div>
 

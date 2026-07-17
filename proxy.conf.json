@@ -1,12 +1,12 @@
 {
   "/api": {
-    "target": "http://localhost:3000",
-    "secure": false,
+    "target": "https://api.constantine.tours",
+    "secure": true,
     "changeOrigin": true
   },
   "/webhooks": {
-    "target": "http://localhost:3000",
-    "secure": false,
+    "target": "https://api.constantine.tours",
+    "secure": true,
     "changeOrigin": true
   }
 }

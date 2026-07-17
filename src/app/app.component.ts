@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { AuthService } from './core/services/auth.service';
+import { RedirectService } from './core/auth/redirect.service';
 import { OfflineService } from './core/offline/offline.service';
 
 @Component({
@@ -101,6 +102,7 @@ export class AppComponent implements OnInit {
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
   private readonly swUpdate = inject(SwUpdate);
+  private readonly redirect = inject(RedirectService);
   readonly offline = inject(OfflineService);
 
   // The marketing footer is hidden in the full-height app workspaces — the
@@ -152,6 +154,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.auth.init();
+    // Start remembering the pre-auth page so sign-in can return the user there.
+    this.redirect.start();
 
     const fullHeightRoute = /^\/(studio|library\/[^/]+\/play)\b/;
     this.router.events

@@ -20,9 +20,11 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
   if (auth.isLoggedIn() && auth.user()) return true;
 
-  // Token exists but user data hasn't loaded yet (e.g. expired token cleared by init)
+  // Token exists but user data hasn't loaded yet (e.g. expired token cleared by init).
+  // Remember where they were headed so we can send them back after they sign in —
+  // this navigation is cancelled, so it never becomes a tracked "previous" page.
   if (!auth.isLoggedIn()) {
-    return router.createUrlTree(['/auth/login']);
+    return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
   }
 
   // Token exists but user not yet resolved — allow, init() will handle invalid tokens

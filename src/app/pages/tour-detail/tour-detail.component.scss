@@ -53,13 +53,24 @@
   }
 
   &__title {
-    font-size: $font-size-2xl;
+    // Frosted-glass panel behind the title so white text stays legible over any
+    // cover photo — same treatment as the homepage hero.
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    font-size: $font-size-xl;
     color: $white;
     line-height: $line-height-tight;
     overflow-wrap: anywhere;   // never clip — always show the whole title
+    padding: $space-3 $space-5;
+    border-radius: $radius-lg;
+    background: rgba($black, 0.38);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba($black, 0.24);
 
-    @include sm { font-size: $font-size-3xl; }
-    @include md { font-size: $font-size-4xl; }
+    @include sm { font-size: $font-size-2xl; }
+    @include md { font-size: $font-size-3xl; }
   }
 
   &__creator {
@@ -105,6 +116,13 @@
     gap: $space-3;
 
     .detail__error { flex-basis: 100%; margin: 0; }
+
+    // The outline "Gift this tour" button is near-invisible over the hero photo
+    // until hovered — pin it to its hover appearance so it always reads.
+    ::ng-deep .btn--outline {
+      border-color: $accent-primary;
+      color: $accent-primary;
+    }
 
     // On mobile the Buy / Gift buttons share the row equally with a small gap,
     // and shrink so a big title stays fully visible above them.

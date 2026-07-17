@@ -25,6 +25,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/badges/badges.component').then(m => m.BadgesComponent),
   },
   {
+    path: 'downloads',
+    loadComponent: () => import('./pages/downloads/downloads.component').then(m => m.DownloadsComponent),
+  },
+  {
     path: 'about',
     loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent),
   },

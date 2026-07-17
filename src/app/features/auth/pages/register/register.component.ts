@@ -2,6 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { RedirectService } from '../../../../core/auth/redirect.service';
+import { internalReturnUrl } from '../../../../core/auth/return-url';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { GoogleSigninComponent } from '../../../../shared/components/google-signin/google-signin.component';
@@ -21,10 +23,11 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent implements OnInit {
-  private readonly fb     = inject(FormBuilder);
-  private readonly auth   = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route  = inject(ActivatedRoute);
+  private readonly fb       = inject(FormBuilder);
+  private readonly auth     = inject(AuthService);
+  private readonly router   = inject(Router);
+  private readonly route    = inject(ActivatedRoute);
+  private readonly redirect = inject(RedirectService);
 
   readonly loading = signal(false);
   readonly error   = signal<string | null>(null);
@@ -53,7 +56,7 @@ export class RegisterComponent implements OnInit {
 
     const { confirm_password, ...payload } = this.form.getRawValue();
     this.auth.register(payload).subscribe({
-      next:  () => this.router.navigate(['/about']),
+      next:  () => this.router.navigateByUrl(this.destination()),
       error: (err) => {
         this.error.set(err.error?.error ?? 'Registration failed. Please try again.');
         this.loading.set(false);
@@ -67,11 +70,19 @@ export class RegisterComponent implements OnInit {
     this.googleError.set(null);
 
     this.auth.loginWithGoogle(credential).subscribe({
-      next:  () => this.router.navigate(['/about']),
+      next:  () => this.router.navigateByUrl(this.destination()),
       error: (err) => {
         this.googleError.set(err.error?.error ?? 'Google sign-in failed. Please try again.');
         this.loading.set(false);
       },
     });
+  }
+
+  /** Where to land after signing up: an explicit ?returnUrl wins, then the page
+   *  the user was on before reaching sign-up, then a neutral default. */
+  private destination(): string {
+    return internalReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'))
+      ?? this.redirect.previousUrl()
+      ?? '/explore';
   }
 }

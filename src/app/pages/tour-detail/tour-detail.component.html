@@ -26,8 +26,10 @@
             <div class="detail__cta">
               @if (embedded) {
                 <!-- Host (e.g. library modal) provides its own Start-tour action. -->
-              } @else if (owned() && purchaseId()) {
-                <app-button [routerLink]="['/library', purchaseId(), 'play']" variant="primary" size="lg">Start tour</app-button>
+              } @else if (owned()) {
+                <!-- Owned tours always offer Start tour, never Buy. If the purchase id
+                     hasn't resolved yet, fall back to the library rather than showing Buy. -->
+                <app-button [routerLink]="purchaseId() ? ['/library', purchaseId(), 'play'] : ['/library']" variant="primary" size="lg">Start tour</app-button>
               } @else if (auth.isLoggedIn()) {
                 <app-button variant="primary" size="lg" [loading]="acquiring()" (click)="acquire()">
                   @if (v.price_cents === 0) { Get for free } @else { Buy tour }

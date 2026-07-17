@@ -1,0 +1,72 @@
+<div class="downloads">
+  <!-- Hero -->
+  <section class="downloads__hero container">
+    <span class="downloads__eyebrow">Constantine for iPhone &amp; iPad</span>
+    <h1 class="downloads__title">Take the tour with you.</h1>
+    <p class="downloads__lead">
+      The website is where you find a tour. The app is where you walk it — guided by your location,
+      working offline, with your whole library in your pocket.
+    </p>
+
+    <div class="downloads__cta">
+      @if (released) {
+        <a [href]="appStoreUrl" target="_blank" rel="noopener" class="store-btn">
+          <mat-icon class="store-btn__glyph">apple</mat-icon>
+          <span class="store-btn__text">
+            <span class="store-btn__small">Download on the</span>
+            <span class="store-btn__big">App Store</span>
+          </span>
+        </a>
+      } @else {
+        <span class="store-btn store-btn--soon" aria-disabled="true">
+          <mat-icon class="store-btn__glyph">apple</mat-icon>
+          <span class="store-btn__text">
+            <span class="store-btn__small">Coming soon to the</span>
+            <span class="store-btn__big">App Store</span>
+          </span>
+        </span>
+        <p class="downloads__soon-note">
+          We’re putting the finishing touches on the app. It isn’t on the App Store just yet —
+          <a routerLink="/explore">browse the tours</a> in the meantime and they’ll be waiting in
+          your library when it lands.
+        </p>
+      }
+    </div>
+
+    <!-- The one thing people need to know before they try -->
+    <p class="downloads__platform" role="note">
+      <mat-icon class="downloads__platform-icon">phone_iphone</mat-icon>
+      <span>
+        <strong>iPhone and iPad only.</strong> There’s no Android version yet. On Android or a
+        desktop, everything except the walking experience works right here on the website.
+      </span>
+    </p>
+  </section>
+
+  <!-- Why the app -->
+  <section class="downloads__benefits container">
+    <h2 class="downloads__h2">Why you’ll want the app</h2>
+    <div class="downloads__grid">
+      @for (b of benefits; track b.title) {
+        <article class="benefit">
+          <mat-icon class="benefit__icon">{{ b.icon }}</mat-icon>
+          <h3 class="benefit__title">{{ b.title }}</h3>
+          <p class="benefit__blurb">{{ b.blurb }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="downloads__foot container">
+    <h2 class="downloads__h2">Already have an account?</h2>
+    <p class="downloads__lead">
+      Sign in on the app with the same account and every tour you own appears straight away —
+      nothing to transfer.
+    </p>
+    <div class="downloads__foot-links">
+      <a routerLink="/explore" class="downloads__link">Browse tours</a>
+      <a routerLink="/faq" class="downloads__link">Read the FAQ</a>
+    </div>
+  </section>
+</div>
