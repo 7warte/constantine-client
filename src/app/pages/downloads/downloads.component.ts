@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { APP_RELEASED, APP_STORE_URL } from '../../core/app-release';
 
 interface Benefit {
   icon: string;
@@ -18,15 +19,11 @@ interface Benefit {
   styleUrl: './downloads.component.scss',
 })
 export class DownloadsComponent {
-  /**
-   * The App Store listing for the iOS app (App Store Connect id 6791914126).
-   *
-   * `released` gates the store button: until the app is publicly released it is
-   * TestFlight-only, and this URL 404s. Flip `released` to true on launch day —
-   * the link is already correct.
-   */
-  readonly appStoreUrl = 'https://apps.apple.com/app/id6791914126';
-  readonly released = false;
+  // Both come from the single release flag in core/app-release.ts. The route
+  // guard already blocks this page pre-release, so `released` here is really a
+  // belt-and-braces for the store button's copy.
+  readonly appStoreUrl = APP_STORE_URL;
+  readonly released = APP_RELEASED;
 
   readonly benefits: Benefit[] = [
     {

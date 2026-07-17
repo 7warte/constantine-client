@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
+import { releasedGuard } from './core/guards/released.guard';
 
 export const routes: Routes = [
   // ── Public pages ───────────────────────────────────────────────────────────
@@ -25,7 +26,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/badges/badges.component').then(m => m.BadgesComponent),
   },
   {
+    // Hidden until the app is publicly on the App Store — see core/app-release.ts.
     path: 'downloads',
+    canActivate: [releasedGuard],
     loadComponent: () => import('./pages/downloads/downloads.component').then(m => m.DownloadsComponent),
   },
   {

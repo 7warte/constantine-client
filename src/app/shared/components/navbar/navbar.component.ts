@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { gsap } from 'gsap';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { APP_RELEASED } from '../../../core/app-release';
 import { AuthService } from '../../../core/services/auth.service';
 import { OfflineService } from '../../../core/offline/offline.service';
 import { ButtonComponent } from '../button/button.component';
@@ -20,6 +21,8 @@ import { ButtonComponent } from '../button/button.component';
 export class NavbarComponent {
   readonly auth     = inject(AuthService);
   readonly offline  = inject(OfflineService);
+  /** Gates the Downloads link — hidden until the app is on the App Store. */
+  readonly appReleased = APP_RELEASED;
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly zone = inject(NgZone);
