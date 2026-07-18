@@ -1165,7 +1165,10 @@
 .tourp {
   display: flex;
   flex-direction: column;
-  max-width: 720px;
+  // Was a 720px reading column, which left big empty margins on desktop. Widen
+  // to the site's xl content width so the running tour uses the horizontal space
+  // like the rest of the app.
+  max-width: $bp-xl;
   margin: 0 auto;
   padding: 0 1rem 3rem;
 }
@@ -1586,7 +1589,7 @@
 
 .tourp {
   width: 100%;
-  max-width: 720px;
+  max-width: $bp-xl;
 }
 
 .tourp__auto,

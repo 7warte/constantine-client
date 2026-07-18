@@ -144,29 +144,59 @@
   font-weight: $font-weight-bold;
 }
 
+// Subtle destructive text action — removes (hides) the tour from the library.
+.purchase-card__remove {
+  align-self: center;
+  margin-top: $space-1;
+  padding: $space-2 $space-3;
+  background: none;
+  border: none;
+  font-family: $font-family-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  cursor: pointer;
+  transition: color $transition-fast;
+
+  &:hover:not(:disabled) { color: $color-error; }
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
 // ── Synthetic details modal ─────────────────────────────────────────────────
 .details-backdrop {
   position: fixed;
   inset: 0;
-  z-index: $z-modal;
+  // Sit above the sticky navbar ($z-nav: 300) so the overlay truly covers the
+  // whole page — otherwise the navbar punches through on top and the modal
+  // reads as "contained in the page".
+  z-index: $z-nav + 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: $space-5;
-  background: rgba($black, 0.55);
+  padding: 0;                 // full-bleed on phones
+  background: rgba($black, 0.6);
+
+  @include md { padding: $space-6; }   // breathing room around it on desktop
 }
 
 .details-modal {
   position: relative;
   width: 100%;
-  max-width: 620px;
-  max-height: 92vh;
+  height: 100%;
+  // Fill the screen on phones; on desktop grow to the standard page width so the
+  // tour content has the same horizontal room as a real page.
+  max-width: $container-max-width;
   background: $bg-surface;
-  border-radius: $radius-lg;
   overflow: hidden;
   box-shadow: $shadow-lg;
   display: flex;
   flex-direction: column;
+
+  @include md {
+    height: auto;
+    max-height: 92vh;
+    border-radius: $radius-lg;
+  }
 
   &__close {
     position: absolute;

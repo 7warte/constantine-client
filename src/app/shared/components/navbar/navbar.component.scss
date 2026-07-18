@@ -49,15 +49,17 @@
   }
 
   &__brand-mark {
-    width: 22px;
-    height: 22px;
-    background: $white;
-    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
     flex-shrink: 0;
+    // Recolor the dark-filled SVG to white to match the brand text
+    filter: brightness(0) invert(1);
 
     @media (max-width: #{$bp-lg - 1px}) {
-      width: 18px;
-      height: 18px;
+      width: 26px;
+      height: 26px;
     }
   }
 

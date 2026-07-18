@@ -52,6 +52,16 @@
             <button type="button" class="btn btn--ghost btn--block" (click)="detailsFor.set(purchase)">
               Details
             </button>
+            @if (!purchase.shared) {
+              <button
+                type="button"
+                class="purchase-card__remove"
+                [disabled]="removing().has(purchase.id)"
+                (click)="remove(purchase, $event)"
+              >
+                {{ removing().has(purchase.id) ? 'Removing…' : 'Remove from library' }}
+              </button>
+            }
           </div>
         </div>
       }
