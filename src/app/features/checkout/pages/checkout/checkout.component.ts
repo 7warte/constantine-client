@@ -80,7 +80,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     this.api.post<any>('/purchases', body).subscribe({
       next: async (res) => {
-        if (res.free) {
+        // `free`: a €0 tour added directly. `restored`: the user already owned
+        // this (it was removed from their library) — put it back, no charge.
+        if (res.free || res.restored) {
           this.router.navigate(['/checkout/confirmation', res.purchase.id]);
           return;
         }
