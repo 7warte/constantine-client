@@ -7,12 +7,13 @@ import { gsap } from 'gsap';
 import * as L from 'leaflet';
 import { ApiService } from '../../../../core/services/api.service';
 import { OfflineService } from '../../../../core/offline/offline.service';
+import { VenueAreaMapComponent } from '../../../../shared/components/venue-area-map/venue-area-map.component';
 
 @Component({
   selector: 'app-tour-player',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, VenueAreaMapComponent],
   templateUrl: './tour-player.component.html',
   styleUrl: './tour-player.component.scss',
 })
@@ -42,6 +43,9 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   readonly expandedVenueIdx = signal<number | null>(null);
   readonly expandedStopId   = signal<string | null>(null);
+
+  // Overflow menu in the tour header (auto-play toggle + End tour).
+  readonly menuOpen = signal(false);
 
   readonly purchaseId = this.route.snapshot.paramMap.get('purchaseId') ?? '';
 
@@ -297,6 +301,16 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   readonly hasAreaMap = computed(() => {
     if (this.variant()?.latitude != null) return true;
     return this.mapSpaces().some(s => s.polygon || (s.latitude != null && s.longitude != null));
+  });
+
+  // Stable start/finish coords for the venue-area map (computed → OnPush-safe).
+  readonly startCoord = computed(() => {
+    const v = this.variant();
+    return v?.latitude != null && v?.longitude != null ? { lat: +v.latitude, lng: +v.longitude } : null;
+  });
+  readonly endCoord = computed(() => {
+    const v = this.variant();
+    return v?.end_latitude != null && v?.end_longitude != null ? { lat: +v.end_latitude, lng: +v.end_longitude } : null;
   });
 
   @ViewChild('mapFrame') mapFrameRef?: ElementRef<HTMLElement>;
@@ -892,6 +906,13 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   isUserAtStop(stop: any): boolean {
     const d = this.stopDistanceMeters(stop);
     return d != null && d <= this.HERE_RADIUS_M;
+  }
+
+  /** True when close enough that the stop flashes the "you're near" icon in place
+   *  of its number (matches the phone app). */
+  isNearStop(stop: any): boolean {
+    const d = this.stopDistanceMeters(stop);
+    return d != null && d <= 20;
   }
 
   // ── Auto-play on arrival ─────────────────────────────────────────

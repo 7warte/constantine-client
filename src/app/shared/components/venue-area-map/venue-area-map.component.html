@@ -1,0 +1,30 @@
+<div class="venue-area">
+  <div #mapEl class="venue-area__map"></div>
+
+  @if (selected(); as sp) {
+    <div class="venue-area__panel">
+      <button type="button" class="venue-area__panel-close" (click)="closePanel()" aria-label="Close">&times;</button>
+
+      <div class="venue-area__panel-head">
+        <span class="venue-area__panel-dot" [style.background-color]="sp.color || '#c98a8c'"></span>
+        <h3 class="venue-area__panel-name">{{ sp.name }}</h3>
+      </div>
+
+      @if (sp.description) {
+        <p class="venue-area__panel-desc">{{ sp.description }}</p>
+      }
+
+      @if (selectedStops().length) {
+        <ol class="venue-area__panel-stops">
+          @for (st of selectedStops(); track st.id) {
+            <li class="venue-area__panel-stop">{{ st.title }}</li>
+          }
+        </ol>
+      } @else if (sp.stop_count != null) {
+        <span class="venue-area__panel-count">
+          {{ sp.stop_count }} {{ sp.stop_count === 1 ? 'stop' : 'stops' }}
+        </span>
+      }
+    </div>
+  }
+</div>

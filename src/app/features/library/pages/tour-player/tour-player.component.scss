@@ -8,10 +8,14 @@
   background: $bg-base;
 
   // ── Welcome layout (now the single tour layout) ─────────────────────────────
+  // Centered vertical composition: title → map & areas → itinerary, each block
+  // constrained to a comfortable width and centered inside the site container.
   &__welcome {
     display: flex;
     flex: 1;
     flex-direction: column;
+    align-items: center;
+    gap: $space-5;
     width: 100%;
     background: $bg-base;
     padding-bottom: $space-6;
@@ -23,74 +27,103 @@
     @include lg {
       max-width: $container-max-width;   // match the site/navbar content width
       margin: 0 auto;
-      // Desktop: map (≤ 50%) + details on the top row, itinerary full-width below.
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: $space-6;
-      row-gap: $space-5;
-      align-items: start;
       padding-inline: $space-6;
+      padding-top: $space-6;
+      gap: $space-6;
     }
+  }
+
+  // Tour map + area markers, shown as an image below the title.
+  &__welcome-map-section {
+    width: 100%;
+    max-width: 765px;   // 15% narrower than the reading column, on desktop
+    padding-inline: $space-4;
+
+    @include lg { padding-inline: 0; }
   }
 
   &__welcome-map {
     position: relative;
     width: 100%;
     background: $bg-surface-alt;
-    border-bottom: 1px solid $border-default;
+    border: 1px solid $border-default;
+    border-radius: $radius-md;
+    overflow: hidden;
 
     img {
       width: 100%;
       display: block;
     }
-
-    @include lg {
-      grid-column: 1;
-      grid-row: 1;
-      border: 1px solid $border-default;
-      border-radius: $radius-md;
-      overflow: hidden;
-    }
   }
 
   &__welcome-itinerary {
+    width: 100%;
+    max-width: 720px;
     padding-inline: $space-4;
 
-    @include lg {
-      grid-column: 1 / -1;     // full width, beneath the map + details
-      padding-inline: 0;
-    }
+    @include lg { padding-inline: 0; }
   }
 
-  &__welcome-map-dot {
+  // Venue-area marker: a pin tinted with the venue's colour + its name label.
+  &__welcome-map-marker {
     position: absolute;
     transform: translate(-50%, -50%);
     width: 26px;
     height: 26px;
+  }
+
+  &__welcome-map-pin {
+    position: absolute;
+    inset: 0;
     border-radius: 50%;
-    background: $bg-surface;
-    color: $text-primary;
-    border: 1.5px solid $text-primary;
+    color: $white;
+    border: 2px solid $white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: $font-family-primary;
     font-size: $font-size-xs;
     font-weight: $font-weight-bold;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  }
+
+  &__welcome-map-name {
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 150px;
+    padding: 2px 8px;
+    border-radius: $radius-full;
+    background: rgba($white, 0.94);
+    color: $text-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+
+  // Markers on the right half flip their name to the left so it stays on-map.
+  &__welcome-map-marker--flip &__welcome-map-name {
+    left: auto;
+    right: calc(100% + 6px);
   }
 
   &__welcome-content {
-    padding: $space-5 $space-4;
+    width: 100%;
+    max-width: 720px;
+    padding: $space-5 $space-4 0;
     display: flex;
     flex-direction: column;
-    gap: $space-5;
+    align-items: center;
+    gap: $space-4;
 
     @include lg {
-      grid-column: 2;
-      grid-row: 1;
       min-width: 0;
-      padding-inline: 0;
+      padding: 0;
     }
   }
 
@@ -103,15 +136,15 @@
     overflow-wrap: break-word;
 
     @include lg {
-      text-align: left;
       font-size: $font-size-2xl;
     }
   }
 
   &__welcome-address {
-    display: flex;
+    display: inline-flex;
     gap: $space-3;
     align-items: flex-start;
+    max-width: 100%;
     padding: $space-3 $space-4;
     background: $bg-surface-alt;
     border-radius: $radius-md;
@@ -1211,6 +1244,60 @@
   color: $color-error;
 }
 
+// ── Header overflow menu (auto-play toggle + End tour) ──────────────────────
+.tourp__menu-wrap { position: relative; flex-shrink: 0; }
+
+.tourp__menu-btn {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: $text-primary;
+  padding: 0.2rem 0.45rem;
+}
+
+.tourp__menu-backdrop { position: fixed; inset: 0; z-index: 40; }
+
+.tourp__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 41;
+  min-width: 240px;
+  background: $bg-surface;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+}
+
+.tourp__menu-auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.tourp__menu-label { font-size: 0.8rem; color: $text-secondary; }
+
+.tourp__menu-end {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid $border-default;
+  background: none;
+  cursor: pointer;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-error;
+
+  &:hover { background: rgba($color-error, 0.08); }
+}
+
 /* ── Now playing ── */
 .tourp__now {
   padding: 0.6rem 0 0.75rem;
@@ -1451,6 +1538,25 @@
   font-size: 0.7rem;
   font-weight: 700;
   color: $text-secondary;
+
+  // Close to this stop: the disc takes the accent tint and shows the flashing
+  // "you're near" broadcast icon instead of its number.
+  &--near {
+    background: rgba($accent-primary, 0.18);
+    border: 1px solid $accent-primary;
+  }
+}
+
+.tourp__stop-near {
+  width: 15px;
+  height: 15px;
+  fill: $accent-primary;
+  animation: nearFlash 1s ease-in-out infinite;
+}
+
+@keyframes nearFlash {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.2; }
 }
 
 .tourp__stop-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }

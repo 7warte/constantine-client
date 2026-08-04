@@ -9,21 +9,6 @@
     <!-- ── Before you set off ─────────────────────────────────────── -->
     @if (!started()) {
       <section class="player__welcome player__welcome--has-cta">
-        @if (variant()!.map_image_url) {
-          <div class="player__welcome-map">
-            <img [src]="variant()!.map_image_url" alt="Tour map" />
-            @for (sp of mapSpaces(); track sp.id; let i = $index) {
-              @if (sp.map_x != null) {
-                <span class="player__welcome-map-dot"
-                  [style.left.%]="sp.map_x"
-                  [style.top.%]="sp.map_y">
-                  {{ getRomanNumeral(i) }}
-                </span>
-              }
-            }
-          </div>
-        }
-
         <div class="player__welcome-content">
           <h1 class="player__welcome-title">{{ variant()!.tour_title || variant()!.title }}</h1>
 
@@ -37,6 +22,38 @@
             </div>
           }
         </div>
+
+        @if (hasAreaMap() || variant()!.map_image_url) {
+          <div class="player__welcome-map-section">
+            <h2 class="player__welcome-section-title">Tour map &amp; areas</h2>
+            @if (hasAreaMap()) {
+              <!-- Interactive venue-area map (view-only; click a venue for its stops). -->
+              <app-venue-area-map
+                [spaces]="mapSpaces()"
+                [stops]="stops()"
+                [start]="startCoord()"
+                [end]="endCoord()"></app-venue-area-map>
+            } @else {
+              <!-- No drawn areas / geo — fall back to the static map image. -->
+              <div class="player__welcome-map">
+                <img [src]="variant()!.map_image_url" alt="Tour map" />
+                @for (sp of mapSpaces(); track sp.id; let i = $index) {
+                  @if (sp.map_x != null) {
+                    <span class="player__welcome-map-marker"
+                      [class.player__welcome-map-marker--flip]="sp.map_x > 60"
+                      [style.left.%]="sp.map_x"
+                      [style.top.%]="sp.map_y">
+                      <span class="player__welcome-map-pin" [style.background-color]="sp.color || '#c98a8c'">
+                        {{ getRomanNumeral(i) }}
+                      </span>
+                      <span class="player__welcome-map-name">{{ sp.name }}</span>
+                    </span>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
 
         <div class="player__welcome-itinerary">
           <h2 class="player__welcome-section-title">Itinerary</h2>
@@ -71,7 +88,30 @@
             <span class="tourp__eyebrow">Now touring</span>
             <h1 class="tourp__title">{{ variant()!.tour_title || variant()!.title }}</h1>
           </div>
-          <button type="button" class="tourp__end" (click)="endTour()">End tour</button>
+          <div class="tourp__menu-wrap">
+            <button type="button" class="tourp__menu-btn" aria-label="Tour options"
+                    (click)="menuOpen.set(!menuOpen())">&#8942;</button>
+            @if (menuOpen()) {
+              <div class="tourp__menu-backdrop" (click)="menuOpen.set(false)"></div>
+              <div class="tourp__menu">
+                <div class="tourp__menu-auto">
+                  <span class="tourp__menu-label">
+                    Auto-play at stops
+                    @if (autoPlayNear()) {
+                      @if (userPosition()) { (GPS on) } @else { (locating…) }
+                    }
+                  </span>
+                  <label class="tourp__switch">
+                    <input type="checkbox" [checked]="autoPlayNear()"
+                           (change)="toggleAutoPlayNear($any($event.target).checked)" />
+                    <span class="tourp__switch-track"></span>
+                  </label>
+                </div>
+                <button type="button" class="tourp__menu-end"
+                        (click)="menuOpen.set(false); endTour()">End tour</button>
+              </div>
+            }
+          </div>
         </header>
 
         <!-- Now playing -->
@@ -120,19 +160,7 @@
             <p class="player__audio-error">{{ audioError() }}</p>
           }
 
-          <div class="tourp__auto">
-            <span class="tourp__auto-label">
-              Auto-play at stops
-              @if (autoPlayNear()) {
-                @if (userPosition()) { (GPS on) } @else { (locating…) }
-              }
-            </span>
-            <label class="tourp__switch">
-              <input type="checkbox" [checked]="autoPlayNear()"
-                     (change)="toggleAutoPlayNear($any($event.target).checked)" />
-              <span class="tourp__switch-track"></span>
-            </label>
-          </div>
+          <!-- Auto-play toggle moved into the header overflow menu. -->
           @if (autoPlayError()) {
             <p class="player__audio-error">{{ autoPlayError() }}</p>
           }
@@ -153,7 +181,7 @@
         <!-- List / Map -->
         <div class="tourp__toggle">
           <button type="button" class="tourp__pill" [class.tourp__pill--on]="viewMode() === 'list'"
-                  (click)="setViewMode('list')">List</button>
+                  (click)="setViewMode('list')">Stops</button>
           <button type="button" class="tourp__pill" [class.tourp__pill--on]="viewMode() === 'map'"
                   (click)="setViewMode('map')">Map</button>
         </div>
@@ -171,7 +199,13 @@
                         [class.tourp__stop--current]="expandedStopId() === stop.id"
                         [disabled]="!getAudio(stop)"
                         (click)="selectStop(stop)">
-                  <span class="tourp__stop-num">{{ stopNumber(stop) }}</span>
+                  <span class="tourp__stop-num" [class.tourp__stop-num--near]="isNearStop(stop)">
+                    @if (isNearStop(stop)) {
+                      <svg class="tourp__stop-near" viewBox="0 0 640 640" aria-hidden="true"><path d="M119.9 75.5C108.6 68.6 93.8 72.3 86.9 83.6C62.1 124.6 47.9 172.7 47.9 224C47.9 275.3 62.1 323.4 86.9 364.4C93.8 375.7 108.5 379.4 119.9 372.5C131.3 365.6 134.9 350.9 128 339.5C107.7 305.9 96 266.3 96 224C96 181.7 107.7 142.1 128.1 108.4C135 97.1 131.3 82.3 120 75.4zM520 75.5C508.7 82.4 505 97.1 511.9 108.5C532.3 142.2 544 181.8 544 224.1C544 266.4 532.3 306 511.9 339.7C505 351 508.7 365.8 520 372.7C531.3 379.6 546.1 375.9 553 364.6C577.8 323.6 592 275.5 592 224.2C592 172.9 577.8 124.6 553 83.6C546.1 72.3 531.4 68.6 520 75.5zM352 279.4C371.1 268.3 384 247.7 384 224C384 188.7 355.3 160 320 160C284.7 160 256 188.7 256 224C256 247.7 268.9 268.4 288 279.4L288 544C288 561.7 302.3 576 320 576C337.7 576 352 561.7 352 544L352 279.4zM212.2 155C219.4 143.8 216.1 129 205 121.8C193.9 114.6 179 117.9 171.8 129C154.2 156.4 144 189 144 224C144 259 154.2 291.6 171.8 319C179 330.2 193.8 333.4 205 326.2C216.2 319 219.4 304.2 212.2 293C199.4 273.1 192 249.4 192 224C192 198.6 199.4 174.9 212.2 155zM468.2 129C461 117.8 446.2 114.6 435 121.8C423.8 129 420.6 143.8 427.8 155C440.6 174.9 448 198.6 448 224C448 249.4 440.6 273.1 427.8 293C420.6 304.2 423.9 319 435 326.2C446.1 333.4 461 330.1 468.2 319C485.8 291.6 496 259 496 224C496 189 485.8 156.4 468.2 129z"/></svg>
+                    } @else {
+                      {{ stopNumber(stop) }}
+                    }
+                  </span>
                   <span class="tourp__stop-body">
                     <span class="tourp__stop-title">{{ stop.title }}</span>
                     <span class="tourp__stop-meta">

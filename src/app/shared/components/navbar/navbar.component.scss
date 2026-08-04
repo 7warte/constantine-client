@@ -48,29 +48,16 @@
     padding-block: 0;
   }
 
-  &__brand-mark {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
+  &__brand-wordmark {
+    height: 22px;
+    width: auto;
     display: block;
     flex-shrink: 0;
-    // Recolor the dark-filled SVG to white to match the brand text
-    filter: brightness(0) invert(1);
+    // The asset is white; render it solid black in the navbar.
+    filter: brightness(0);
 
     @media (max-width: #{$bp-lg - 1px}) {
-      width: 26px;
-      height: 26px;
-    }
-  }
-
-  &__brand-name {
-    font-family: $font-family-primary;
-    font-size: $font-size-lg;
-    color: $text-on-dark;
-    letter-spacing: 0.03em;
-
-    @media (max-width: #{$bp-lg - 1px}) {
-      font-size: $font-size-md;
+      height: 18px;
     }
   }
 
@@ -135,7 +122,7 @@
       display: block;
       width: 22px;
       height: 2px;
-      background: $white;
+      background: #000;
       border-radius: $radius-full;
       transition: all $transition-fast;
     }
@@ -182,7 +169,7 @@
     align-items: center;
     column-gap: $space-3;
     row-gap: 2px;
-    padding: $space-3 $space-5;
+    padding: $space-3 0;   // no side padding → items line up with the logo
     border-radius: $radius-md;
     color: rgba($white, 0.85);
     text-align: left;
@@ -208,6 +195,7 @@
   }
 
   &__mobile-text {
+    font-family: 'Montserrat Alternates', #{$font-family-primary};
     font-size: $font-size-md;
     font-weight: $font-weight-semibold;
 

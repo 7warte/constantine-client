@@ -50,7 +50,7 @@
     } @else {
       <div class="explore__grid">
         @for (tour of tours(); track tour.id) {
-          <app-card [tour]="tour" [owned]="ownedVariantIds().has(tour.variant_id)" />
+          <app-card [tour]="tour" [owned]="ownedVariantIds().has(tour.variant_id)" [removed]="removedVariantIds().has(tour.variant_id)" />
         }
       </div>
     }

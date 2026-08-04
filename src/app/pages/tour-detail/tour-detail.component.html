@@ -30,6 +30,12 @@
                 <!-- Owned tours always offer Start tour, never Buy. If the purchase id
                      hasn't resolved yet, fall back to the library rather than showing Buy. -->
                 <app-button [routerLink]="purchaseId() ? ['/library', purchaseId(), 'play'] : ['/library']" variant="primary" size="lg">Start tour</app-button>
+              } @else if (removed()) {
+                <!-- Purchased before, then removed from the library — re-adding is free. -->
+                <app-button variant="primary" size="lg" [loading]="acquiring()" (click)="acquire()">Add to library</app-button>
+                @if (error()) {
+                  <p class="detail__error">{{ error() }}</p>
+                }
               } @else if (auth.isLoggedIn()) {
                 <app-button variant="primary" size="lg" [loading]="acquiring()" (click)="acquire()">
                   @if (v.price_cents === 0) { Get for free } @else { Buy tour }
@@ -143,21 +149,34 @@
       </section>
 
         <!-- Tour map -->
-        @if (v.map_image_url && v.spaces?.length > 0) {
+        @if (hasAreaMap(v.spaces) || (v.map_image_url && v.spaces?.length > 0)) {
         <section class="detail__map">
           <h2>Tour map</h2>
-          <div class="tour-map">
-            <img [src]="v.map_image_url" alt="Tour map" class="tour-map__img" />
-            @for (space of v.spaces; track space.id; let i = $index) {
-              @if (space.map_x != null) {
-                <div class="tour-map__dot"
-                  [style.left.%]="space.map_x"
-                  [style.top.%]="space.map_y">
-                  {{ getRomanNumeral(i) }}
-                </div>
+          @if (hasAreaMap(v.spaces)) {
+            <!-- Interactive venue-area map (view-only; click a venue for details). -->
+            <app-venue-area-map
+              [spaces]="v.spaces"
+              [start]="startCoord()"
+              [end]="endCoord()"></app-venue-area-map>
+          } @else {
+            <!-- No drawn areas / geo — fall back to the static map image. -->
+            <div class="tour-map">
+              <img [src]="v.map_image_url" alt="Tour map" class="tour-map__img" />
+              @for (space of v.spaces; track space.id; let i = $index) {
+                @if (space.map_x != null) {
+                  <div class="tour-map__marker"
+                    [class.tour-map__marker--flip]="space.map_x > 60"
+                    [style.left.%]="space.map_x"
+                    [style.top.%]="space.map_y">
+                    <span class="tour-map__pin" [style.background-color]="space.color || '#c98a8c'">
+                      {{ getRomanNumeral(i) }}
+                    </span>
+                    <span class="tour-map__name">{{ space.name }}</span>
+                  </div>
+                }
               }
-            }
-          </div>
+            </div>
+          }
         </section>
         }
       </div>

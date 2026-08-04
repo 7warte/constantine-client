@@ -116,6 +116,13 @@
     color: $color-success;
   }
 
+  // Owned-but-removed: same slot, brand pink — re-adding is free.
+  &__addback {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: $accent-primary;
+  }
+
   // Rating stars are oversized for a card — shrink them (more so on mobile).
   ::ng-deep .stars__star { font-size: $font-size-base; }
   ::ng-deep .stars__count { font-size: $font-size-xs; }

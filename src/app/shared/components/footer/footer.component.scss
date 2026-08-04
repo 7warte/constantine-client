@@ -2,7 +2,7 @@
 @use '../../../../styles/mixins' as *;
 
 .footer {
-  background: $dusty-rose;
+  background: $black;   // near-black (#1a1a1a), not pure black
   color: $white;
   padding-block: $space-8;
 
@@ -51,18 +51,11 @@
     gap: $space-2;
   }
 
-  &__mark {
-    width: 22px;
+  &__wordmark {
     height: 22px;
-    background: $white;
-    border-radius: 50%;
+    width: auto;
+    display: block;
     flex-shrink: 0;
-  }
-
-  &__name {
-    font-family: $font-family-primary;
-    font-size: $font-size-md;
-    color: $white;
   }
 
   &__tagline {

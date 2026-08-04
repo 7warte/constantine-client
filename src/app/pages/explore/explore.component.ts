@@ -33,6 +33,8 @@ export class ExploreComponent implements OnInit {
   // Variant ids the signed-in user already owns — cards for these show an
   // "In your library" marker instead of a price.
   readonly ownedVariantIds = signal<Set<string>>(new Set());
+  // Owned but removed from the library — cards offer "Add to library" (free).
+  readonly removedVariantIds = signal<Set<string>>(new Set());
 
   readonly filters = this.fb.nonNullable.group({
     search:   [''],
@@ -76,11 +78,16 @@ export class ExploreComponent implements OnInit {
   private loadOwned(): void {
     if (!this.auth.isLoggedIn()) return;
 
-    this.api.get<any[]>('/purchases').subscribe({
-      next:  purchases => this.ownedVariantIds.set(
-        new Set(purchases.map((p: any) => p.tour_variant_id)),
-      ),
-      error: () => this.ownedVariantIds.set(new Set()),
+    this.api.get<any[]>('/purchases', { include_hidden: 1 }).subscribe({
+      next: purchases => {
+        this.ownedVariantIds.set(
+          new Set(purchases.filter((p: any) => !p.hidden).map((p: any) => p.tour_variant_id)),
+        );
+        this.removedVariantIds.set(
+          new Set(purchases.filter((p: any) => p.hidden).map((p: any) => p.tour_variant_id)),
+        );
+      },
+      error: () => { this.ownedVariantIds.set(new Set()); this.removedVariantIds.set(new Set()); },
     });
   }
 

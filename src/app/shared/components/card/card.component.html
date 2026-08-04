@@ -49,6 +49,8 @@
   <div class="tour-card__footer">
     @if (owned) {
       <span class="tour-card__owned">&#x2713; In your library</span>
+    } @else if (removed) {
+      <span class="tour-card__addback">&#xFF0B; Add to library</span>
     } @else {
       <span class="tour-card__price">
         @if (tour.price_cents === 0) { Free }

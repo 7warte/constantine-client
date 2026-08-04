@@ -19,6 +19,10 @@ export class CardComponent {
   // library" instead of showing a price. It stays clickable either way.
   @Input() owned = false;
 
+  // Owned but removed from the library (hidden): the card offers to add it back
+  // (free) instead of showing a price.
+  @Input() removed = false;
+
   private readonly zone = inject(NgZone);
 
   // Sober GSAP hover: a gentle lift + soft shadow.

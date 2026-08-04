@@ -7,12 +7,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { StarRatingComponent } from '../../shared/components/star-rating/star-rating.component';
 import { ReportButtonComponent } from '../../shared/components/report-button/report-button.component';
+import { VenueAreaMapComponent } from '../../shared/components/venue-area-map/venue-area-map.component';
 
 @Component({
   selector: 'app-tour-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, FormsModule, ButtonComponent, StarRatingComponent, ReportButtonComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ButtonComponent, StarRatingComponent, ReportButtonComponent, VenueAreaMapComponent],
   templateUrl: './tour-detail.component.html',
   styleUrl: './tour-detail.component.scss',
 })
@@ -36,6 +37,8 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
   readonly reviews    = signal<any[]>([]);
   readonly loading    = signal(true);
   readonly owned      = signal(false);
+  // Owned but removed from the library (hidden): offer a free "Add to library".
+  readonly removed    = signal(false);
   readonly purchaseId = signal<string | null>(null);
   readonly acquiring  = signal(false);
   readonly error           = signal<string | null>(null);
@@ -70,11 +73,12 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.loadReviews();
 
         if (this.auth.isLoggedIn()) {
-          this.api.get<any[]>('/purchases').subscribe(purchases => {
+          this.api.get<any[]>('/purchases', { include_hidden: 1 }).subscribe(purchases => {
             const match = purchases.find((p: any) => p.tour_variant_id === this.variantId);
             if (match) {
-              this.owned.set(true);
               this.purchaseId.set(match.id);
+              if (match.hidden) this.removed.set(true);
+              else this.owned.set(true);
             }
           });
         }
@@ -106,12 +110,15 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
     const v = this.variant();
     if (!v) return;
 
-    if (v.price_cents === 0) {
+    // A removed (hidden) purchase — or a free tour — is added directly. The
+    // backend restores a hidden purchase for free, whatever its price.
+    if (this.removed() || v.price_cents === 0) {
       this.acquiring.set(true);
       this.api.post<any>('/purchases', { variant_id: this.variantId }).subscribe({
         next: (res) => {
           this.owned.set(true);
-          this.purchaseId.set(res.purchase?.id ?? null);
+          this.removed.set(false);
+          this.purchaseId.set(res.purchase?.id ?? this.purchaseId());
           this.acquiring.set(false);
         },
         error: (err) => {
@@ -198,6 +205,23 @@ export class TourDetailComponent implements OnInit, OnDestroy, AfterViewChecked 
     const numerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return numerals[idx] ?? String(idx + 1);
   }
+
+  /** True when the tour has drawn venue areas / geo → use the interactive map. */
+  hasAreaMap(spaces: any[] | null | undefined): boolean {
+    const v = this.variant();
+    if (v?.latitude != null && v?.longitude != null) return true;
+    return !!spaces?.some(s => s.polygon || (s.latitude != null && s.longitude != null));
+  }
+
+  // Stable start/finish coords for the venue-area map (computed → OnPush-safe).
+  readonly startCoord = computed(() => {
+    const v = this.variant();
+    return v?.latitude != null && v?.longitude != null ? { lat: +v.latitude, lng: +v.longitude } : null;
+  });
+  readonly endCoord = computed(() => {
+    const v = this.variant();
+    return v?.end_latitude != null && v?.end_longitude != null ? { lat: +v.end_latitude, lng: +v.end_longitude } : null;
+  });
 
   // ── Audio preview (30s cap) ─────────────────────────────────────
 
