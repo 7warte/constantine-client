@@ -125,7 +125,9 @@
   font-weight: 700;
   font-size: 12px;
   border: 2px solid #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  // Dark hairline ring outside the white border so the pastel pin stays
+  // legible against light map tiles, plus a stronger drop shadow.
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.4), 0 2px 5px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 

@@ -342,7 +342,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const color = this.spaceColor(this.venuePickerSpace());   // the venue being drawn
     const pts = this.venuePolygon();
     if (pts.length >= 3) {
-      this.venuePolyLayer = L.polygon(pts as any, { color, fillColor: color, weight: 2, fillOpacity: 0.25 })
+      this.venuePolyLayer = L.polygon(pts as any, { color, fillColor: color, weight: 3, fillOpacity: 0.4 })
         .addTo(this.venuePickerMap);
     } else if (pts.length === 2) {
       this.venuePolyLayer = L.polyline(pts as any, { color, weight: 2, dashArray: '4 4' })
@@ -872,7 +872,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       const color = this.spaceColor(space);
       const poly = this.getSpacePolygon(space);
       if (poly.length >= 3) {
-        L.polygon(poly as any, { color, fillColor: color, weight: 2, fillOpacity: 0.22 })
+        L.polygon(poly as any, { color, fillColor: color, weight: 3, fillOpacity: 0.4 })
           .addTo(this.reviewMap!).bindTooltip(`${si + 1}. ${space.name}`);
         poly.forEach(p => bounds.push(p));
       }
@@ -1868,7 +1868,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const venueColor = pinSpace ? this.spaceColor(pinSpace) : '#f57c00';
     const venuePoly = pinSpace ? this.getSpacePolygon(pinSpace) : [];
     if (venuePoly.length >= 3) {
-      L.polygon(venuePoly as any, { color: venueColor, fillColor: venueColor, weight: 2, fillOpacity: 0.18, dashArray: '4 4' })
+      L.polygon(venuePoly as any, { color: venueColor, fillColor: venueColor, weight: 2.5, fillOpacity: 0.3, dashArray: '4 4' })
         .addTo(this.pickerMap)
         .bindTooltip(`${pinSpace!.name} area`);
     }

@@ -99,7 +99,7 @@ export class VenueAreaMapComponent implements AfterViewInit, OnChanges, OnDestro
       const poly   = this.parsePolygon(sp.polygon);
 
       if (poly.length >= 3) {
-        L.polygon(poly as any, { color, weight: 2, fillColor: color, fillOpacity: 0.22 })
+        L.polygon(poly as any, { color, weight: 3, fillColor: color, fillOpacity: 0.4 })
           .addTo(map).on('click', select);
         poly.forEach(p => all.push(p));
         L.marker(this.centroid(poly) as any, { icon: this.numberIcon(this.roman(i), color) })

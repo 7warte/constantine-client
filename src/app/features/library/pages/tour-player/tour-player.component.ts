@@ -390,7 +390,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       const poly = this.parsePolygon(sp.polygon);
       const color = sp.color || '#c98a8c';
       if (poly.length >= 3) {
-        L.polygon(poly as any, { color: '#1a1a1a', weight: 1, fillColor: color, fillOpacity: 0.18 })
+        L.polygon(poly as any, { color: '#1a1a1a', weight: 2, fillColor: color, fillOpacity: 0.4 })
           .addTo(map).bindTooltip(sp.name);
         poly.forEach(p => all.push(p));
       }
@@ -478,7 +478,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       const poly = this.parsePolygon(sp.polygon);
       const color = sp.color || '#c98a8c';
       if (poly.length >= 3) {
-        L.polygon(poly as any, { color, weight: 2, fillColor: color, fillOpacity: 0.2 })
+        L.polygon(poly as any, { color, weight: 3, fillColor: color, fillOpacity: 0.4 })
           .addTo(map).bindTooltip(sp.name);
         poly.forEach(p => all.push(p));
         L.marker(this.centroid(poly) as any, { icon: this.numberIcon(this.getRomanNumeral(i), color) })

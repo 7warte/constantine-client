@@ -1949,6 +1949,12 @@
     crosshair;
 }
 
+// The venue-coloured POI teardrop pins are pastel; a drop shadow lifts them
+// off the map tiles so they're easy to spot (SVG has no CSS otherwise).
+::ng-deep .color-pin {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+
 // Once at least one point is placed, the Clear button turns solid red to signal
 // it will wipe the drawn area.
 .btn.loc-picker__clear--armed {
