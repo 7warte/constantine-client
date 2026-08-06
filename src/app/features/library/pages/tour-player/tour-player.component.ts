@@ -136,9 +136,45 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     return this.audioRef?.nativeElement ?? null;
   }
 
+  // ── Stop cue ─────────────────────────────────────────────────────
+  /** How long (ms) to let the cue play before the stop audio starts. */
+  private readonly CUE_LEAD_MS = 380;
+  private audioCtx: AudioContext | null = null;
+
+  /** A short two-note chime played before each new stop's audio, so listeners
+   *  learn to recognise a clip starting. Synthesised (no asset); best-effort —
+   *  a suspended AudioContext (no gesture yet) simply stays silent. */
+  private playCue(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      const Ctor = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!Ctor) return;
+      if (!this.audioCtx) this.audioCtx = new Ctor();
+      const ctx = this.audioCtx!;
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      const now = ctx.currentTime;
+      const notes = [{ f: 880, t: 0 }, { f: 1174.66, t: 0.12 }];   // A5 → D6
+      for (const n of notes) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = n.f;
+        const start = now + n.t;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(0.15, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.2);
+      }
+    } catch { /* cue is best-effort */ }
+  }
+
   /** Select a stop and play it. */
   playStop(stop: any): void {
     if (!stop) return;
+    // Any manual/auto start of a NEW clip consumes the queue.
+    this.pendingStopId.set(null);
     this.expandedStopId.set(stop.id);
     this.audioError.set(null);
     this.currentTime.set(0);
@@ -146,13 +182,19 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
     if (!this.getAudio(stop)) { this.playing.set(false); return; }
 
-    // The [src] binding lands on the next tick, so load/play after it.
+    // Mark playing now (before the cue lead) so a second GPS fix during the cue
+    // queues the next stop instead of cutting in.
+    this.playing.set(true);
+
+    // Play a short cue first so listeners learn a new clip is starting, then the
+    // audio. The delay also lets the [src] binding land before load/play.
+    this.playCue();
     setTimeout(() => {
       const el = this.audio;
       if (!el) return;
       el.load();
       el.play().then(() => this.playing.set(true)).catch(() => this.playing.set(false));
-    });
+    }, this.CUE_LEAD_MS);
   }
 
   togglePlay(): void {
@@ -180,7 +222,19 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   onTimeUpdate(): void      { this.currentTime.set(this.audio?.currentTime ?? 0); }
   onLoadedMetadata(): void  { this.duration.set(this.audio?.duration || 0); }
-  onEnded(): void           { this.playing.set(false); }
+
+  onEnded(): void {
+    this.playing.set(false);
+    // A stop reached while this clip was playing was queued — play it now if it's
+    // still the nearest eligible stop ("closest wins" re-evaluated at dequeue).
+    if (!this.pendingStopId()) return;
+    this.pendingStopId.set(null);
+    const next = this.pickNearestEligibleStop();
+    if (next) {
+      this.autoPlayed.add(next.id);
+      this.selectStop(next);
+    }
+  }
 
   /** A media URL that 404s or times out used to fail silently. Say so. */
   onAudioError(): void {
@@ -224,6 +278,12 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.viewMode.set('list');
     // Live distances to every stop, exactly as the app shows them.
     this.acquireGeo('tour');
+    // Autostart-on-arrival is on by default — start its GPS watch now (this click
+    // is the gesture that lets us prompt for location).
+    if (this.autoPlayNear()) this.acquireGeo('autoplay');
+    // Keep the next-stop arrow live inline (request device orientation from this
+    // same gesture, as iOS requires).
+    this.ensureOrientation();
 
     const groups = this.groupedStops();
     if (!groups.length) return;
@@ -231,8 +291,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
     const firstStop = groups[0].stops[0];
     if (firstStop) {
-      // Select it, but don't auto-start playback: browsers block audio that the
-      // user didn't ask for, and a silent "playing" state is worse than none.
+      // Select it, but don't auto-start playback here: browsers block audio the
+      // user didn't ask for. Once in range, the autostart effect plays it.
       this.expandedStopId.set(firstStop.id);
     }
     this.scrollIntoViewLater('.player__now', 'start', 100);
@@ -243,12 +303,16 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.started.set(false);
     this.expandedStopId.set(null);
     this.expandedVenueIdx.set(null);
-    this.autoPlayNear.set(false);
+    // Keep the autoPlayNear *preference* (persisted); just stop this session's
+    // watch and clear the played/queued state.
     this.autoPlayed.clear();
+    this.pendingStopId.set(null);
     this.viewMode.set('list');
     this.releaseGeo('tour');
     this.releaseGeo('autoplay');
     this.releaseGeo('inline-map');
+    this.releaseGeo('compass');
+    this.detachOrientation();
   }
 
   /** Tap a stop in the list: load it into the transport and play. */
@@ -770,6 +834,8 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   // ── Compass to next stop ─────────────────────────────────────────
   readonly compassOpen             = signal(false);
   readonly userPosition            = signal<{ lat: number; lng: number } | null>(null);
+  /** Accuracy (m) of the latest GPS fix; used to gate auto-trigger. */
+  readonly userAccuracy            = signal<number | null>(null);
   readonly userHeading             = signal<number | null>(null);
   readonly compassError            = signal<string | null>(null);
   readonly compassPermissionDenied = signal(false);
@@ -866,27 +932,45 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.arrowDisplayAngle.set(this.lastArrowAngle);
   }, { allowSignalWrites: true });
 
+  /** Open the full-screen compass. Geolocation + orientation are already live for
+   *  the inline arrow, so this just shows the overlay (and re-requests orientation
+   *  in case it was denied earlier — this call is a user gesture). */
   openCompass(): void {
     this.compassOpen.set(true);
-    this.userPosition.set(null);
-    this.userHeading.set(null);
     this.compassError.set(null);
-    this.compassPermissionDenied.set(false);
-    this.rawTargetHeading = null;
-    this.currentDisplayHeading = null;
-    this.lastArrowAngle = 0;
-    this.arrowDisplayAngle.set(0);
-
     this.acquireGeo('compass');
+    this.ensureOrientation();
+  }
 
+  /** Attach the device-orientation listener once, requesting iOS permission from
+   *  the current user gesture. Idempotent — safe to call from several places. */
+  private ensureOrientation(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.orientationListener) return;
     const reqPermFn = (DeviceOrientationEvent as any)?.requestPermission;
     if (typeof reqPermFn === 'function') {
       reqPermFn().then((res: string) => {
         if (res === 'granted') this.attachOrientationListener();
+        else this.compassPermissionDenied.set(true);
       }).catch(() => {});
     } else {
       this.attachOrientationListener();
     }
+  }
+
+  private detachOrientation(): void {
+    if (this.orientationListener) {
+      window.removeEventListener('deviceorientationabsolute', this.orientationListener as any, true);
+      window.removeEventListener('deviceorientation', this.orientationListener as any, true);
+      this.orientationListener = null;
+    }
+    if (this.headingRafId != null) {
+      cancelAnimationFrame(this.headingRafId);
+      this.headingRafId = null;
+    }
+    this.rawTargetHeading = null;
+    this.currentDisplayHeading = null;
+    this.userHeading.set(null);
   }
 
   /** How close (metres) the user must be to a stop to count as "here". Sized for
@@ -919,15 +1003,30 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   /** Walk into a stop and its clip opens and plays itself — the same behaviour
    *  as the phone app. Wider than HERE_RADIUS_M so playback starts as you walk
    *  up to a stop rather than once you're on top of it. */
-  private readonly AUTOPLAY_RADIUS_M = 40;
+  private readonly AUTOPLAY_RADIUS_M = 15;
 
-  readonly autoPlayNear = signal(false);
+  /** Ignore fixes worse than this (m) when auto-triggering, so a poor GPS fix
+   *  can't fire the wrong stop now that the radius is tight. */
+  private readonly MAX_TRIGGER_ACCURACY_M = 35;
+
+  /** Persisted on/off preference; defaults ON so autostart "just works". */
+  readonly autoPlayNear = signal(this.loadAutoPlayPref());
   readonly autoPlayError = signal<string | null>(null);
   /** Stops already auto-played, so walking back past one doesn't restart it. */
   private readonly autoPlayed = new Set<string>();
+  /** A stop reached while another clip is still playing waits here (auto-triggers
+   *  only); it plays when the current clip ends. Manual taps bypass it. */
+  private readonly pendingStopId = signal<string | null>(null);
+
+  private loadAutoPlayPref(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return true;
+    try { return localStorage.getItem('constantine.autoPlayNear') !== 'false'; }
+    catch { return true; }
+  }
 
   toggleAutoPlayNear(on: boolean): void {
     this.autoPlayError.set(null);
+    this.persistAutoPlayPref(on);
     if (!on) {
       this.autoPlayNear.set(false);
       this.releaseGeo('autoplay');
@@ -941,10 +1040,18 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     this.autoPlayNear.set(true);
   }
 
-  private readonly _autoPlayEffect = effect(() => {
-    if (!this.autoPlayNear() || !this.started()) return;
-    if (!this.userPosition()) return;   // tracked: re-runs on every fix
+  private persistAutoPlayPref(on: boolean): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try { localStorage.setItem('constantine.autoPlayNear', on ? 'true' : 'false'); }
+    catch { /* private mode */ }
+  }
 
+  /** The nearest stop that's in range, has audio and hasn't auto-played yet — or
+   *  null. Skips triggering entirely on a poor GPS fix. "Closest wins." */
+  private pickNearestEligibleStop(): any | null {
+    if (!this.userPosition()) return null;
+    const acc = this.userAccuracy();
+    if (acc != null && acc > this.MAX_TRIGGER_ACCURACY_M) return null;
     let best: any = null;
     let bestDist = Infinity;
     for (const group of this.groupedStops()) {
@@ -957,7 +1064,24 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
         }
       }
     }
-    if (!best || best.id === this.expandedStopId()) return;
+    return best;
+  }
+
+  private readonly _autoPlayEffect = effect(() => {
+    if (!this.autoPlayNear() || !this.started()) return;
+    if (!this.userPosition()) return;   // tracked: re-runs on every fix
+    this.userAccuracy();                // tracked too
+
+    const best = this.pickNearestEligibleStop();
+    if (!best) return;
+
+    // Don't cut off a clip that's still playing — queue the closest and let it
+    // play when the current one ends. Read `playing` untracked so pausing near a
+    // stop doesn't itself trigger playback.
+    if (untracked(() => this.playing())) {
+      this.pendingStopId.set(best.id);
+      return;
+    }
 
     this.autoPlayed.add(best.id);
     untracked(() => this.selectStop(best));
@@ -1010,7 +1134,10 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
       return;
     }
     this.geoWatchId = navigator.geolocation.watchPosition(
-      (pos) => this.userPosition.set({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => {
+        this.userAccuracy.set(pos.coords.accuracy ?? null);
+        this.userPosition.set({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
           this.compassError.set('Location permission denied.');
@@ -1028,6 +1155,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   }
 
   private attachOrientationListener(): void {
+    if (this.orientationListener) return;
     this.orientationListener = (e: any) => {
       let raw: number | null = null;
       if (typeof e.webkitCompassHeading === 'number') {
@@ -1084,19 +1212,10 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
   };
 
   closeCompass(): void {
+    // Just hide the overlay — orientation stays live for the inline arrow and is
+    // torn down in endTour().
     this.compassOpen.set(false);
     this.releaseGeo('compass');
-    if (this.orientationListener) {
-      window.removeEventListener('deviceorientationabsolute', this.orientationListener as any, true);
-      window.removeEventListener('deviceorientation', this.orientationListener as any, true);
-      this.orientationListener = null;
-    }
-    if (this.headingRafId != null) {
-      cancelAnimationFrame(this.headingRafId);
-      this.headingRafId = null;
-    }
-    this.rawTargetHeading = null;
-    this.currentDisplayHeading = null;
   }
 
   formatDistance(meters: number | null): string {
@@ -1107,6 +1226,7 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeCompass();
+    this.detachOrientation();
     this.geoConsumers.clear();
     this.stopGeoWatch();
     this.resetAudioState();

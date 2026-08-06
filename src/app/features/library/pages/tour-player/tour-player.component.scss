@@ -1621,6 +1621,20 @@
   border-radius: 4px;
 }
 
+/* Same row, but rendered as a button (inline arrow that opens the full compass). */
+.tourp__compass-row--inline {
+  width: 100%;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover { border-color: $accent-primary; }
+}
+
 .tourp__compass-dial {
   display: flex;
   align-items: center;

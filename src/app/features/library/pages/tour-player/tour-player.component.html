@@ -257,9 +257,21 @@
                     }
 
                     @if (canShowCompass()) {
-                      <button type="button" class="player__compass-cta" (click)="openCompass()">
-                        <mat-icon class="player__compass-cta-icon">explore</mat-icon>
-                        <span class="player__compass-cta-label">Open compass to next stop</span>
+                      <!-- Live arrow to the next stop, shown directly (tap to open
+                           the full-screen compass). -->
+                      <button type="button" class="tourp__compass-row tourp__compass-row--inline"
+                              (click)="openCompass()">
+                        <div class="tourp__compass-dial">
+                          <span class="tourp__compass-arrow"
+                                [style.transform]="'rotate(' + arrowDisplayAngle() + 'deg)'">&#8593;</span>
+                        </div>
+                        <div class="tourp__compass-body">
+                          <span class="tourp__compass-label">Next stop</span>
+                          <span class="tourp__compass-stop">{{ nextStop()?.title }}</span>
+                        </div>
+                        <span class="tourp__compass-dist">
+                          {{ userPosition() ? formatDistance(distanceMeters()) : '—' }}
+                        </span>
                       </button>
                     }
 
