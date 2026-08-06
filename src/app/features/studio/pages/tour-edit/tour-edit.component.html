@@ -189,6 +189,9 @@
             placeholder="e.g. Via dei Fori Imperiali, Rome"
             [value]="startAddressInput()" (input)="onAddressInput('start', $event)"
             (keydown.enter)="$event.preventDefault()"></textarea>
+          @if (startSearching()) {
+            <span class="address-spinner" aria-label="Searching addresses"></span>
+          }
           @if (startSuggestions().length > 0) {
             <ul class="address-suggestions">
               @for (s of startSuggestions(); track s.display_name) {
@@ -216,6 +219,9 @@
               placeholder="e.g. Piazza del Duomo, Florence"
               [value]="endAddressInput()" (input)="onAddressInput('end', $event)"
               (keydown.enter)="$event.preventDefault()"></textarea>
+            @if (endSearching()) {
+              <span class="address-spinner" aria-label="Searching addresses"></span>
+            }
             @if (endSuggestions().length > 0) {
               <ul class="address-suggestions">
                 @for (s of endSuggestions(); track s.display_name) {
@@ -400,7 +406,7 @@
                 <button type="button" class="space-block__pin" [class.space-block__pin--placed]="space.polygon != null"
                   (click)="openVenuePicker(space)">
                   <mat-icon>pentagon</mat-icon>
-                  <span>{{ space.polygon != null ? 'Area set' : 'Draw area' }}</span>
+                  <span>{{ space.polygon != null ? 'Edit area' : 'Draw area' }}</span>
                 </button>
 
                 <div class="space-block__bar-right">
@@ -759,12 +765,18 @@
               </div>
 
               <div class="loc-picker__toolbar">
-                <button type="button" class="btn btn--ghost btn--sm" [disabled]="pickerLocating()" (click)="useCurrentLocation()">
+                <button type="button" class="btn btn--ghost btn--sm loc-picker__use-location" [disabled]="pickerLocating()" (click)="useCurrentLocation()">
                   <mat-icon class="loc-picker__icon">my_location</mat-icon>
                   {{ pickerLocating() ? 'Locating…' : 'Use my current location' }}
                 </button>
                 @if (pickerLat() != null && pickerLng() != null) {
-                  <span class="loc-picker__coords">{{ pickerLat() | number:'1.5-5' }}, {{ pickerLng() | number:'1.5-5' }}</span>
+                  @if (pickerAddressLoading()) {
+                    <span class="loc-picker__coords loc-picker__coords--muted">Finding address…</span>
+                  } @else if (pickerAddress()) {
+                    <span class="loc-picker__coords">{{ pickerAddress() }}</span>
+                  } @else {
+                    <span class="loc-picker__coords">{{ pickerLat() | number:'1.5-5' }}, {{ pickerLng() | number:'1.5-5' }}</span>
+                  }
                 } @else {
                   <span class="loc-picker__coords loc-picker__coords--muted">Tap the map to drop a pin, or use your location</span>
                 }

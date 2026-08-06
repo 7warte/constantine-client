@@ -9,7 +9,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Subject, debounceTime, switchMap, of, Subscription } from 'rxjs';
+import { Subject, debounceTime, switchMap, of, Subscription, catchError } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TagInputComponent } from '../../../../shared/components/tag-input/tag-input.component';
@@ -189,9 +189,16 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   // True when a ≥3-char search returned nothing — prompt the user to fix typos.
   readonly startNoResults = signal(false);
   readonly endNoResults   = signal(false);
+  // True while a geocode request is in flight — drives the in-input spinner.
+  readonly startSearching = signal(false);
+  readonly endSearching   = signal(false);
 
   private geocode$ = new Subject<{ query: string; target: 'start' | 'end' }>();
   private geoSub!: Subscription;
+  // Reverse-geocode the stop picker's pin so we can show a human address
+  // (rather than raw coordinates) next to "Use my current location".
+  private revGeocode$ = new Subject<{ lat: number; lng: number }>();
+  private revGeoSub!: Subscription;
   private map: L.Map | null = null;
   private mapRendered = false;
   private startMarker: L.Marker | null = null;
@@ -579,6 +586,9 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   readonly pickerLng          = signal<number | null>(null);
   readonly pickerLocating     = signal(false);
   readonly pickerError        = signal<string | null>(null);
+  // Human-readable address for the current pin, resolved by reverse geocoding.
+  readonly pickerAddress        = signal<string | null>(null);
+  readonly pickerAddressLoading = signal(false);
   private pickerMap: L.Map | null = null;
   private pickerMarker: L.Marker | null = null;
   private pickerPinColor = '#f57c00';   // the POI pin colour (set to the venue's colour when pinning)
@@ -632,12 +642,15 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       debounceTime(400),
       switchMap(({ query, target }) => {
         if (query.length < 3) {
-          if (target === 'start') { this.startSuggestions.set([]); this.startNoResults.set(false); }
-          else                    { this.endSuggestions.set([]);   this.endNoResults.set(false); }
+          if (target === 'start') { this.startSuggestions.set([]); this.startNoResults.set(false); this.startSearching.set(false); }
+          else                    { this.endSuggestions.set([]);   this.endNoResults.set(false);   this.endSearching.set(false); }
           return of(null);
         }
         const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`;
-        return this.http.get<any[]>(url).pipe(switchMap(results => of({ target, results })));
+        return this.http.get<any[]>(url).pipe(
+          switchMap(results => of({ target, results })),
+          catchError(() => of({ target, results: [] })),
+        );
       }),
     ).subscribe(data => {
       if (!data) return;
@@ -648,8 +661,24 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         boundingbox: r.boundingbox,
       }));
       const empty = suggestions.length === 0;
-      if (data.target === 'start') { this.startSuggestions.set(suggestions); this.startNoResults.set(empty); }
-      else                         { this.endSuggestions.set(suggestions);   this.endNoResults.set(empty); }
+      if (data.target === 'start') { this.startSuggestions.set(suggestions); this.startNoResults.set(empty); this.startSearching.set(false); }
+      else                         { this.endSuggestions.set(suggestions);   this.endNoResults.set(empty);   this.endSearching.set(false); }
+    });
+
+    // Reverse geocoding for the stop location picker — debounced so dragging the
+    // pin or tapping around the map doesn't hammer Nominatim.
+    this.revGeoSub = this.revGeocode$.pipe(
+      debounceTime(500),
+      switchMap(({ lat, lng }) => {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&zoom=18&addressdetails=1&lat=${lat}&lon=${lng}`;
+        return this.http.get<any>(url).pipe(
+          switchMap(res => of(res?.display_name as string | undefined ?? null)),
+          catchError(() => of(null)),
+        );
+      }),
+    ).subscribe(name => {
+      this.pickerAddress.set(name);
+      this.pickerAddressLoading.set(false);
     });
 
     const id = this.routeTourId;
@@ -753,6 +782,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   ngOnDestroy(): void {
     this.geoSub?.unsubscribe();
+    this.revGeoSub?.unsubscribe();
     this.map?.remove();
     this.reviewMap?.remove();
     this.pickerMap?.remove();
@@ -1076,17 +1106,20 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     const query = (event.target as HTMLInputElement).value;
     // Typing only filters the list — it never commits a value. The committed
     // address/coords are cleared until the user clicks a list item.
+    const searching = query.trim().length >= 3;
     if (target === 'start') {
       this.startAddressInput.set(query);
       this.startAddress.set('');
       this.startCoords.set(null);
       this.startNoResults.set(false);
+      this.startSearching.set(searching);
       if (this.startMarker) { this.startMarker.remove(); this.startMarker = null; }
     } else {
       this.endAddressInput.set(query);
       this.endAddress.set('');
       this.endCoords.set(null);
       this.endNoResults.set(false);
+      this.endSearching.set(searching);
       if (this.endMarker) { this.endMarker.remove(); this.endMarker = null; }
     }
     this.geocode$.next({ query, target });
@@ -1583,6 +1616,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     // creator clicks to drop this stop's single pin.
     this.pickerLat.set(null);
     this.pickerLng.set(null);
+    this.resetPickerAddress();
 
     this.pinPromptStop.set(null);
     this.pickerError.set(null);
@@ -1601,9 +1635,11 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (stop.latitude != null && stop.longitude != null) {
       this.pickerLat.set(Number(stop.latitude));
       this.pickerLng.set(Number(stop.longitude));
+      this.requestPickerAddress(Number(stop.latitude), Number(stop.longitude));
     } else {
       this.pickerLat.set(null);
       this.pickerLng.set(null);
+      this.resetPickerAddress();
     }
 
     this.pickerError.set(null);
@@ -1665,9 +1701,11 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (formLat != null && formLng != null) {
       this.pickerLat.set(formLat);
       this.pickerLng.set(formLng);
+      this.requestPickerAddress(formLat, formLng);
     } else {
       this.pickerLat.set(null);
       this.pickerLng.set(null);
+      this.resetPickerAddress();
     }
 
     this.pickerError.set(null);
@@ -1744,6 +1782,18 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.stopForm.patchValue({ latitude: null, longitude: null });
   }
 
+  /** Kick off a debounced reverse-geocode for the picker's current pin. */
+  private requestPickerAddress(lat: number, lng: number): void {
+    this.pickerAddressLoading.set(true);
+    this.revGeocode$.next({ lat, lng });
+  }
+
+  /** Clear the picker address state (used when opening with no pin). */
+  private resetPickerAddress(): void {
+    this.pickerAddress.set(null);
+    this.pickerAddressLoading.set(false);
+  }
+
   useCurrentLocation(): void {
     if (!('geolocation' in navigator)) {
       this.pickerError.set('Geolocation is not supported by this browser.');
@@ -1757,6 +1807,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         this.pickerLat.set(latitude);
         this.pickerLng.set(longitude);
         this.pickerLocating.set(false);
+        this.requestPickerAddress(latitude, longitude);
         if (this.pickerMap) {
           this.updatePickerMarker(latitude, longitude);
           this.pickerMap.panTo([latitude, longitude]);
@@ -1847,6 +1898,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     this.pickerMap.on('click', (e: L.LeafletMouseEvent) => {
       this.pickerLat.set(e.latlng.lat);
       this.pickerLng.set(e.latlng.lng);
+      this.requestPickerAddress(e.latlng.lat, e.latlng.lng);
       this.updatePickerMarker(e.latlng.lat, e.latlng.lng);
     });
 
@@ -1862,6 +1914,11 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
         const ll = (e.target as L.Marker).getLatLng();
         this.pickerLat.set(ll.lat);
         this.pickerLng.set(ll.lng);
+      });
+      // Resolve the address once the drag settles, not on every frame.
+      this.pickerMarker.on('dragend', (e: L.LeafletEvent) => {
+        const ll = (e.target as L.Marker).getLatLng();
+        this.requestPickerAddress(ll.lat, ll.lng);
       });
     } else {
       this.pickerMarker.setLatLng([lat, lng]);
