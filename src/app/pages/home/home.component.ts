@@ -114,7 +114,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Each image declares its text color so the hero title/sub stay readable.
   // Use 'dark' for light/bright photos, 'light' for dim/dark photos.
-  readonly heroImages: { src: string; textColor: 'dark' | 'light' }[] = [
+  // These ship with the site and are the fallback when an admin hasn't uploaded
+  // any phone images under Admin → Homepage media.
+  private readonly BUNDLED_HERO_IMAGES: { src: string; textColor: 'dark' | 'light' }[] = [
     { src: 'assets/homepage/hero-images/chris-czermak.jpg',                       textColor: 'dark'  },
     { src: 'assets/homepage/hero-images/andrei-mike-LLRENtzIo34-unsplash.jpg',    textColor: 'light' },
     { src: 'assets/homepage/hero-images/jean-baptiste-d-OGw8hPRgPpY-unsplash.jpg', textColor: 'light' },
@@ -123,7 +125,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     { src: 'assets/homepage/hero-images/priscilla-du-preez-7etIYqqw2jU-unsplash.jpg', textColor: 'light' },
   ];
 
-  readonly activeTextColor = computed(() => this.heroImages[this.activeSlide()].textColor);
+  // Phone stills managed in Admin → Homepage media; empty until they load.
+  private readonly uploadedHeroImages = signal<{ src: string; textColor: 'dark' | 'light' }[]>([]);
+
+  /** What the phone slideshow actually renders — uploads win, bundled otherwise. */
+  readonly heroImages = computed(() =>
+    this.uploadedHeroImages().length ? this.uploadedHeroImages() : this.BUNDLED_HERO_IMAGES);
+
+  readonly activeTextColor = computed(() =>
+    this.heroImages()[this.activeSlide() % this.heroImages().length]?.textColor ?? 'light');
 
   private slideTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -169,16 +179,24 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isMobile.set(this.heroMql.matches);
       this.heroMql.addEventListener('change', this.onHeroMqlChange);
 
-      this.api.get<{ desktop: string[]; mobile: string[] }>('/hero-videos')
+      this.api.get<{
+        desktop: string[];
+        mobile: string[];
+        mobileImages?: { url: string; text_color: 'dark' | 'light' }[];
+      }>('/homepage-media')
         .subscribe(v => {
           this.heroDesktop.set(v.desktop ?? []);
           this.heroMobile.set(v.mobile ?? []);
+          this.uploadedHeroImages.set(
+            (v.mobileImages ?? []).map(i => ({ src: i.url, textColor: i.text_color })));
+          // A shorter uploaded list could leave the index past the end.
+          this.activeSlide.set(0);
           this.initHeroBuffers();
         });
 
       // Rotate the mobile hero images as a slow crossfade slideshow.
       this.slideTimer = setInterval(
-        () => this.activeSlide.update(i => (i + 1) % this.heroImages.length),
+        () => this.activeSlide.update(i => (i + 1) % this.heroImages().length),
         5000,
       );
     }

@@ -327,7 +327,9 @@
               </button>
             }
 
-            <button type="button" class="space-empty__example-btn space-empty__example-btn--mt" (click)="showExample.set(true)">See an example</button>
+            <div class="space-empty__example-row">
+              <button type="button" class="space-empty__example-btn" (click)="showExample.set(true)">See an example</button>
+            </div>
           </div>
 
           <!-- Example modal -->
@@ -344,27 +346,80 @@
                     Inside each venue you add <strong>points of interest</strong> — the individual things visitors will look at, listen to, or learn about.
                   </p>
 
-                  <p class="example-modal__label">VENUE</p>
-                  <div class="example-space">
-                    <div class="example-space__header">
-                      <strong>Hall of Sculptures</strong>
-                      <span>The main gallery on the ground floor featuring Roman and Greek works</span>
-                    </div>
+                  <p class="example-modal__caption">This is exactly how it looks to a visitor walking your tour:</p>
 
-                    <p class="example-modal__label example-modal__label--stop">POINTS OF INTEREST INSIDE THIS VENUE</p>
-
-                    <div class="example-stop">
-                      <span class="example-stop__num">1</span>
-                      <div>
-                        <strong>Venus de Milo</strong>
-                        <p>The iconic Greek sculpture from 130 BC. Notice the missing arms and the draping fabric…</p>
+                  <!-- Mirrors the real tour player's stop list, with the labels
+                       broken out into their own column so it's obvious which
+                       part of the screen is a venue and which is a stop. -->
+                  <div class="tour-preview">
+                    <span class="tour-preview__label tour-preview__label--venue">VENUE</span>
+                    <div class="tour-preview__cell">
+                      <div class="tp-venue">
+                        <span class="tp-venue__dot" style="background-color: #c98a8c"></span>
+                        <span class="tp-venue__name">Hall of Sculptures</span>
                       </div>
                     </div>
-                    <div class="example-stop">
-                      <span class="example-stop__num">2</span>
-                      <div>
-                        <strong>Apollo Belvedere</strong>
-                        <p>This Roman marble copy of a Greek bronze is considered a pinnacle of classical art…</p>
+
+                    <span class="tour-preview__label tour-preview__label--stop">POINT OF INTEREST</span>
+                    <div class="tour-preview__cell">
+                      <div class="tp-stop tp-stop--current">
+                        <span class="tp-stop__num">1</span>
+                        <span class="tp-stop__body">
+                          <span class="tp-stop__title">Venus de Milo</span>
+                          <span class="tp-stop__meta">&#9654; Playing</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--sub">DESCRIPTION</span>
+                    <div class="tour-preview__cell tour-preview__cell--sub">
+                      <p class="tp-desc">The iconic Greek sculpture from 130 BC. Notice the missing arms and the draping fabric…</p>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--sub">AUDIO</span>
+                    <div class="tour-preview__cell tour-preview__cell--sub">
+                      <div class="tp-audio" aria-hidden="true">
+                        <span class="tp-audio__play">&#9654;</span>
+                        <span class="tp-audio__track"><span class="tp-audio__fill" style="width: 34%"></span></span>
+                        <span class="tp-audio__time">2:14</span>
+                      </div>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--sub">MEDIA</span>
+                    <div class="tour-preview__cell tour-preview__cell--sub">
+                      <div class="tp-media">
+                        <span class="tp-thumb tp-thumb--empty"></span>
+                        <span class="tp-thumb tp-thumb--empty"></span>
+                      </div>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--stop">POINT OF INTEREST</span>
+                    <div class="tour-preview__cell">
+                      <div class="tp-stop">
+                        <span class="tp-stop__num">2</span>
+                        <span class="tp-stop__body">
+                          <span class="tp-stop__title">Apollo Belvedere</span>
+                          <span class="tp-stop__meta">Tap to play</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--venue">VENUE</span>
+                    <div class="tour-preview__cell">
+                      <div class="tp-venue">
+                        <span class="tp-venue__dot" style="background-color: #8aa8c9"></span>
+                        <span class="tp-venue__name">Sculpture Garden</span>
+                      </div>
+                    </div>
+
+                    <span class="tour-preview__label tour-preview__label--stop">POINT OF INTEREST</span>
+                    <div class="tour-preview__cell">
+                      <div class="tp-stop">
+                        <span class="tp-stop__num">3</span>
+                        <span class="tp-stop__body">
+                          <span class="tp-stop__title">The Bronze Horses</span>
+                          <span class="tp-stop__meta">Tap to play</span>
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -1,0 +1,81 @@
+<section class="hpm">
+  <header class="hpm__head">
+    <h1>Homepage media</h1>
+    <p>
+      Everything the homepage hero shows. Big screens play the desktop video; phones get
+      the still images when there are any, and fall back to video otherwise.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <p class="hpm__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="hpm__error" role="alert">{{ error() }}</div>
+  } @else {
+    <div class="hpm__grid">
+      @for (meta of slotMeta; track meta.slot) {
+        <div class="hpm__card">
+          <h2 class="hpm__slot-title">{{ meta.title }}</h2>
+          <p class="hpm__slot-hint">{{ meta.hint }}</p>
+
+          @if (items(meta.slot).length) {
+            <ul class="hpm__list">
+              @for (it of items(meta.slot); track it.public_id) {
+                <li class="hpm__item">
+                  <div class="hpm__preview" [class.hpm__preview--portrait]="meta.portraitPreview">
+                    @if (meta.kind === 'video') {
+                      <video [src]="it.url" muted loop autoplay playsinline></video>
+                    } @else {
+                      <img [src]="it.url" alt="" loading="lazy" />
+                    }
+                  </div>
+
+                  <div class="hpm__item-meta">
+                    <p class="hpm__meta">{{ it.width }}×{{ it.height }} · {{ formatBytes(it.bytes) }}</p>
+
+                    @if (meta.kind === 'image') {
+                      <div class="hpm__text-color">
+                        <span class="hpm__text-color-label">Hero text</span>
+                        <div class="hpm__toggle">
+                          <button type="button" class="hpm__toggle-btn"
+                            [class.hpm__toggle-btn--on]="it.text_color !== 'dark'"
+                            (click)="setTextColor(meta.slot, it, 'light')">Light</button>
+                          <button type="button" class="hpm__toggle-btn"
+                            [class.hpm__toggle-btn--on]="it.text_color === 'dark'"
+                            (click)="setTextColor(meta.slot, it, 'dark')">Dark</button>
+                        </div>
+                      </div>
+                    }
+
+                    <button type="button" class="hpm__btn hpm__btn--danger"
+                      [disabled]="isUploading(meta.slot)"
+                      (click)="remove(meta.slot, it)">Delete</button>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hpm__empty">{{ meta.emptyHint }}</p>
+          }
+
+          <div class="hpm__actions">
+            <label class="hpm__file">
+              <input type="file" [accept]="meta.accept" (change)="onPick(meta.slot, $event)" />
+              <span>{{ pickedName(meta.slot) }}</span>
+            </label>
+
+            <button type="button" class="hpm__btn hpm__btn--primary"
+              [disabled]="!selected()[meta.slot] || isUploading(meta.slot)"
+              (click)="upload(meta.slot)">
+              {{ isUploading(meta.slot) ? 'Uploading…' : (meta.kind === 'image' ? 'Add image' : 'Add video') }}
+            </button>
+          </div>
+
+          @if (errorFor(meta.slot); as e) {
+            <div class="hpm__error" role="alert">{{ e }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

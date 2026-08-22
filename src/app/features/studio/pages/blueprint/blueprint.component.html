@@ -30,45 +30,69 @@
     <p class="bp__desc">{{ tour.description }}</p>
   </header>
 
-  <!-- Itinerary — the exact accordion layout a visitor sees while following a tour -->
+  <!-- Itinerary — the exact layout a visitor sees while following a tour, with a
+       label column naming each part so creators can map the vocabulary onto it. -->
   <h2 class="bp__section-title">Itinerary</h2>
-  <mat-accordion class="bp__venues" displayMode="flat">
-    @for (venue of tour.venues; track venue.name; let gi = $index) {
-      <mat-expansion-panel class="bp__venue" [expanded]="gi === 0">
-        <mat-expansion-panel-header collapsedHeight="64px" expandedHeight="64px">
-          <mat-panel-title class="bp__venue-title">
-            <span class="bp__venue-num">{{ gi + 1 }}</span>
-            <span class="bp__venue-name">{{ venue.name }}</span>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
+  <p class="bp__section-hint">
+    This is the visitor's screen. The labels down the left name each piece you'll build —
+    tap any point of interest to open it.
+  </p>
 
-        <ng-template matExpansionPanelContent>
-          <p class="bp__venue-tagline">{{ venue.tagline }}</p>
-          <mat-accordion class="bp__stops" displayMode="flat">
-            @for (stop of venue.stops; track stop.numeral) {
-              <mat-expansion-panel class="bp__stop">
-                <mat-expansion-panel-header collapsedHeight="48px" expandedHeight="48px">
-                  <mat-panel-title class="bp__stop-title">
-                    <span class="bp__stop-num">{{ stop.numeral }}</span>
-                    <span class="bp__stop-name">{{ stop.title }}</span>
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
+  <div class="tour-preview bp__itinerary">
+    @for (venue of tour.venues; track venue.name) {
+      <span class="tour-preview__label tour-preview__label--venue">VENUE</span>
+      <div class="tour-preview__cell">
+        <div class="tp-venue">
+          <span class="tp-venue__dot" [style.background-color]="venue.color"></span>
+          <span class="tp-venue__name">{{ venue.name }}</span>
+        </div>
+        <p class="tp-venue__tagline">{{ venue.tagline }}</p>
+      </div>
 
-                <ng-template matExpansionPanelContent>
-                  <div class="bp__stop-body">
-                    @if (stop.image) {
-                      <img class="bp__stop-image" [src]="stop.image" [alt]="stop.title" loading="lazy" />
-                    }
-                    <p class="bp__stop-text">{{ stop.text }}</p>
-                  </div>
-                </ng-template>
-              </mat-expansion-panel>
-            }
-          </mat-accordion>
-        </ng-template>
-      </mat-expansion-panel>
+      @for (stop of venue.stops; track stop.numeral) {
+        <span class="tour-preview__label tour-preview__label--stop">POINT OF INTEREST</span>
+        <div class="tour-preview__cell">
+          <button type="button" class="tp-stop tp-stop--button"
+            [class.tp-stop--current]="isOpen(stop)"
+            [attr.aria-expanded]="isOpen(stop)"
+            (click)="selectStop(stop)">
+            <span class="tp-stop__num">{{ stop.numeral }}</span>
+            <span class="tp-stop__body">
+              <span class="tp-stop__title">{{ stop.title }}</span>
+              <span class="tp-stop__meta">{{ isOpen(stop) ? 'Open' : 'Tap to play' }}</span>
+            </span>
+          </button>
+        </div>
+
+        @if (isOpen(stop)) {
+          <span class="tour-preview__label tour-preview__label--sub">DESCRIPTION</span>
+          <div class="tour-preview__cell tour-preview__cell--sub">
+            <p class="tp-desc">{{ stop.text }}</p>
+          </div>
+
+          <span class="tour-preview__label tour-preview__label--sub">AUDIO</span>
+          <div class="tour-preview__cell tour-preview__cell--sub">
+            <div class="tp-audio" aria-hidden="true">
+              <span class="tp-audio__play">&#9654;</span>
+              <span class="tp-audio__track"><span class="tp-audio__fill" style="width: 34%"></span></span>
+              <span class="tp-audio__time">{{ stop.duration }}</span>
+            </div>
+            <p class="tp-note">Your own recording plays here — this blueprint has none.</p>
+          </div>
+
+          @if (stop.image) {
+            <span class="tour-preview__label tour-preview__label--sub">MEDIA</span>
+            <div class="tour-preview__cell tour-preview__cell--sub">
+              <div class="tp-media">
+                <img class="tp-thumb" [src]="stop.image" [alt]="stop.title" loading="lazy" />
+              </div>
+              <p class="tp-note">Photos and PDFs you attach to the stop.</p>
+            </div>
+          }
+        }
+      }
     }
-  </mat-accordion>
+  </div>
 
   <div class="bp__footer">
     <p>This is just an example. Ready to build the real thing?</p>

@@ -1,0 +1,250 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Tour preview — a labelled mock of what a visitor sees while following a tour.
+//
+// Used by the "See an example" modal in the tour editor and by the read-only
+// blueprint demo tour. The right-hand column is a faithful copy of the real
+// player's stop list (tour-player.component.scss — .tourp__venue / .tourp__stop);
+// keep the two in step if the player changes. The left column names each part
+// so a creator can map "venue", "point of interest", "description", "audio" and
+// "media" onto what they're looking at.
+//
+// Consume with `@use '<path>/styles/tour-preview' as *;` — it emits plain rules,
+// so Angular scopes them per component.
+// ─────────────────────────────────────────────────────────────────────────────
+
+@use 'variables' as *;
+
+// Indent of the extras (description / audio / media) under a stop card, matching
+// .tourp__extras in the player.
+$tp-extras-indent: 2.4rem;
+
+.tour-preview {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  column-gap: $space-4;
+  row-gap: $space-2;
+  align-items: start;
+  padding: $space-4;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  background: $bg-light;
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    padding-top: 6px;
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    color: $accent-primary;
+
+    // Connector line running from the label toward the row it names.
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.35;
+    }
+
+    &--stop {
+      color: $text-muted;
+      padding-top: 14px;
+    }
+
+    // Description / audio / media — parts of the stop that's open.
+    &--sub {
+      color: $text-muted;
+      padding-top: 4px;
+    }
+  }
+
+  &__cell { min-width: 0; }
+
+  // Extras line up under the stop card they belong to.
+  &__cell--sub { padding-left: $tp-extras-indent; }
+
+  // Breathing room before each venue after the first, so the grouping reads.
+  &__label--venue:not(:first-child),
+  &__label--venue:not(:first-child) + &__cell {
+    margin-top: $space-4;
+  }
+
+  @media (max-width: #{$bp-sm - 1px}) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+    padding: $space-3;
+
+    &__label { padding-top: $space-2; }
+    &__label--stop,
+    &__label--sub { padding-top: $space-2; padding-left: $space-3; }
+    &__cell--sub { padding-left: $space-3; }
+  }
+}
+
+// Venue header row — matches .tourp__venue in the player.
+.tp-venue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: $accent-primary;
+  }
+
+  &__name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: $text-primary;
+  }
+
+  &__tagline {
+    margin: 2px 0 0 20px;
+    font-size: $font-size-xs;
+    color: $text-secondary;
+  }
+}
+
+// Stop card — matches .tourp__stop in the player.
+.tp-stop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid $border-default;
+  border-radius: 4px;
+  background: #ffffff;
+  text-align: left;
+  font-family: inherit;
+
+  &--current {
+    border-color: $accent-primary;
+    background: rgba($accent-primary, 0.08);
+  }
+
+  &--button {
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+    &:hover { border-color: $accent-primary; }
+  }
+
+  &__num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: $border-light;
+    font-family: $font-family-primary;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: $text-secondary;
+  }
+
+  &--current &__num {
+    background: rgba($accent-primary, 0.18);
+    color: $accent-dark;
+  }
+
+  &__body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  &__title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-primary;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta { font-size: 0.7rem; color: $text-secondary; }
+}
+
+// ── Extras of the open stop ──────────────────────────────────────────────────
+
+.tp-desc {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  line-height: $line-height-loose;
+}
+
+// Inert copy of the player's transport bar. It is deliberately not interactive —
+// these previews carry no recording.
+.tp-audio {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-3;
+  border: 1px solid $border-light;
+  border-radius: 4px;
+  background: #ffffff;
+
+  &__play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: $accent-primary;
+    color: #ffffff;
+    font-size: 9px;
+    padding-left: 2px;
+  }
+
+  &__track {
+    flex: 1;
+    height: 4px;
+    border-radius: $radius-full;
+    background: $border-light;
+    overflow: hidden;
+  }
+
+  &__fill {
+    display: block;
+    height: 100%;
+    background: $accent-primary;
+    opacity: 0.7;
+  }
+
+  &__time {
+    font-size: $font-size-xs;
+    font-variant-numeric: tabular-nums;
+    color: $text-secondary;
+    flex-shrink: 0;
+  }
+}
+
+.tp-note {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: $text-muted;
+  font-style: italic;
+}
+
+.tp-media { display: flex; flex-wrap: wrap; gap: $space-2; }
+
+.tp-thumb {
+  width: 84px;
+  height: 60px;
+  border-radius: 4px;
+  border: 1px solid $border-default;
+  object-fit: cover;
+  display: block;
+
+  // Placeholder variant (no photo to show).
+  &--empty {
+    background: linear-gradient(135deg, rgba($accent-primary, 0.55), rgba($accent-blue, 0.75));
+  }
+}

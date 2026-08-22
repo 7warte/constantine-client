@@ -4,7 +4,7 @@
     @if (isMobile()) {
       <!-- Mobile: a light crossfading image slideshow (no video → saves data,
            avoids iOS autoplay issues). -->
-      @for (img of heroImages; track img.src; let i = $index) {
+      @for (img of heroImages(); track img.src; let i = $index) {
         <img class="hero__img" [class.hero__img--active]="i === activeSlide()" [src]="img.src" alt="" />
       }
     } @else {

@@ -15,12 +15,16 @@ export interface DemoStop {
   gradient: string;
   /** Real photo (assigned from the assets below). */
   image?: string;
+  /** Mock recording length, shown on the (inert) audio bar. */
+  duration?: string;
 }
 
 export interface DemoVenue {
   name: string;
   tagline: string;
   stops: DemoStop[];
+  /** Venue colour — the player tints each venue's dot with it. */
+  color?: string;
 }
 
 export interface DemoTour {
@@ -170,10 +174,19 @@ const DEMO_PHOTOS = [
   'assets/homepage/hero-images/kai-pilger-1_D59lYGpZA-unsplash.jpg',
 ];
 
+// Venue colours, cycled from the same palette the studio hands out to new venues.
+const DEMO_VENUE_COLORS = ['#e7c9ca', '#e8ddc7', '#cdd8c6', '#c7d6e0', '#d7cce2'];
+
+// Plausible recording lengths so the preview's audio bar shows something real.
+// Nothing plays — the blueprint carries no audio files.
+const DEMO_DURATIONS = ['2:14', '1:47', '3:02', '2:38', '1:22', '2:55', '3:19'];
+
 let _photoIdx = 0;
-for (const venue of DEMO_TOUR.venues) {
+for (const [vi, venue] of DEMO_TOUR.venues.entries()) {
+  venue.color = DEMO_VENUE_COLORS[vi % DEMO_VENUE_COLORS.length];
   for (const stop of venue.stops) {
     stop.image = DEMO_PHOTOS[_photoIdx % DEMO_PHOTOS.length];
+    stop.duration = DEMO_DURATIONS[_photoIdx % DEMO_DURATIONS.length];
     _photoIdx++;
   }
 }

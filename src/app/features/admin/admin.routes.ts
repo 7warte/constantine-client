@@ -106,10 +106,12 @@ export const ADMIN_ROUTES: Routes = [
           import('./pages/faqs/admin-faqs.component').then(m => m.AdminFaqsComponent),
       },
       {
-        path: 'hero-videos',
+        path: 'homepage-media',
         loadComponent: () =>
-          import('./pages/hero-videos/admin-hero-videos.component').then(m => m.AdminHeroVideosComponent),
+          import('./pages/homepage-media/admin-homepage-media.component').then(m => m.AdminHomepageMediaComponent),
       },
+      // Old bookmarks / the previous nav label.
+      { path: 'hero-videos', pathMatch: 'full', redirectTo: 'homepage-media' },
       {
         path: 'analytics',
         loadComponent: () =>

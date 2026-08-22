@@ -24,6 +24,13 @@ import 'altcha';
  *
  * Backend route: use `requireCaptcha` middleware OR call `verifySolution(req.body.captcha_token)`.
  */
+/** Widget methods we call — see altcha's WidgetMethods interface. */
+type AltchaWidget = HTMLElement & {
+  getState?: () => string;
+  reset?: (state?: string, err?: string | null) => void;
+  verify?: () => Promise<unknown>;
+};
+
 @Component({
   selector: 'app-captcha',
   standalone: true,
@@ -61,6 +68,13 @@ export class CaptchaComponent {
 
   @ViewChild('widget') widgetRef?: ElementRef<HTMLElement>;
 
+  // The widget fetches its challenge once on load. A blip on that request (an
+  // edge 504, a dropped connection) used to leave the form permanently
+  // unsubmittable until the user reloaded the page, so retry it ourselves.
+  private static readonly MAX_RETRIES = 3;
+  private retries = 0;
+  private retryTimer?: ReturnType<typeof setTimeout>;
+
   onStateChange(event: Event): void {
     const detail = (event as CustomEvent).detail;
     // eslint-disable-next-line no-console
@@ -69,6 +83,34 @@ export class CaptchaComponent {
     if (detail?.state !== 'verified' && this.token() !== null) {
       this.token.set(null);
       this.tokenChange.emit(null);
+    }
+    if (detail?.state === 'error') this.scheduleRetry();
+    if (detail?.state === 'verified') this.retries = 0;
+  }
+
+  /** Re-fetch the challenge with a short backoff (0.5s, 1s, 2s). */
+  private scheduleRetry(): void {
+    if (this.retryTimer || this.retries >= CaptchaComponent.MAX_RETRIES) return;
+    const delay = 500 * 2 ** this.retries;
+    this.retries++;
+    // eslint-disable-next-line no-console
+    console.debug(`[captcha] challenge failed — retry ${this.retries} in ${delay}ms`);
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = undefined;
+      this.retryNow();
+    }, delay);
+  }
+
+  private retryNow(): void {
+    const widget = this.widgetRef?.nativeElement as AltchaWidget | undefined;
+    if (!widget?.verify) return;
+    try {
+      widget.reset?.();
+      // reset() alone only clears the UI; verify() re-requests the challenge.
+      void widget.verify()?.catch(() => {});
+    } catch {
+      // Swallowed on purpose — a failed retry just leaves the widget in `error`,
+      // which schedules the next attempt via onStateChange.
     }
   }
 
@@ -85,12 +127,25 @@ export class CaptchaComponent {
     }
   }
 
-  /** Wait up to `timeoutMs` for the captcha to be solved, then return the token. */
-  async getToken(timeoutMs = 8000): Promise<string | null> {
+  /**
+   * Wait up to `timeoutMs` for the captcha to be solved, then return the token.
+   * If the widget is sitting in an error state (its challenge request failed),
+   * one more attempt is kicked off rather than waiting out the clock for nothing.
+   */
+  async getToken(timeoutMs = 12_000): Promise<string | null> {
     const start = Date.now();
+    let nudged = false;
+
     while (Date.now() - start < timeoutMs) {
       const t = this.token() ?? this.readPayloadFromDom();
       if (t) return t;
+
+      if (!nudged && this.state() === 'error') {
+        nudged = true;
+        this.retries = 0;          // the user is actively submitting — try again
+        this.retryNow();
+      }
+
       await new Promise(r => setTimeout(r, 100));
     }
     // eslint-disable-next-line no-console

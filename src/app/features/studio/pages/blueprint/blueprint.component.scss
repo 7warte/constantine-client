@@ -1,8 +1,11 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
+// The labelled player mock (.tour-preview / .tp-*) — shared with the
+// "See an example" modal in the tour editor.
+@use '../../../../../styles/tour-preview' as *;
 
 .bp {
-  max-width: 760px;
+  max-width: 820px;
 
   // ── Welcome header ─────────────────────────────────────────────────────────
   &__welcome { margin-bottom: $space-6; }
@@ -37,70 +40,22 @@
     margin: $space-6 0 $space-4;
   }
 
-  // ── Venues / stops accordion (mirrors the player) ──────────────────────────
-  &__venues { display: block; }
-
-  // Flatten Material's default card chrome into a clean list.
-  ::ng-deep .mat-expansion-panel {
-    box-shadow: none !important;
-    border-radius: $radius-md !important;
-    border: 1px solid $border-default;
-    margin-bottom: $space-3;
-    background: $bg-surface;
-  }
-  ::ng-deep .mat-expansion-panel-body { padding: 0 $space-5 $space-4; }
-
-  &__venue {
-    ::ng-deep .mat-expansion-panel-header { padding: 0 $space-4; }
-  }
-
-  &__venue-title { display: flex; align-items: center; gap: $space-3; }
-  &__venue-num {
-    @include flex-center;
-    width: 28px; height: 28px; flex-shrink: 0;
-    border-radius: $radius-full;
-    background: $accent-muted;
-    color: $accent-primary;
-    font-family: $font-family-primary;
-    font-weight: $font-weight-bold;
+  &__section-hint {
+    margin: -$space-2 0 $space-4;
     font-size: $font-size-sm;
-  }
-  &__venue-name {
-    font-family: $font-family-primary;
-    font-weight: $font-weight-bold;
-    color: $text-primary;
-  }
-  &__venue-tagline {
     color: $text-secondary;
-    font-style: italic;
-    margin-bottom: $space-3;
+    line-height: $line-height-normal;
   }
 
-  &__stops { display: block; }
-  &__stop {
-    ::ng-deep .mat-expansion-panel-header { padding: 0 $space-3; }
-    border-color: $border-light;
+  // ── Itinerary ──────────────────────────────────────────────────────────────
+  // Layout comes from the shared .tour-preview partial; this page just gives the
+  // stop photos a bit more room than the cramped modal version.
+  &__itinerary {
+    .tp-thumb {
+      width: 160px;
+      height: 108px;
+    }
   }
-
-  &__stop-title { display: flex; align-items: center; gap: $space-3; }
-  &__stop-num {
-    font-family: $font-family-primary;
-    font-weight: $font-weight-bold;
-    color: $accent-primary;
-    font-size: $font-size-sm;
-    min-width: 28px;
-  }
-  &__stop-name { color: $text-primary; font-weight: $font-weight-semibold; }
-
-  &__stop-body { padding-top: $space-2; }
-  &__stop-image {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: $radius-md;
-    margin-bottom: $space-3;
-  }
-  &__stop-text { color: $text-secondary; line-height: $line-height-loose; }
 
   // ── Footer ─────────────────────────────────────────────────────────────────
   &__footer {
