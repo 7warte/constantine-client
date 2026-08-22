@@ -607,6 +607,125 @@
   }
 
   // ── Image carousel modal ───────────────────────────────────────────────────
+  // ── "Before you set off" notice ─────────────────────────────────────────────
+  // Sits in front of the welcome screen; the tour only starts from inside it.
+  &__notice-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: $z-modal;
+    padding: $space-4;
+  }
+
+  &__notice {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: calc(100dvh - #{$space-8});
+    overflow-y: auto;
+    background: $bg-light;
+    border-radius: $radius-lg;
+    padding: $space-6 $space-5 $space-5;
+    box-shadow: $shadow-xl;
+  }
+
+  &__notice-close {
+    position: absolute;
+    top: $space-2;
+    right: $space-3;
+    background: none;
+    border: none;
+    font-size: $font-size-xl;
+    line-height: 1;
+    color: $text-muted;
+    cursor: pointer;
+
+    &:hover { color: $text-primary; }
+  }
+
+  &__notice-eyebrow {
+    margin: 0 0 $space-1;
+    font-family: $font-family-display;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: $text-muted;
+  }
+
+  &__notice-title {
+    margin: 0 0 $space-4;
+    font-family: $font-family-display;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+  }
+
+  &__notice-points {
+    margin: 0 0 $space-5;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    li {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-left: $space-4;
+      border-left: 2px solid $accent-primary;
+    }
+  }
+
+  &__notice-point-title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+  }
+
+  &__notice-point-body {
+    font-size: $font-size-sm;
+    line-height: $line-height-normal;
+    color: $text-secondary;
+  }
+
+  &__notice-actions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+  }
+
+  &__notice-start {
+    width: 100%;
+    padding: $space-3 $space-4;
+    background: $text-primary;
+    color: $bg-light;
+    border: none;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    cursor: pointer;
+    transition: background $transition-fast, transform $transition-fast;
+
+    &:hover { background: $accent-primary; }
+    &:active { transform: translateY(1px); }
+  }
+
+  &__notice-cancel {
+    width: 100%;
+    padding: $space-2;
+    background: none;
+    border: none;
+    font-size: $font-size-sm;
+    color: $text-muted;
+    cursor: pointer;
+
+    &:hover { color: $text-primary; }
+  }
+
   &__modal-backdrop {
     position: fixed;
     inset: 0;

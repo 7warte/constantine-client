@@ -273,7 +273,28 @@ export class TourPlayerComponent implements OnInit, OnDestroy {
     }, delay));
   }
 
+  /** Gate in front of `beginTour` — see the notice modal in the template. */
+  readonly showStartNotice = signal(false);
+
   startTour(): void {
+    this.showStartNotice.set(true);
+  }
+
+  dismissStartNotice(): void {
+    this.showStartNotice.set(false);
+  }
+
+  /**
+   * The modal's "Start tour" click is itself a user gesture, so everything that
+   * needs one (geolocation, iOS device-orientation, audio unlock) still works
+   * from here — the gate doesn't cost us the permission prompts.
+   */
+  confirmStart(): void {
+    this.showStartNotice.set(false);
+    this.beginTour();
+  }
+
+  private beginTour(): void {
     this.started.set(true);
     this.viewMode.set('list');
     // Live distances to every stop, exactly as the app shows them.

@@ -446,3 +446,54 @@
     }
   }
 </div>
+
+<!-- ── Before you set off ─────────────────────────────────────────────
+     A browser tab can't start audio on its own once the phone locks, so the
+     autostart-on-arrival feature quietly stops working in a pocket. Say that
+     up front rather than letting it read as a broken tour. -->
+@if (showStartNotice()) {
+  <div class="player__notice-backdrop" (click)="dismissStartNotice()">
+    <div
+      class="player__notice"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="start-notice-title"
+      (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="player__notice-close"
+        aria-label="Close"
+        (click)="dismissStartNotice()">&times;</button>
+
+      <p class="player__notice-eyebrow">Before you set off</p>
+      <h2 class="player__notice-title" id="start-notice-title">Keep your screen awake</h2>
+
+      <ul class="player__notice-points">
+        <li>
+          <span class="player__notice-point-title">Don't lock your phone</span>
+          <span class="player__notice-point-body">
+            Stops start playing on their own as you arrive — but only while this page is open and
+            your screen is on. If you lock the phone or switch apps, your browser stops the audio
+            and the tour goes quiet until you come back.
+          </span>
+        </li>
+        <li>
+          <span class="player__notice-point-title">Pocket-friendly in the app</span>
+          <span class="player__notice-point-body">
+            The Constantine app keeps guiding you with the phone locked in your pocket, starting
+            each stop's audio automatically as you reach it — hands-free, screen off.
+          </span>
+        </li>
+      </ul>
+
+      <div class="player__notice-actions">
+        <button type="button" class="player__notice-start" (click)="confirmStart()">
+          Start tour
+        </button>
+        <button type="button" class="player__notice-cancel" (click)="dismissStartNotice()">
+          Not yet
+        </button>
+      </div>
+    </div>
+  </div>
+}
