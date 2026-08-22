@@ -46,6 +46,39 @@ interface Resources {
 
 type UsageStatus = 'ok' | 'warn' | 'danger';
 
+// ── TEMPORARY: development content reset ───────────────────────────────────
+// Delete these types, the state below and the matching template block once the
+// platform is live (along with the API's /admin/dev/content-reset endpoints).
+
+interface ResetCounts {
+  tours: number;
+  variants: number;
+  venues: number;
+  stops: number;
+  media: number;
+  purchases: number;
+  reviews: number;
+  translation_requests: number;
+  tour_requests: number;
+  payouts: number;
+  users_kept: number;
+}
+
+interface ResetPreview {
+  enabled: boolean;
+  confirm_phrase: string;
+  folders: string[];
+  counts: ResetCounts;
+}
+
+interface ResetResult {
+  ok: boolean;
+  deleted: ResetCounts;
+  cloudinary: { deleted: number; folders: Record<string, number>; errors: string[] };
+  mux?: { deleted: number; skipped?: string; error?: string };
+  remaining: ResetCounts;
+}
+
 @Component({
   selector: 'app-admin-resources',
   standalone: true,
@@ -61,10 +94,50 @@ export class AdminResourcesComponent implements OnInit {
   readonly data    = signal<Resources | null>(null);
   readonly error   = signal<string | null>(null);
 
+  // ── TEMPORARY: development content reset ─────────────────────────────────
+  readonly reset       = signal<ResetPreview | null>(null);
+  readonly confirmText = signal('');
+  readonly resetting   = signal(false);
+  readonly resetError  = signal<string | null>(null);
+  readonly resetResult = signal<ResetResult | null>(null);
+
   ngOnInit(): void {
     this.api.get<Resources>('/resources').subscribe({
       next: (d)  => { this.data.set(d);  this.loading.set(false); },
       error: (e) => { this.error.set(e.error?.error ?? 'Failed to load'); this.loading.set(false); },
+    });
+
+    this.loadResetPreview();
+  }
+
+  private loadResetPreview(): void {
+    this.api.get<ResetPreview>('/dev/content-reset').subscribe({
+      next: (r) => this.reset.set(r),
+      // The endpoint is temporary — if it's gone, just hide the card.
+      error: () => this.reset.set(null),
+    });
+  }
+
+  runReset(): void {
+    const preview = this.reset();
+    if (!preview || this.resetting()) return;
+    if (this.confirmText() !== preview.confirm_phrase) return;
+
+    this.resetting.set(true);
+    this.resetError.set(null);
+
+    this.api.post<ResetResult>('/dev/content-reset', { confirm: this.confirmText() }).subscribe({
+      next: (res) => {
+        this.resetting.set(false);
+        this.resetResult.set(res);
+        this.confirmText.set('');
+        // Refresh the counts so the card reflects the now-empty database.
+        this.loadResetPreview();
+      },
+      error: (e) => {
+        this.resetting.set(false);
+        this.resetError.set(e.error?.error ?? 'Reset failed');
+      },
     });
   }
 

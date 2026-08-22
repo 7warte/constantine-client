@@ -176,6 +176,85 @@
         <a href="https://dashboard.mux.com" target="_blank" rel="noopener">Mux dashboard</a>
         <a href="https://dashboard.stripe.com" target="_blank" rel="noopener">Stripe dashboard</a>
       </div>
+
+      <!-- ── TEMPORARY: development content reset ─────────────────────
+           Remove this block (and the /dev/content-reset endpoints) once
+           the platform is live. -->
+      @if (reset(); as r) {
+        <h2 class="admin-resources__section-title">Development</h2>
+
+        <div class="danger" [class.danger--locked]="!r.enabled">
+          <div class="danger__head">
+            <h3 class="danger__title">Wipe all tours &amp; tour media</h3>
+            <span class="danger__tag">{{ r.enabled ? 'Armed' : 'Locked' }}</span>
+          </div>
+
+          <p class="danger__text">
+            Deletes every tour and every asset behind it from Cloudinary, so the CDN starts
+            clean after a round of testing. <strong>This cannot be undone.</strong>
+          </p>
+
+          <div class="danger__scope">
+            <div class="danger__scope-col">
+              <span class="danger__scope-label">Deletes</span>
+              <ul>
+                <li>{{ r.counts.tours }} tours · {{ r.counts.variants }} language versions</li>
+                <li>{{ r.counts.venues }} venues · {{ r.counts.stops }} points of interest</li>
+                <li>{{ r.counts.media }} media files</li>
+                <li>{{ r.counts.purchases }} purchases · {{ r.counts.payouts }} payouts</li>
+                <li>{{ r.counts.reviews }} reviews · {{ r.counts.tour_requests }} tour requests</li>
+                <li>{{ r.counts.translation_requests }} translation jobs</li>
+              </ul>
+            </div>
+            <div class="danger__scope-col">
+              <span class="danger__scope-label">Keeps</span>
+              <ul>
+                <li>{{ r.counts.users_kept }} user accounts</li>
+                <li>Profile pictures</li>
+                <li>Homepage media, FAQs, legal pages</li>
+                <li>Tickets, to-dos, logs</li>
+              </ul>
+            </div>
+          </div>
+
+          @if (!r.enabled) {
+            <p class="danger__locked-note">
+              Disabled on this server. Set <code>ALLOW_CONTENT_RESET=true</code> on the API to arm it —
+              leave it unset in production and this button can never fire there.
+            </p>
+          } @else if (resetResult()) {
+            <div class="danger__done" role="status">
+              <strong>Done.</strong>
+              Removed {{ resetResult()!.deleted.tours }} tours and
+              {{ resetResult()!.cloudinary.deleted }} Cloudinary assets<!--
+              -->@if (resetResult()!.mux?.deleted) { , plus {{ resetResult()!.mux!.deleted }} Mux assets }.
+              @if (resetResult()!.cloudinary.errors.length) {
+                <span class="danger__done-warn">
+                  {{ resetResult()!.cloudinary.errors.length }} folder(s) reported errors:
+                  {{ resetResult()!.cloudinary.errors.join('; ') }}
+                </span>
+              }
+            </div>
+          } @else {
+            <label class="danger__field">
+              <span>Type <code>{{ r.confirm_phrase }}</code> to unlock</span>
+              <input type="text" [value]="confirmText()"
+                (input)="confirmText.set($any($event.target).value)"
+                [placeholder]="r.confirm_phrase" autocomplete="off" spellcheck="false" />
+            </label>
+
+            <button type="button" class="danger__btn"
+              [disabled]="confirmText() !== r.confirm_phrase || resetting()"
+              (click)="runReset()">
+              {{ resetting() ? 'Wiping…' : 'Delete all tours and media' }}
+            </button>
+          }
+
+          @if (resetError(); as e) {
+            <div class="danger__error" role="alert">{{ e }}</div>
+          }
+        </div>
+      }
     }
   }
 </section>

@@ -160,3 +160,172 @@
     }
   }
 }
+
+// ── TEMPORARY: development content reset ─────────────────────────────────────
+// Remove alongside the .danger block in the template once the platform is live.
+.danger {
+  border: 1px solid rgba($color-error, 0.35);
+  border-left: 4px solid $color-error;
+  border-radius: $radius-md;
+  background: rgba($color-error, 0.04);
+  padding: $space-4 $space-5;
+  max-width: 760px;
+
+  &--locked {
+    border-color: $border-default;
+    border-left-color: $border-strong;
+    background: $bg-surface-alt;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-2;
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    color: $text-primary;
+    margin: 0;
+  }
+
+  &__tag {
+    padding: 2px 10px;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba($color-error, 0.14);
+    color: $color-error;
+  }
+
+  &--locked &__tag {
+    background: rgba(0, 0, 0, 0.06);
+    color: $text-muted;
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: $line-height-normal;
+    margin: 0 0 $space-4;
+
+    strong { color: $color-error; }
+  }
+
+  &__scope {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $space-4;
+    margin-bottom: $space-4;
+  }
+
+  &__scope-label {
+    display: block;
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $text-muted;
+    margin-bottom: $space-2;
+  }
+
+  &__scope-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__scope-col li {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+  }
+
+  &__locked-note {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    line-height: $line-height-normal;
+    margin: 0;
+
+    code {
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.06);
+      font-size: 11px;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: $space-3;
+    max-width: 340px;
+
+    span {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+
+      code {
+        padding: 1px 5px;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.06);
+        font-weight: $font-weight-bold;
+      }
+    }
+
+    input {
+      padding: $space-2 $space-3;
+      border: 1px solid $border-default;
+      border-radius: $radius-sm;
+      font-family: $font-family-secondary;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      background: $white;
+    }
+  }
+
+  &__btn {
+    padding: $space-2 $space-5;
+    border: 1px solid $color-error;
+    border-radius: $radius-sm;
+    background: $color-error;
+    color: $white;
+    font-family: $font-family-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: darken($color-error, 8%); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  &__done {
+    padding: $space-3;
+    border-radius: $radius-sm;
+    background: rgba($color-success, 0.1);
+    font-size: $font-size-sm;
+    color: $text-primary;
+    line-height: $line-height-normal;
+  }
+
+  &__done-warn {
+    display: block;
+    margin-top: $space-2;
+    color: $color-warning;
+    font-size: $font-size-xs;
+  }
+
+  &__error {
+    margin-top: $space-3;
+    font-size: $font-size-sm;
+    color: $color-error;
+  }
+}
