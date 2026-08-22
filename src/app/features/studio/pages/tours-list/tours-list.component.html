@@ -16,9 +16,11 @@
     </div>
 
     <div class="tours-page__filters">
-      <button mat-stroked-button [class.active-filter]="filter() === 'all'" (click)="setFilter('all')">All</button>
-      <button mat-stroked-button [class.active-filter]="filter() === 'published'" (click)="setFilter('published')">Published</button>
-      <button mat-stroked-button [class.active-filter]="filter() === 'draft'" (click)="setFilter('draft')">Drafts</button>
+      @for (f of filters; track f.value) {
+        <button mat-stroked-button [class.active-filter]="filter() === f.value" (click)="setFilter(f.value)">
+          {{ f.label }}
+        </button>
+      }
     </div>
   </div>
 
@@ -52,7 +54,7 @@
                 </span>
                 <span class="tours-table__cover-badge"
                   [class]="'tours-table__cover-badge--status-' + row.status">
-                  {{ row.status }}
+                  {{ statusLabel(row.status) }}
                 </span>
               </div>
             </div>
@@ -95,7 +97,12 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let row">
-          <span class="status-chip" [class]="'status-chip--' + row.status">{{ row.status }}</span>
+          <span class="status-chip" [class]="'status-chip--' + row.status">{{ statusLabel(row.status) }}</span>
+          @if (row._type === 'tour' && row.unresolved_remarks > 0) {
+            <a class="status-remarks" [routerLink]="['/studio/tours', row.id]">
+              {{ row.unresolved_remarks }} to fix
+            </a>
+          }
         </td>
       </ng-container>
 

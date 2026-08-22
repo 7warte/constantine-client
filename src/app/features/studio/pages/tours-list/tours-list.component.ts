@@ -14,6 +14,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ApiService } from '../../../../core/services/api.service';
 
+type TourFilter = 'all' | 'published' | 'under_review' | 'needs_changes' | 'draft';
+
 @Component({
   selector: 'app-tours-list',
   standalone: true,
@@ -39,7 +41,15 @@ export class ToursListComponent implements OnInit {
   readonly expandedTourIds = signal<Set<string>>(new Set());
   readonly variantsMap     = signal<Record<string, any[]>>({});
   readonly search   = signal('');
-  readonly filter   = signal<'all' | 'published' | 'draft'>('all');
+  readonly filter   = signal<TourFilter>('all');
+
+  readonly filters: { value: TourFilter; label: string }[] = [
+    { value: 'all',           label: 'All' },
+    { value: 'published',     label: 'Published' },
+    { value: 'under_review',  label: 'In review' },
+    { value: 'needs_changes', label: 'Needs changes' },
+    { value: 'draft',         label: 'Drafts' },
+  ];
 
   // ── Delete state ──────────────────────────────────────────────
   readonly deleteTarget     = signal<any | null>(null);
@@ -84,8 +94,13 @@ export class ToursListComponent implements OnInit {
     this.loadTours();
   }
 
-  setFilter(f: 'all' | 'published' | 'draft'): void {
+  setFilter(f: TourFilter): void {
     this.filter.set(f);
+  }
+
+  /** `under_review` → "under review" — the chips capitalise the first word. */
+  statusLabel(status: string): string {
+    return (status ?? '').replace('_', ' ');
   }
 
   isExpanded(tourId: string): boolean {

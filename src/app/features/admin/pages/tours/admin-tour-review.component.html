@@ -1,0 +1,370 @@
+<section class="rev">
+  <a class="rev__back" routerLink="/admin/tours">← Back to tours</a>
+
+  @if (loading()) {
+    <p class="rev__loading">Loading tour…</p>
+  } @else if (!tour()) {
+    <div class="rev__error" role="alert">{{ error() ?? 'Tour not found' }}</div>
+  } @else {
+    @if (error(); as e) { <div class="rev__error" role="alert">{{ e }}</div> }
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header class="rev__head">
+      @if (tour()!.cover_image_url) {
+        <img class="rev__cover" [src]="tour()!.cover_image_url" [alt]="tour()!.title" />
+      } @else {
+        <div class="rev__cover rev__cover--empty"></div>
+      }
+
+      <div class="rev__head-body">
+        <div class="rev__head-top">
+          <h1>{{ tour()!.title }}</h1>
+          <span class="rev__status" [class]="'rev__status--' + tour()!.status">{{ statusLabel(tour()!.status) }}</span>
+        </div>
+
+        <p class="rev__byline">
+          by
+          <a [routerLink]="['/admin/users', tour()!.creator_id]">
+            {{ tour()!.creator_display_name || '@' + tour()!.creator_username }}
+          </a>
+          · {{ tour()!.creator_email }}
+          @if (tour()!.creator_suspended_at) { <span class="rev__suspended">suspended</span> }
+        </p>
+
+        @if (review(); as rv) {
+          <p class="rev__submitted">
+            Submitted {{ fmtDate(rv.submitted_at) }}
+            @if (rv.reviewed_at) { · last decision {{ statusLabel(rv.status) }} on {{ fmtDate(rv.reviewed_at) }} }
+          </p>
+        } @else {
+          <p class="rev__submitted">Never submitted for review.</p>
+        }
+
+        @if (tour()!.description) { <p class="rev__desc">{{ tour()!.description }}</p> }
+
+        @if (tour()!.tags.length) {
+          <div class="rev__tags">
+            @for (t of tour()!.tags; track t) { <span class="rev__tag">{{ t }}</span> }
+          </div>
+        }
+
+        <div class="rev__head-actions">
+          <button type="button" class="rev__btn rev__btn--approve" (click)="openDecision('approve')">Approve &amp; publish</button>
+          <button type="button" class="rev__btn rev__btn--changes" (click)="openDecision('changes')"
+            [disabled]="openRemarks().length === 0"
+            [title]="openRemarks().length === 0 ? 'Add at least one remark first' : ''">
+            Request changes ({{ openRemarks().length }})
+          </button>
+          <button type="button" class="rev__btn" (click)="flag('tour', null, null)">Flag the tour itself</button>
+          <a class="rev__btn" [href]="publicUrl()" target="_blank" rel="noopener">Open public page ↗</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Summary tiles ──────────────────────────────────────────────────── -->
+    <div class="rev__tiles">
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ fmtDurationLong(tour()!.totals.audio_duration_seconds) }}</span>
+        <span class="rev__tile-label">
+          Total audio
+          @if (tour()!.totals.missing_audio_duration) { <em title="Some clips have no stored duration">at least</em> }
+        </span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.totals.audio_count }}</span>
+        <span class="rev__tile-label">Audio clips</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.totals.stop_count }}</span>
+        <span class="rev__tile-label">Points of interest</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.totals.space_count }}</span>
+        <span class="rev__tile-label">Venues</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.totals.media_count }}</span>
+        <span class="rev__tile-label">Media items</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ fmtPrice(tour()!.price_cents) }}</span>
+        <span class="rev__tile-label">Price</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.totals.purchase_count }}</span>
+        <span class="rev__tile-label">Existing sales</span>
+      </div>
+      <div class="rev__tile">
+        <span class="rev__tile-value">{{ tour()!.duration_minutes ?? '—' }}<small>min</small></span>
+        <span class="rev__tile-label">Advertised duration</span>
+      </div>
+    </div>
+
+    @if (tour()!.start_address) {
+      <p class="rev__addr"><strong>Start:</strong> {{ tour()!.start_address }}
+        @if (tour()!.end_address) { <span> · <strong>End:</strong> {{ tour()!.end_address }}</span> }
+      </p>
+    }
+
+    <!-- Tour-level remarks live right under the header. -->
+    @if (remarksFor(null).length) {
+      <div class="rev__inline-remarks">
+        @for (r of remarksFor(null); track r.id) {
+          <div class="rev__remark" [class.rev__remark--resolved]="r.resolved_at">
+            <span class="rev__remark-body">{{ r.body }}</span>
+            <button type="button" class="rev__remark-act" (click)="toggleResolved(r)">{{ r.resolved_at ? 'Re-open' : 'Resolve' }}</button>
+            <button type="button" class="rev__remark-act rev__remark-act--del" (click)="deleteRemark(r)">Delete</button>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="rev__body">
+      <!-- ── Content walkthrough ─────────────────────────────────────────── -->
+      <div class="rev__content">
+        @if (tour()!.presentation_audio_url) {
+          <div class="rev__panel">
+            <h2 class="rev__panel-title">Presentation audio</h2>
+            <audio class="rev__audio" [src]="tour()!.presentation_audio_url!" controls preload="none"></audio>
+          </div>
+        }
+
+        @for (v of tour()!.variants; track v.id) {
+          <div class="rev__variant">
+            <div class="rev__variant-head">
+              <h2>
+                {{ v.language_code | uppercase }}
+                @if (v.is_original) { <span class="rev__pill">original</span> }
+                <span class="rev__pill rev__pill--status">{{ statusLabel(v.status) }}</span>
+              </h2>
+              <div class="rev__variant-meta">
+                {{ v.stop_count }} stops · {{ v.audio_count }} audio ·
+                <strong>{{ fmtDurationLong(v.audio_duration_seconds) }}</strong> ·
+                {{ fmtPrice(v.price_cents) }} · {{ v.purchase_count }} sold
+              </div>
+            </div>
+
+            @if (v.spaces.length === 0 && v.ungrouped_stops.length === 0) {
+              <p class="rev__empty">This language version has no stops yet.</p>
+            }
+
+            @for (sp of v.spaces; track sp.id) {
+              <div class="rev__space">
+                <div class="rev__space-head" [style.border-left-color]="sp.color || '#c98a8c'">
+                  <div>
+                    <h3>{{ sp.name }}</h3>
+                    @if (sp.description) { <p class="rev__space-desc">{{ sp.description }}</p> }
+                  </div>
+                  <div class="rev__space-meta">
+                    {{ sp.stop_count }} stops · {{ fmtDurationLong(sp.audio_duration_seconds) }}
+                    <button type="button" class="rev__flag" (click)="flag('space', sp.id, sp.name)">Flag venue</button>
+                  </div>
+                </div>
+
+                @for (r of remarksFor(sp.id); track r.id) {
+                  <div class="rev__remark" [class.rev__remark--resolved]="r.resolved_at">
+                    <span class="rev__remark-body">{{ r.body }}</span>
+                    <button type="button" class="rev__remark-act" (click)="toggleResolved(r)">{{ r.resolved_at ? 'Re-open' : 'Resolve' }}</button>
+                    <button type="button" class="rev__remark-act rev__remark-act--del" (click)="deleteRemark(r)">Delete</button>
+                  </div>
+                }
+
+                @for (st of sp.stops; track st.id) {
+                  <ng-container [ngTemplateOutlet]="stopTpl" [ngTemplateOutletContext]="{ $implicit: st }" />
+                }
+              </div>
+            }
+
+            @if (v.ungrouped_stops.length) {
+              <div class="rev__space">
+                <div class="rev__space-head rev__space-head--loose">
+                  <h3>Not assigned to a venue</h3>
+                  <div class="rev__space-meta">{{ v.ungrouped_stops.length }} stops</div>
+                </div>
+                @for (st of v.ungrouped_stops; track st.id) {
+                  <ng-container [ngTemplateOutlet]="stopTpl" [ngTemplateOutletContext]="{ $implicit: st }" />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── Remarks rail ────────────────────────────────────────────────── -->
+      <aside class="rev__rail">
+        <div class="rev__rail-inner">
+          <h2 class="rev__rail-title">Feedback</h2>
+          <p class="rev__rail-hint">
+            Pin a point to the venue, stop or media item that needs work. The creator has to
+            resolve every open point before the tour can be submitted again.
+          </p>
+
+          @if (composerTarget(); as t) {
+            <div class="rev__composer">
+              <span class="rev__composer-target">
+                {{ t.label ? t.type + ' · ' + t.label : 'Whole tour' }}
+              </span>
+              <textarea rows="4" placeholder="What needs to change?"
+                [ngModel]="composerBody()" (ngModelChange)="composerBody.set($event)"></textarea>
+              <div class="rev__composer-actions">
+                <button type="button" class="rev__btn rev__btn--sm" (click)="cancelComposer()">Cancel</button>
+                <button type="button" class="rev__btn rev__btn--sm rev__btn--primary"
+                  [disabled]="!composerBody().trim() || savingRemark()" (click)="saveRemark()">
+                  {{ savingRemark() ? 'Saving…' : 'Add point' }}
+                </button>
+              </div>
+            </div>
+          }
+
+          <h3 class="rev__rail-sub">Open ({{ openRemarks().length }})</h3>
+          @if (openRemarks().length === 0) {
+            <p class="rev__rail-empty">Nothing flagged yet.</p>
+          } @else {
+            @for (r of openRemarks(); track r.id) {
+              <div class="rev__rail-item">
+                <span class="rev__rail-target">{{ r.target_label || 'Whole tour' }}</span>
+                <p>{{ r.body }}</p>
+                <button type="button" class="rev__remark-act rev__remark-act--del" (click)="deleteRemark(r)">Delete</button>
+              </div>
+            }
+          }
+
+          @if (resolvedRemarks().length) {
+            <h3 class="rev__rail-sub">Resolved by the creator ({{ resolvedRemarks().length }})</h3>
+            @for (r of resolvedRemarks(); track r.id) {
+              <div class="rev__rail-item rev__rail-item--done">
+                <span class="rev__rail-target">{{ r.target_label || 'Whole tour' }}</span>
+                <p>{{ r.body }}</p>
+                <button type="button" class="rev__remark-act" (click)="toggleResolved(r)">Re-open</button>
+              </div>
+            }
+          }
+        </div>
+      </aside>
+    </div>
+
+    <!-- ── Decision modal ─────────────────────────────────────────────────── -->
+    @if (decision(); as kind) {
+      <div class="rev__backdrop" (click)="closeDecision()">
+        <div class="rev__modal" (click)="$event.stopPropagation()">
+          @if (kind === 'approve') {
+            <h2>Approve and publish</h2>
+            <p>
+              <strong>{{ tour()!.title }}</strong> goes on sale immediately and the creator gets an
+              email with a link to it.
+              @if (openRemarks().length) {
+                <span class="rev__modal-warn">
+                  {{ openRemarks().length }} open point(s) will be closed automatically.
+                </span>
+              }
+            </p>
+          } @else {
+            <h2>Request changes</h2>
+            <p>
+              The creator gets an email listing the {{ openRemarks().length }} open point(s) and has to
+              resolve them before resubmitting.
+              @if (tour()!.status === 'published') {
+                <span class="rev__modal-warn">
+                  This tour is live — it will be pulled from sale. Existing buyers keep access.
+                </span>
+              }
+            </p>
+          }
+
+          <label class="rev__field">
+            <span>Note to the creator (optional)</span>
+            <textarea rows="3" maxlength="2000"
+              [ngModel]="decisionNote()" (ngModelChange)="decisionNote.set($event)"
+              placeholder="Anything to add beyond the points above?"></textarea>
+          </label>
+
+          @if (decisionError(); as de) { <div class="rev__error" role="alert">{{ de }}</div> }
+
+          <div class="rev__modal-actions">
+            <button type="button" class="rev__btn" (click)="closeDecision()" [disabled]="deciding()">Cancel</button>
+            <button type="button" class="rev__btn"
+              [class.rev__btn--approve]="kind === 'approve'"
+              [class.rev__btn--changes]="kind === 'changes'"
+              [disabled]="deciding()" (click)="confirmDecision()">
+              {{ deciding() ? 'Saving…' : (kind === 'approve' ? 'Approve & publish' : 'Send back for changes') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</section>
+
+<!-- ── One stop: media list with per-item durations ─────────────────────────── -->
+<ng-template #stopTpl let-st>
+  <div class="rev__stop">
+    <div class="rev__stop-head">
+      <span class="rev__stop-num">{{ st.order_index + 1 }}</span>
+      <div class="rev__stop-title">
+        <strong>{{ st.title }}</strong>
+        @if (st.description) { <p>{{ st.description }}</p> }
+      </div>
+      <div class="rev__stop-meta">
+        <span class="rev__stop-dur">{{ fmtDurationLong(st.audio_duration_seconds) }}</span>
+        <span class="rev__stop-counts">
+          {{ st.audio_count }}🎧 {{ st.image_count }}🖼 {{ st.pdf_count + st.video_count }}📄
+        </span>
+        @if (st.latitude == null) { <span class="rev__warn">no location</span> }
+        @if (st.audio_count === 0) { <span class="rev__warn">no audio</span> }
+        <button type="button" class="rev__flag" (click)="flag('stop', st.id, st.title)">Flag stop</button>
+      </div>
+    </div>
+
+    @for (r of remarksFor(st.id); track r.id) {
+      <div class="rev__remark" [class.rev__remark--resolved]="r.resolved_at">
+        <span class="rev__remark-body">{{ r.body }}</span>
+        <button type="button" class="rev__remark-act" (click)="toggleResolved(r)">{{ r.resolved_at ? 'Re-open' : 'Resolve' }}</button>
+        <button type="button" class="rev__remark-act rev__remark-act--del" (click)="deleteRemark(r)">Delete</button>
+      </div>
+    }
+
+    @if (st.media.length === 0) {
+      <p class="rev__no-media">No media attached to this stop.</p>
+    } @else {
+      <div class="rev__media-list">
+        @for (m of st.media; track m.id) {
+          <div class="rev__media">
+            <div class="rev__media-main">
+              @if (m.media_type === 'audio') {
+                <audio class="rev__audio" [src]="m.url" controls preload="none"></audio>
+              } @else if (m.media_type === 'image') {
+                <a [href]="m.url" target="_blank" rel="noopener">
+                  <img class="rev__media-img" [src]="m.url" [alt]="m.caption || st.title" />
+                </a>
+              } @else {
+                <a class="rev__media-link" [href]="m.url" target="_blank" rel="noopener">
+                  {{ m.media_type | uppercase }} ↗
+                </a>
+              }
+              @if (m.caption) { <span class="rev__media-caption">{{ m.caption }}</span> }
+            </div>
+
+            <div class="rev__media-side">
+              @if (m.media_type === 'audio' || m.media_type === 'video') {
+                <span class="rev__media-dur" [class.rev__warn]="m.duration_seconds == null">
+                  {{ m.duration_seconds == null ? 'unknown length' : fmtDuration(m.duration_seconds) }}
+                </span>
+              }
+              <button type="button" class="rev__flag" (click)="flag('media', m.id, st.title + ' — ' + m.media_type)">
+                Flag
+              </button>
+            </div>
+          </div>
+
+          @for (r of remarksFor(m.id); track r.id) {
+            <div class="rev__remark rev__remark--nested" [class.rev__remark--resolved]="r.resolved_at">
+              <span class="rev__remark-body">{{ r.body }}</span>
+              <button type="button" class="rev__remark-act" (click)="toggleResolved(r)">{{ r.resolved_at ? 'Re-open' : 'Resolve' }}</button>
+              <button type="button" class="rev__remark-act rev__remark-act--del" (click)="deleteRemark(r)">Delete</button>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</ng-template>

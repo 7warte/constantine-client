@@ -358,6 +358,27 @@
   &--archived  { background: rgba(#f9ab00, 0.12); color: #f9ab00;
     &::before { content: '\1F4E6'; } // 📦
   }
+  &--under_review { background: rgba(#f9ab00, 0.14); color: #a8690a;
+    &::before { content: '\23F3'; } // ⏳
+  }
+  &--needs_changes { background: rgba(#d65c5c, 0.14); color: #a63b3b;
+    &::before { content: '\1F4DD'; } // 📝
+  }
+}
+
+// Nudge back to the tour when a reviewer left points open.
+.status-remarks {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  background: rgba(#d65c5c, 0.12);
+  color: #a63b3b;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-decoration: none;
+
+  &:hover { background: rgba(#d65c5c, 0.2); }
 }
 
 // ── Delete modal ─────────────────────────────────────────────────────────────

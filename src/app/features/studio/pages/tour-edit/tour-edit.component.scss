@@ -2570,6 +2570,124 @@
   border-radius: $radius-md;
   font-size: $font-size-sm;
   font-weight: $font-weight-semibold;
+
+  &--review {
+    background: rgba($color-warning, 0.16);
+    color: darken($color-warning, 12%);
+  }
+}
+
+// ── Review workflow (step 4) ─────────────────────────────────────────────────
+
+.rev-note {
+  display: flex;
+  gap: $space-3;
+  padding: $space-4;
+  margin-bottom: $space-4;
+  border-radius: $radius-md;
+  border-left: 4px solid;
+
+  mat-icon { flex-shrink: 0; }
+
+  strong { display: block; font-size: $font-size-base; margin-bottom: 2px; }
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    line-height: $line-height-normal;
+    color: $text-secondary;
+  }
+
+  &--waiting {
+    background: rgba($color-warning, 0.09);
+    border-left-color: $color-warning;
+    strong, mat-icon { color: darken($color-warning, 12%); }
+  }
+
+  &--changes {
+    background: rgba($color-error, 0.08);
+    border-left-color: $color-error;
+    strong, mat-icon { color: $color-error; }
+  }
+}
+
+.rev-reviewer-note {
+  padding: $space-3 $space-4;
+  margin-bottom: $space-4;
+  background: $bg-surface-alt;
+  border-radius: $radius-md;
+
+  &__label {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    font-weight: $font-weight-bold;
+  }
+
+  p { margin: 4px 0 0; font-size: $font-size-sm; color: $text-primary; line-height: $line-height-normal; }
+}
+
+.rev-points {
+  padding: $space-4;
+  margin-bottom: $space-5;
+  border: 1px solid $border-default;
+  border-radius: $radius-md;
+  background: $bg-surface;
+
+  &__title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $space-3;
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    color: $text-primary;
+    margin: 0 0 $space-3;
+  }
+
+  &__count {
+    font-family: $font-family-secondary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-regular;
+    color: $text-muted;
+  }
+
+  &__hint {
+    margin: $space-3 0 0;
+    font-size: $font-size-xs;
+    color: $text-muted;
+  }
+}
+
+.rev-point {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover { background: $bg-surface-alt; }
+
+  input { margin-top: 3px; flex-shrink: 0; accent-color: $accent-primary; }
+
+  &__body {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    line-height: $line-height-normal;
+  }
+
+  &__where {
+    display: block;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $accent-primary;
+    font-weight: $font-weight-bold;
+  }
+
+  &--done &__body { text-decoration: line-through; color: $text-muted; }
 }
 
 // ── Mobile overrides ─────────────────────────────────────────────────────────

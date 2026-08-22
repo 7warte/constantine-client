@@ -37,9 +37,13 @@ export const ADMIN_ROUTES: Routes = [
       },
       {
         path: 'tours',
-        data: { title: 'Tours' },
         loadComponent: () =>
-          import('./pages/placeholder/admin-placeholder.component').then(m => m.AdminPlaceholderComponent),
+          import('./pages/tours/admin-tours.component').then(m => m.AdminToursComponent),
+      },
+      {
+        path: 'tours/:id',
+        loadComponent: () =>
+          import('./pages/tours/admin-tour-review.component').then(m => m.AdminTourReviewComponent),
       },
       {
         path: 'money-flow',

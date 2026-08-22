@@ -852,7 +852,73 @@
     @if (step() === 4) {
       <div class="edit-card">
         <h2 class="edit-card__title">Review &amp; publish</h2>
-        <p class="edit-card__desc">This is how travellers will see your tour. Review it, then publish when you're happy.</p>
+        @if (reviewEnabled()) {
+          <p class="edit-card__desc">
+            This is how travellers will see your tour. When you're happy, submit it — one of our
+            reviewers checks it over before it goes on sale.
+          </p>
+        } @else {
+          <p class="edit-card__desc">This is how travellers will see your tour. Review it, then publish when you're happy.</p>
+        }
+
+        <!-- ── Review status ────────────────────────────────────────────── -->
+        @if (isUnderReview()) {
+          <div class="rev-note rev-note--waiting">
+            <mat-icon>hourglass_top</mat-icon>
+            <div>
+              <strong>Waiting for review</strong>
+              <p>
+                We're going through your tour now. You'll get an email as soon as it's approved.
+                It isn't on sale yet — anyone who already bought it keeps full access.
+              </p>
+            </div>
+          </div>
+        } @else if (needsChanges()) {
+          <div class="rev-note rev-note--changes">
+            <mat-icon>edit_note</mat-icon>
+            <div>
+              <strong>Changes requested</strong>
+              <p>
+                Our reviewer left {{ openRemarks().length }} point{{ openRemarks().length === 1 ? '' : 's' }}
+                to address. Fix each one, tick it off, then submit your tour again.
+              </p>
+            </div>
+          </div>
+        }
+
+        @if (reviewerNote(); as note) {
+          <div class="rev-reviewer-note">
+            <span class="rev-reviewer-note__label">Note from the reviewer</span>
+            <p>{{ note }}</p>
+          </div>
+        }
+
+        @if (reviewRemarks().length > 0) {
+          <div class="rev-points">
+            <h3 class="rev-points__title">
+              Points to resolve
+              <span class="rev-points__count">{{ resolvedRemarks().length }} / {{ reviewRemarks().length }} done</span>
+            </h3>
+
+            @for (r of reviewRemarks(); track r.id) {
+              <label class="rev-point" [class.rev-point--done]="r.resolved_at">
+                <input type="checkbox" [checked]="!!r.resolved_at"
+                  [disabled]="resolvingRemark() === r.id"
+                  (change)="toggleRemark(r)" />
+                <span class="rev-point__body">
+                  @if (r.target_label) { <span class="rev-point__where">{{ r.target_label }}</span> }
+                  {{ r.body }}
+                </span>
+              </label>
+            }
+
+            @if (!canSubmitReview()) {
+              <p class="rev-points__hint">
+                Tick every point once you've made the change — then you can submit your tour again.
+              </p>
+            }
+          </div>
+        }
 
         <!-- Presentation audio (optional) — a short intro visitors hear before buying. -->
         <div class="publish-audio">
@@ -966,12 +1032,15 @@
         <div class="edit-form__actions edit-form__actions--mt">
           <button type="button" class="btn btn--ghost" (click)="goToStep(3)">Back</button>
           <a [routerLink]="['/studio/tours']" class="btn btn--ghost">Save as draft</a>
-          @if (tour()?.status !== 'published') {
-            <button type="button" class="btn btn--publish btn--lg" [disabled]="publishing()" (click)="publish()">
-              {{ publishing() ? 'Publishing…' : 'Publish tour' }}
-            </button>
-          } @else {
+          @if (tourStatus() === 'published') {
             <span class="publish-badge">Published</span>
+          } @else if (isUnderReview()) {
+            <span class="publish-badge publish-badge--review">Under review</span>
+          } @else {
+            <button type="button" class="btn btn--publish btn--lg"
+              [disabled]="publishing() || !canSubmitReview()" (click)="publish()">
+              {{ publishLabel() }}
+            </button>
           }
         </div>
       </div>
@@ -981,11 +1050,20 @@
         <div class="confirm-backdrop" (click)="showPublishIntro.set(false)">
           <div class="confirm-modal" (click)="$event.stopPropagation()">
             <h3 class="confirm-modal__title">One last look</h3>
-            <p class="confirm-modal__text">
-              You're about to publish. This page shows your tour exactly as travellers will see it —
-              take a moment to review the cover, price and itinerary. When everything looks right, hit
-              <strong>Publish tour</strong>. You can still edit it afterwards.
-            </p>
+            @if (reviewEnabled()) {
+              <p class="confirm-modal__text">
+                This page shows your tour exactly as travellers will see it — take a moment to check
+                the cover, price and itinerary. When it looks right, hit <strong>Submit for review</strong>.
+                A reviewer listens through it and either publishes it or sends back a few points to fix.
+                You'll hear from us by email either way.
+              </p>
+            } @else {
+              <p class="confirm-modal__text">
+                You're about to publish. This page shows your tour exactly as travellers will see it —
+                take a moment to review the cover, price and itinerary. When everything looks right, hit
+                <strong>Publish tour</strong>. You can still edit it afterwards.
+              </p>
+            }
             <div class="confirm-modal__actions">
               <button type="button" class="btn btn--primary" (click)="showPublishIntro.set(false)">Got it</button>
             </div>

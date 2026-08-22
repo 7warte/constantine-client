@@ -98,6 +98,28 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
   });
   readonly showPublishIntro = signal(false);
 
+  // ── Review workflow ──────────────────────────────────────────────────────
+  // Publishing submits the tour to an admin queue instead of putting it on sale
+  // (unless the platform-wide review step is switched off).
+  readonly reviewEnabled   = signal(true);
+  readonly reviewRemarks   = signal<any[]>([]);
+  readonly reviewLoaded    = signal(false);
+  readonly reviewerNote    = signal<string | null>(null);
+  readonly resolvingRemark = signal<string | null>(null);
+
+  readonly tourStatus       = computed<string>(() => this.tour()?.status ?? 'draft');
+  readonly isUnderReview    = computed(() => this.tourStatus() === 'under_review');
+  readonly needsChanges     = computed(() => this.tourStatus() === 'needs_changes');
+  readonly openRemarks      = computed(() => this.reviewRemarks().filter(r => !r.resolved_at));
+  readonly resolvedRemarks  = computed(() => this.reviewRemarks().filter(r => r.resolved_at));
+  readonly canSubmitReview  = computed(() => this.openRemarks().length === 0);
+  /** Label for the primary button on the publish step. */
+  readonly publishLabel = computed(() => {
+    if (this.publishing()) return this.reviewEnabled() ? 'Submitting…' : 'Publishing…';
+    if (this.needsChanges()) return 'Submit for review again';
+    return this.reviewEnabled() ? 'Submit for review' : 'Publish tour';
+  });
+
   // Preview image lightbox — lets the creator view stop images as a buyer would.
   readonly previewImages   = signal<any[]>([]);
   readonly previewImageIdx = signal(0);
@@ -1054,6 +1076,7 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
     if (s === 4) {
       // Greet the creator with a "review before you publish" note.
       this.showPublishIntro.set(true);
+      this.loadReview();
     }
   }
 
@@ -1389,6 +1412,43 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
 
   // ── Publish ─────────────────────────────────────────────────────────────
 
+  /** Current review state + the points the reviewer wants fixed. */
+  loadReview(): void {
+    if (!this.tourId()) return;
+    this.api.get<any>(`/studio/tours/${this.tourId()}/review`).subscribe({
+      next: (res) => {
+        this.reviewEnabled.set(res.review_enabled);
+        this.reviewRemarks.set(res.remarks ?? []);
+        this.reviewerNote.set(res.review?.reviewer_note ?? null);
+        this.reviewLoaded.set(true);
+      },
+      // A missing review is not an error worth showing — the tour was simply
+      // never submitted. Fall back to "publishing works as usual".
+      error: () => this.reviewLoaded.set(true),
+    });
+  }
+
+  /** Creator ticks off a point they've addressed. Reviewers can re-open it. */
+  toggleRemark(remark: any): void {
+    if (this.resolvingRemark()) return;
+    this.resolvingRemark.set(remark.id);
+
+    this.api.post<any>(
+      `/studio/tours/${this.tourId()}/review/remarks/${remark.id}/resolve`,
+      { resolved: !remark.resolved_at },
+    ).subscribe({
+      next: (res) => {
+        this.reviewRemarks.update(rs =>
+          rs.map(r => r.id === remark.id ? { ...r, resolved_at: res.resolved_at } : r));
+        this.resolvingRemark.set(null);
+      },
+      error: (err) => {
+        this.error.set(err.error?.error ?? 'Could not update that point.');
+        this.resolvingRemark.set(null);
+      },
+    });
+  }
+
   publish(): void {
     this.publishing.set(true);
     this.error.set(null);
@@ -1397,11 +1457,19 @@ export class TourEditComponent implements OnInit, OnDestroy, AfterViewChecked, A
       next: (result) => {
         this.tour.update(t => t ? { ...t, status: result.status } : t);
         this.publishing.set(false);
-        this.router.navigate(['/studio/tours']);
+        // Submitted for review: stay put and show the waiting state instead of
+        // bouncing the creator to a list where nothing looks like it happened.
+        if (result.status === 'under_review') {
+          this.loadReview();
+        } else {
+          this.router.navigate(['/studio/tours']);
+        }
       },
       error: (err) => {
         this.error.set(err.error?.error ?? 'Failed to publish tour.');
         this.publishing.set(false);
+        // 409 = open remarks; refresh so the list on screen matches the server.
+        if (err.status === 409) this.loadReview();
       },
     });
   }

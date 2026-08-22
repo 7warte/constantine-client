@@ -1,0 +1,106 @@
+<section class="tours">
+  <header class="tours__head">
+    <h1>Tours</h1>
+    <p>
+      Creators submit tours here before they go on sale.
+      @if (queueSize() > 0) {
+        <strong>{{ queueSize() }} waiting for review.</strong>
+      } @else {
+        The queue is empty.
+      }
+    </p>
+  </header>
+
+  <!-- Kill switch -->
+  <div class="tours__flag" [class.tours__flag--off]="!reviewEnabled()">
+    <label class="tours__switch">
+      <input type="checkbox" [checked]="reviewEnabled()" [disabled]="togglingFlag()"
+        (change)="toggleReview(!reviewEnabled())" />
+      <span class="tours__switch-track"><span class="tours__switch-knob"></span></span>
+    </label>
+    <div class="tours__flag-text">
+      <strong>Require review before publishing</strong>
+      @if (reviewEnabled()) {
+        <span>Publishing sends a tour to this queue. Nothing goes on sale until it's approved.</span>
+      } @else {
+        <span>Off — every creator publishes straight to the marketplace, no review. Intended for development.</span>
+      }
+    </div>
+  </div>
+
+  <div class="tours__filters">
+    @for (f of filters; track f.value) {
+      <button type="button" class="tours__chip"
+        [class.tours__chip--active]="statusFilter() === f.value"
+        (click)="setFilter(f.value)">
+        {{ f.label }}
+        <span class="tours__chip-count">{{ count(f.value) }}</span>
+      </button>
+    }
+
+    <input class="tours__search" type="search" placeholder="Search title or creator…"
+      [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="reload()" />
+  </div>
+
+  @if (loading()) {
+    <p class="tours__loading">Loading…</p>
+  } @else if (error()) {
+    <div class="tours__error" role="alert">{{ error() }}</div>
+  } @else if (rows().length === 0) {
+    <p class="tours__empty">No tours match this filter.</p>
+  } @else {
+    <div class="tours__table-wrap">
+      <table class="tours__table">
+        <thead>
+          <tr>
+            <th>Tour</th>
+            <th>Creator</th>
+            <th>Status</th>
+            <th>Content</th>
+            <th>Sales</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td>
+                <div class="tours__title-cell">
+                  @if (r.cover_image_url) {
+                    <img class="tours__thumb" [src]="r.cover_image_url" [alt]="r.title" />
+                  } @else {
+                    <div class="tours__thumb tours__thumb--empty"></div>
+                  }
+                  <a class="tours__title" [routerLink]="['/admin/tours', r.id]">{{ r.title }}</a>
+                </div>
+              </td>
+              <td>
+                <a class="tours__creator" [routerLink]="['/admin/users', r.creator_id]">
+                  {{ r.creator_name || '@' + r.creator_username }}
+                </a>
+              </td>
+              <td>
+                <span class="tours__status" [class]="'tours__status--' + r.status">{{ statusLabel(r.status) }}</span>
+                @if (r.unresolved_remarks > 0) {
+                  <span class="tours__remark-badge">{{ r.unresolved_remarks }} open</span>
+                }
+              </td>
+              <td class="tours__num">{{ r.stop_count }} stops · {{ r.variant_count }} lang</td>
+              <td class="tours__num">{{ r.purchase_count }}</td>
+              <td>
+                {{ fmtDate(r.submitted_at) }}
+                @if (waitingFor(r); as w) { <span class="tours__waiting">waiting {{ w }}</span> }
+              </td>
+              <td>
+                <a class="tours__btn tours__btn--primary" [routerLink]="['/admin/tours', r.id]">
+                  {{ r.status === 'under_review' ? 'Review' : 'Open' }}
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
